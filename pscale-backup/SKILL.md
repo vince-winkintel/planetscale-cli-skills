@@ -29,10 +29,10 @@ pscale backup delete <database> <branch> <backup-id>
 
 ```bash
 # Create backup before schema changes
-pscale backup create winkintel-com-pre-prod main
+pscale backup create my-database main
 
 # Proceed with migration
-pscale deploy-request deploy winkintel-com-pre-prod 1
+pscale deploy-request deploy my-database 1
 
 # If issues, restore from backup (contact PlanetScale support)
 ```

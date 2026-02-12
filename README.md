@@ -3,7 +3,7 @@
 Comprehensive `pscale` command reference and automation workflows for managing PlanetScale databases via terminal.
 
 [![ClawHub](https://img.shields.io/badge/ClawHub-planetscale--cli--skills-blue)](https://clawhub.com/skills/planetscale-cli-skills)
-[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## 🎯 What This Skill Provides
 
@@ -90,12 +90,12 @@ All scripts in `scripts/` directory execute without loading into context (~90% t
 
 ### create-branch-for-mr.sh
 
-Create PlanetScale branch matching GitLab MR or GitHub PR:
+Create PlanetScale branch matching your MR or PR:
 
 ```bash
 ./scripts/create-branch-for-mr.sh \
-  --database winkintel-com-pre-prod \
-  --branch 2721-database-migration
+  --database my-database \
+  --branch feature-schema-migration
 ```
 
 ### deploy-schema-change.sh
@@ -104,8 +104,8 @@ Complete schema deployment workflow:
 
 ```bash
 ./scripts/deploy-schema-change.sh \
-  --database winkintel-com-pre-prod \
-  --branch 2721-migration \
+  --database my-database \
+  --branch feature-schema-v2 \
   --deploy
 ```
 
@@ -164,23 +164,21 @@ deploy-schema:
           --deploy
 ```
 
-### WinkIntel.com Pattern (Drizzle Integration)
+### Drizzle ORM Integration
 
 ```bash
-# 1. Edit schema.sql
-vim packages/winkity-db/drizzle/sql/schema.sql
+# 1. Edit your schema file
+vim schema.sql
 
-# 2. Create and apply to PlanetScale
-./scripts/create-branch-for-mr.sh --database winkintel-com-pre-prod --branch $(git branch --show-current)
-pscale shell winkintel-com-pre-prod $(git branch --show-current) < packages/winkity-db/drizzle/sql/schema.sql
+# 2. Create PlanetScale branch and apply changes
+./scripts/create-branch-for-mr.sh --database my-database --branch $(git branch --show-current)
+pscale shell my-database $(git branch --show-current) < schema.sql
 
 # 3. Deploy
-./scripts/deploy-schema-change.sh --database winkintel-com-pre-prod --branch $(git branch --show-current) --deploy
+./scripts/deploy-schema-change.sh --database my-database --branch $(git branch --show-current) --deploy
 
-# 4. Pull back to Drizzle
-pnpm db:pull
-./packages/winkity-db/drizzle/scripts/fix-introspect-out-oddities.pl
-cp drizzle/introspect-out/schema.ts packages/winkity-db/src/database/schema.ts
+# 4. Pull schema back to Drizzle
+pnpm drizzle-kit introspect
 ```
 
 ## 🎓 Decision Trees
@@ -241,7 +239,7 @@ Contributions welcome! Please:
 
 ## 📄 License
 
-Apache License 2.0 - see [LICENSE](LICENSE) file.
+MIT License - see [LICENSE](LICENSE) file.
 
 ## 🙏 Acknowledgments
 

@@ -6,7 +6,7 @@ Token-efficient scripts for common PlanetScale operations. Execute without loadi
 
 ### 🌿 create-branch-for-mr.sh
 
-Create PlanetScale branch matching GitLab MR or GitHub PR branch name.
+Create PlanetScale branch matching your MR or PR branch name.
 
 **Usage:**
 ```bash
@@ -15,10 +15,10 @@ Create PlanetScale branch matching GitLab MR or GitHub PR branch name.
 
 **Examples:**
 ```bash
-# Create branch for GitLab MR
+# Create branch for MR/PR
 ./scripts/create-branch-for-mr.sh \
-  --database winkintel-com-pre-prod \
-  --branch 2721-database-account-settings-changes
+  --database my-database \
+  --branch feature-user-settings
 
 # Create from specific source branch
 ./scripts/create-branch-for-mr.sh \
@@ -53,13 +53,13 @@ Create deploy request and optionally deploy schema changes.
 ```bash
 # Create deploy request only (manual deploy later)
 ./scripts/deploy-schema-change.sh \
-  --database winkintel-com-pre-prod \
-  --branch 2721-migration
+  --database my-database \
+  --branch feature-schema-v2
 
 # Create and auto-deploy
 ./scripts/deploy-schema-change.sh \
-  --database winkintel-com-pre-prod \
-  --branch 2721-migration \
+  --database my-database \
+  --branch feature-schema-v2 \
   --deploy
 
 # With organization
@@ -93,7 +93,7 @@ Refresh development branch schema with main branch.
 ```bash
 # Sync branch with main
 ./scripts/sync-branch-with-main.sh \
-  --database winkintel-com-pre-prod \
+  --database my-database \
   --branch feature-branch
 
 # With organization
@@ -150,29 +150,26 @@ All scripts:
 
 ## Complete Workflow Examples
 
-### Schema Migration for GitLab MR
+### Schema Migration for MR/PR
 
 ```bash
 # 1. Create PlanetScale branch matching MR branch
 ./scripts/create-branch-for-mr.sh \
-  --database winkintel-com-pre-prod \
-  --branch 2721-database-account-settings-changes
+  --database my-database \
+  --branch feature-user-settings
 
 # 2. Make schema changes
-pscale shell winkintel-com-pre-prod 2721-database-account-settings-changes
+pscale shell my-database feature-user-settings
 # ... run ALTER TABLE, etc.
 
 # 3. Deploy schema change
 ./scripts/deploy-schema-change.sh \
-  --database winkintel-com-pre-prod \
-  --branch 2721-database-account-settings-changes \
+  --database my-database \
+  --branch feature-user-settings \
   --deploy
 
-# 4. Pull schema back to Drizzle (WinkIntel workflow)
-cd ~/clawd/winkintel.com-mr189
-pnpm db:pull
-./packages/winkity-db/drizzle/scripts/fix-introspect-out-oddities.pl
-cp drizzle/introspect-out/schema.ts src/database/schema.ts
+# 4. Pull schema back to Drizzle (if using Drizzle ORM)
+pnpm drizzle-kit introspect
 ```
 
 ### Sync Stale Branch Before Deploy
@@ -180,15 +177,15 @@ cp drizzle/introspect-out/schema.ts src/database/schema.ts
 ```bash
 # If main has been updated since branch creation
 ./scripts/sync-branch-with-main.sh \
-  --database winkintel-com-pre-prod \
+  --database my-database \
   --branch old-feature-branch
 
 # Verify diff shows only your changes
-pscale branch diff winkintel-com-pre-prod old-feature-branch
+pscale branch diff my-database old-feature-branch
 
 # Then deploy
 ./scripts/deploy-schema-change.sh \
-  --database winkintel-com-pre-prod \
+  --database my-database \
   --branch old-feature-branch \
   --deploy
 ```
@@ -196,7 +193,7 @@ pscale branch diff winkintel-com-pre-prod old-feature-branch
 ### CI/CD Integration
 
 ```bash
-# In .gitlab-ci.yml or .github/workflows/deploy.yml
+# In your CI/CD pipeline config (.github/workflows, .gitlab-ci.yml, etc.)
 
 deploy-schema:
   script:
@@ -219,33 +216,30 @@ deploy-schema:
 
 ## Common Patterns
 
-### WinkIntel.com Schema Migration Pattern
+### Drizzle ORM Schema Migration Pattern
 
-Based on MR 189 workflow:
+Generic workflow for Drizzle users:
 
 ```bash
-# 1. Edit schema.sql manually
-vim ~/clawd/winkintel.com-mr189/packages/winkity-db/drizzle/sql/schema.sql
+# 1. Edit your schema.sql file
+vim schema.sql
 
 # 2. Create PlanetScale branch
 ./scripts/create-branch-for-mr.sh \
-  --database winkintel-com-pre-prod \
+  --database my-database \
   --branch $(git branch --show-current)
 
 # 3. Apply schema changes
-pscale shell winkintel-com-pre-prod $(git branch --show-current) \
-  < packages/winkity-db/drizzle/sql/schema.sql
+pscale shell my-database $(git branch --show-current) < schema.sql
 
 # 4. Deploy
 ./scripts/deploy-schema-change.sh \
-  --database winkintel-com-pre-prod \
+  --database my-database \
   --branch $(git branch --show-current) \
   --deploy
 
-# 5. Pull back to Drizzle
-pnpm db:pull
-./packages/winkity-db/drizzle/scripts/fix-introspect-out-oddities.pl
-cp drizzle/introspect-out/schema.ts packages/winkity-db/src/database/schema.ts
+# 5. Pull schema back to Drizzle
+pnpm drizzle-kit introspect
 ```
 
 ## Contributing

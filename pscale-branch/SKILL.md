@@ -41,27 +41,27 @@ pscale branch promote <database> <branch-name>
 
 ```bash
 # 1. Create development branch
-pscale branch create winkintel-com-pre-prod 2721-migration --from main
+pscale branch create my-database feature-migration --from main
 
 # 2. Make schema changes (via shell, ORM, or direct SQL)
-pscale shell winkintel-com-pre-prod 2721-migration
+pscale shell my-database feature-migration
 # ... run ALTER TABLE, CREATE TABLE, etc.
 
 # 3. View changes
-pscale branch diff winkintel-com-pre-prod 2721-migration
+pscale branch diff my-database feature-migration
 
 # 4. Create deploy request (safer than direct promotion)
-pscale deploy-request create winkintel-com-pre-prod 2721-migration
+pscale deploy-request create my-database feature-migration
 
 # 5. Deploy via deploy request (see pscale-deploy-request)
 ```
 
-### Quick Branch for GitLab MR
+### Quick Branch for MR/PR
 
 ```bash
-# Match PlanetScale branch to GitLab MR branch
-MR_BRANCH="2721-database-account-settings-changes-run-migration-2"
-pscale branch create winkintel-com-pre-prod $MR_BRANCH --from main
+# Match PlanetScale branch to your MR/PR branch
+BRANCH_NAME="feature-add-user-preferences"
+pscale branch create my-database $BRANCH_NAME --from main
 ```
 
 See `scripts/create-branch-for-mr.sh` for automation.
@@ -175,7 +175,7 @@ pscale branch list <database> | grep main
 - **pscale-deploy-request** - Create deploy requests from branches (safer than direct promotion)
 - **pscale-database** - Database management
 - **drizzle-kit** - ORM-based schema migrations (generates SQL for pscale shell)
-- **gitlab-cli-skills** - GitLab MR integration (match branch names)
+- **gitlab-cli-skills** - MR/PR integration (match branch names across tools)
 
 ## References
 

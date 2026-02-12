@@ -40,26 +40,26 @@ This is the safest way to deploy schema changes to production:
 
 ```bash
 # 1. Create development branch
-pscale branch create winkintel-com-pre-prod 2721-migration --from main
+pscale branch create my-database feature-schema-v2 --from main
 
 # 2. Make schema changes
-pscale shell winkintel-com-pre-prod 2721-migration
+pscale shell my-database feature-schema-v2
 # ... execute ALTER TABLE, etc.
 
 # 3. Review changes locally
-pscale branch diff winkintel-com-pre-prod 2721-migration
+pscale branch diff my-database feature-schema-v2
 
 # 4. Create deploy request
-pscale deploy-request create winkintel-com-pre-prod 2721-migration
+pscale deploy-request create my-database feature-schema-v2
 
 # 5. Review deploy request diff
-pscale deploy-request diff winkintel-com-pre-prod 1
+pscale deploy-request diff my-database 1
 
 # 6. Deploy to production
-pscale deploy-request deploy winkintel-com-pre-prod 1
+pscale deploy-request deploy my-database 1
 
 # 7. Verify deployment
-pscale deploy-request show winkintel-com-pre-prod 1
+pscale deploy-request show my-database 1
 ```
 
 ### Review Before Deploy
@@ -208,40 +208,34 @@ See `scripts/deploy-schema-change.sh` for complete automation:
 ```bash
 # Automated deploy workflow
 ./scripts/deploy-schema-change.sh \
-  --database winkintel-com-pre-prod \
-  --branch 2721-migration \
+  --database my-database \
+  --branch feature-schema-v2 \
   --auto-approve
 ```
 
 ## Integration with Drizzle
 
-Common pattern for WinkIntel.com:
+Common pattern for Drizzle ORM users:
 
 ```bash
-# 1. Edit drizzle/sql/schema.sql manually
+# 1. Edit your schema.sql file
 # 2. Create PlanetScale branch
-pscale branch create winkintel-com-pre-prod <branch-name>
+pscale branch create my-database <branch-name>
 
 # 3. Apply schema changes
-pscale shell winkintel-com-pre-prod <branch-name> < drizzle/sql/schema.sql
+pscale shell my-database <branch-name> < schema.sql
 
 # 4. Create deploy request
-pscale deploy-request create winkintel-com-pre-prod <branch-name>
+pscale deploy-request create my-database <branch-name>
 
 # 5. Deploy
-pscale deploy-request deploy winkintel-com-pre-prod <number>
+pscale deploy-request deploy my-database <number>
 
 # 6. Pull schema back to Drizzle
-pnpm db:pull
+pnpm drizzle-kit introspect
 
-# 7. Fix introspection oddities
-./packages/winkity-db/drizzle/scripts/fix-introspect-out-oddities.pl
-
-# 8. Copy to src/database/schema.ts
-cp drizzle/introspect-out/schema.ts src/database/schema.ts
+# 7. Review and apply generated schema
 ```
-
-See MR 189 workflow for complete example.
 
 ## References
 
