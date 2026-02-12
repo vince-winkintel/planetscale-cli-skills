@@ -1,6 +1,6 @@
 ---
 name: pscale-service-token
-description: Create, list, and manage service tokens for CI/CD authentication. Use when setting up automated deployments, configuring GitHub Actions/GitLab CI, creating non-interactive authentication, or rotating CI/CD credentials. Preferred over passwords for production automation. Triggers on service token, CI/CD auth, automation token, GitHub Actions, GitLab CI.
+description: Create, list, and manage service tokens for CI/CD authentication. Use when setting up automated deployments, configuring CI/CD pipelines (GitHub Actions, GitLab CI, CircleCI, etc.), creating non-interactive authentication, or rotating CI/CD credentials. Preferred over passwords for production automation. Triggers on service token, CI/CD auth, automation token, pipeline authentication.
 ---
 
 # pscale service-token
@@ -45,20 +45,20 @@ pscale service-token create --org my-org
 #   pscale deploy-request deploy my-db my-branch
 ```
 
-### GitLab CI Integration
+### CI/CD Pipeline Integration
 
 ```bash
 # 1. Create service token
 pscale service-token create --org my-org
 
-# 2. Add to GitLab CI/CD Variables
+# 2. Add to your CI/CD secrets/variables
 #   PLANETSCALE_SERVICE_TOKEN_ID
 #   PLANETSCALE_SERVICE_TOKEN
 
-# 3. Use in .gitlab-ci.yml
+# 3. Use in your pipeline config (.github/workflows, .gitlab-ci.yml, etc.)
 # deploy:
 #   script:
-#     - pscale deploy-request create $DATABASE $CI_COMMIT_REF_NAME
+#     - pscale deploy-request create $DATABASE $BRANCH_NAME
 ```
 
 ### Token Rotation
@@ -107,7 +107,7 @@ pscale service-token list --org <correct-org>
 2. **Use separate tokens** for different CI/CD systems
 3. **Delete unused tokens** immediately
 4. **Never commit tokens** to version control
-5. **Use secrets management** (GitHub Secrets, GitLab Variables, etc.)
+5. **Use secrets management** (GitHub Secrets, environment variables, vault systems)
 6. **Limit token scope** if possible (coming in future PlanetScale updates)
 
 ## Related Skills

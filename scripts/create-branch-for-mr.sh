@@ -2,7 +2,7 @@
 set -e
 
 # create-branch-for-mr.sh
-# Create PlanetScale branch matching GitLab/GitHub MR/PR branch name
+# Create PlanetScale branch matching your MR/PR branch name
 
 show_help() {
   cat << EOF
@@ -18,7 +18,7 @@ OPTIONS:
   -h, --help              Show this help message
 
 EXAMPLES:
-  # Create branch for GitLab MR
+  # Create branch for MR/PR
   $(basename "$0") --database my-database \\
     --branch 2721-database-account-settings-changes
 

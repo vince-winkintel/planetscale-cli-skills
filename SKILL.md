@@ -105,7 +105,7 @@ pscale deploy-request create <database> <feature-branch>
 # Create service token for CI/CD
 pscale service-token create --org <org>
 
-# Use in GitHub Actions / GitLab CI
+# Use in CI/CD pipelines (GitHub Actions, GitLab CI, etc.)
 export PLANETSCALE_SERVICE_TOKEN_ID=<token-id>
 export PLANETSCALE_SERVICE_TOKEN=<token>
 
@@ -148,7 +148,7 @@ pscale shell <database> <branch>
 
 See `scripts/` directory for token-efficient automation:
 
-- `create-branch-for-mr.sh` - Create PlanetScale branch matching GitLab/GitHub branch
+- `create-branch-for-mr.sh` - Create PlanetScale branch matching your MR/PR branch name
 - `deploy-schema-change.sh` - Complete schema migration workflow
 - `sync-branch-with-main.sh` - Sync development branch with main
 

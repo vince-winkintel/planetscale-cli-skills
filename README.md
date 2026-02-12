@@ -90,7 +90,7 @@ All scripts in `scripts/` directory execute without loading into context (~90% t
 
 ### create-branch-for-mr.sh
 
-Create PlanetScale branch matching GitLab MR or GitHub PR:
+Create PlanetScale branch matching your MR or PR:
 
 ```bash
 ./scripts/create-branch-for-mr.sh \

@@ -6,7 +6,7 @@ Token-efficient scripts for common PlanetScale operations. Execute without loadi
 
 ### 🌿 create-branch-for-mr.sh
 
-Create PlanetScale branch matching GitLab MR or GitHub PR branch name.
+Create PlanetScale branch matching your MR or PR branch name.
 
 **Usage:**
 ```bash
@@ -15,7 +15,7 @@ Create PlanetScale branch matching GitLab MR or GitHub PR branch name.
 
 **Examples:**
 ```bash
-# Create branch for GitLab MR
+# Create branch for MR/PR
 ./scripts/create-branch-for-mr.sh \
   --database my-database \
   --branch 2721-database-account-settings-changes
@@ -150,7 +150,7 @@ All scripts:
 
 ## Complete Workflow Examples
 
-### Schema Migration for GitLab MR
+### Schema Migration for MR/PR
 
 ```bash
 # 1. Create PlanetScale branch matching MR branch
@@ -193,7 +193,7 @@ pscale branch diff my-database old-feature-branch
 ### CI/CD Integration
 
 ```bash
-# In .gitlab-ci.yml or .github/workflows/deploy.yml
+# In your CI/CD pipeline config (.github/workflows, .gitlab-ci.yml, etc.)
 
 deploy-schema:
   script:
