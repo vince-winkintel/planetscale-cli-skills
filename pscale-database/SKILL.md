@@ -43,13 +43,13 @@ pscale branch create my-new-db development
 
 ```bash
 # Open shell to specific branch
-pscale shell winkintel-com-pre-prod main
+pscale shell my-database main
 
 # Execute SQL directly
-pscale shell winkintel-com-pre-prod main --execute "SHOW TABLES"
+pscale shell my-database main --execute "SHOW TABLES"
 
 # Run SQL from file
-pscale shell winkintel-com-pre-prod main < schema.sql
+pscale shell my-database main < schema.sql
 ```
 
 ## Troubleshooting

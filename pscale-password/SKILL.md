@@ -26,7 +26,7 @@ pscale password delete <database> <branch> <password-id>
 
 ```bash
 # Create password for production app
-pscale password create winkintel-com main production-app
+pscale password create my-database main production-app
 
 # Returns connection string:
 # mysql://username:password@host/database

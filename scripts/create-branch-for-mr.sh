@@ -19,7 +19,7 @@ OPTIONS:
 
 EXAMPLES:
   # Create branch for GitLab MR
-  $(basename "$0") --database winkintel-com-pre-prod \\
+  $(basename "$0") --database my-database \\
     --branch 2721-database-account-settings-changes
 
   # Create branch from specific source

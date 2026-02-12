@@ -41,17 +41,17 @@ pscale branch promote <database> <branch-name>
 
 ```bash
 # 1. Create development branch
-pscale branch create winkintel-com-pre-prod 2721-migration --from main
+pscale branch create my-database 2721-migration --from main
 
 # 2. Make schema changes (via shell, ORM, or direct SQL)
-pscale shell winkintel-com-pre-prod 2721-migration
+pscale shell my-database 2721-migration
 # ... run ALTER TABLE, CREATE TABLE, etc.
 
 # 3. View changes
-pscale branch diff winkintel-com-pre-prod 2721-migration
+pscale branch diff my-database 2721-migration
 
 # 4. Create deploy request (safer than direct promotion)
-pscale deploy-request create winkintel-com-pre-prod 2721-migration
+pscale deploy-request create my-database 2721-migration
 
 # 5. Deploy via deploy request (see pscale-deploy-request)
 ```
@@ -61,7 +61,7 @@ pscale deploy-request create winkintel-com-pre-prod 2721-migration
 ```bash
 # Match PlanetScale branch to GitLab MR branch
 MR_BRANCH="2721-database-account-settings-changes-run-migration-2"
-pscale branch create winkintel-com-pre-prod $MR_BRANCH --from main
+pscale branch create my-database $MR_BRANCH --from main
 ```
 
 See `scripts/create-branch-for-mr.sh` for automation.

@@ -18,7 +18,7 @@ OPTIONS:
 
 EXAMPLES:
   # Sync branch with main
-  $(basename "$0") --database winkintel-com-pre-prod --branch feature-branch
+  $(basename "$0") --database my-database --branch feature-branch
 
   # With organization
   $(basename "$0") --database my-db --branch dev-branch --org my-org

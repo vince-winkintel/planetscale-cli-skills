@@ -19,10 +19,10 @@ OPTIONS:
 
 EXAMPLES:
   # Create deploy request only (manual deploy)
-  $(basename "$0") --database winkintel-com-pre-prod --branch 2721-migration
+  $(basename "$0") --database my-database --branch 2721-migration
 
   # Create and auto-deploy
-  $(basename "$0") --database winkintel-com-pre-prod --branch 2721-migration --deploy
+  $(basename "$0") --database my-database --branch 2721-migration --deploy
 
   # With organization
   $(basename "$0") --database my-db --branch feature-x --org my-org --deploy
