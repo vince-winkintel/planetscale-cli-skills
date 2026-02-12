@@ -3,7 +3,7 @@
 Comprehensive `pscale` command reference and automation workflows for managing PlanetScale databases via terminal.
 
 [![ClawHub](https://img.shields.io/badge/ClawHub-planetscale--cli--skills-blue)](https://clawhub.com/skills/planetscale-cli-skills)
-[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## 🎯 What This Skill Provides
 
@@ -239,7 +239,7 @@ Contributions welcome! Please:
 
 ## 📄 License
 
-Apache License 2.0 - see [LICENSE](LICENSE) file.
+MIT License - see [LICENSE](LICENSE) file.
 
 ## 🙏 Acknowledgments
 
