@@ -18,7 +18,7 @@ Create PlanetScale branch matching your MR or PR branch name.
 # Create branch for MR/PR
 ./scripts/create-branch-for-mr.sh \
   --database my-database \
-  --branch 2721-database-account-settings-changes
+  --branch feature-user-settings
 
 # Create from specific source branch
 ./scripts/create-branch-for-mr.sh \
@@ -54,12 +54,12 @@ Create deploy request and optionally deploy schema changes.
 # Create deploy request only (manual deploy later)
 ./scripts/deploy-schema-change.sh \
   --database my-database \
-  --branch 2721-migration
+  --branch feature-schema-v2
 
 # Create and auto-deploy
 ./scripts/deploy-schema-change.sh \
   --database my-database \
-  --branch 2721-migration \
+  --branch feature-schema-v2 \
   --deploy
 
 # With organization
@@ -156,16 +156,16 @@ All scripts:
 # 1. Create PlanetScale branch matching MR branch
 ./scripts/create-branch-for-mr.sh \
   --database my-database \
-  --branch 2721-database-account-settings-changes
+  --branch feature-user-settings
 
 # 2. Make schema changes
-pscale shell my-database 2721-database-account-settings-changes
+pscale shell my-database feature-user-settings
 # ... run ALTER TABLE, etc.
 
 # 3. Deploy schema change
 ./scripts/deploy-schema-change.sh \
   --database my-database \
-  --branch 2721-database-account-settings-changes \
+  --branch feature-user-settings \
   --deploy
 
 # 4. Pull schema back to Drizzle (if using Drizzle ORM)

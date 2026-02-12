@@ -95,7 +95,7 @@ Create PlanetScale branch matching your MR or PR:
 ```bash
 ./scripts/create-branch-for-mr.sh \
   --database my-database \
-  --branch 2721-database-migration
+  --branch feature-schema-migration
 ```
 
 ### deploy-schema-change.sh
@@ -105,7 +105,7 @@ Complete schema deployment workflow:
 ```bash
 ./scripts/deploy-schema-change.sh \
   --database my-database \
-  --branch 2721-migration \
+  --branch feature-schema-v2 \
   --deploy
 ```
 

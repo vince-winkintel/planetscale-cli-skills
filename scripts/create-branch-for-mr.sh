@@ -20,7 +20,7 @@ OPTIONS:
 EXAMPLES:
   # Create branch for MR/PR
   $(basename "$0") --database my-database \\
-    --branch 2721-database-account-settings-changes
+    --branch feature-user-settings
 
   # Create branch from specific source
   $(basename "$0") --database my-db --branch feature-x --from development

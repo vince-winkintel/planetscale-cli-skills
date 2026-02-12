@@ -40,17 +40,17 @@ This is the safest way to deploy schema changes to production:
 
 ```bash
 # 1. Create development branch
-pscale branch create my-database 2721-migration --from main
+pscale branch create my-database feature-schema-v2 --from main
 
 # 2. Make schema changes
-pscale shell my-database 2721-migration
+pscale shell my-database feature-schema-v2
 # ... execute ALTER TABLE, etc.
 
 # 3. Review changes locally
-pscale branch diff my-database 2721-migration
+pscale branch diff my-database feature-schema-v2
 
 # 4. Create deploy request
-pscale deploy-request create my-database 2721-migration
+pscale deploy-request create my-database feature-schema-v2
 
 # 5. Review deploy request diff
 pscale deploy-request diff my-database 1
@@ -209,7 +209,7 @@ See `scripts/deploy-schema-change.sh` for complete automation:
 # Automated deploy workflow
 ./scripts/deploy-schema-change.sh \
   --database my-database \
-  --branch 2721-migration \
+  --branch feature-schema-v2 \
   --auto-approve
 ```
 
