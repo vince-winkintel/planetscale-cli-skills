@@ -1,6 +1,18 @@
 ---
 name: planetscale-cli-skills
 description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database branches, deploy requests, schema migrations, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, deploy requests, databases, backups, and 10+ other pscale commands. Triggers on pscale, PlanetScale CLI, database branch, deploy request, schema migration, PlanetScale automation.
+requirements:
+  binaries:
+    - pscale
+  binaries_optional:
+    - grep
+  env_optional:
+    - PLANETSCALE_SERVICE_TOKEN_ID
+    - PLANETSCALE_SERVICE_TOKEN
+  notes: |
+    Requires PlanetScale CLI authentication via 'pscale auth login' (stores token in ~/.config/planetscale/).
+    Automation scripts use shell eval - ensure branch/database names come from trusted sources only (not user input).
+    Scripts require PCRE-enabled grep (grep -oP) - may need adjustment on BSD/macOS systems.
 ---
 
 # PlanetScale CLI Skills
