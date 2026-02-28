@@ -11,8 +11,35 @@ requirements:
     - PLANETSCALE_SERVICE_TOKEN
   notes: |
     Requires PlanetScale CLI authentication via 'pscale auth login' (stores token in ~/.config/planetscale/).
-    Automation scripts use shell eval - ensure branch/database names come from trusted sources only (not user input).
     Scripts require PCRE-enabled grep (grep -oP) - may need adjustment on BSD/macOS systems.
+metadata:
+  openclaw:
+    purpose: >
+      Provide command reference and automation for PlanetScale CLI (pscale) operations only.
+      Scope is limited to: database and branch management, deploy requests, backups, passwords,
+      service tokens, and organization management via the pscale CLI tool.
+    capabilities:
+      - Run pscale CLI commands to manage PlanetScale databases, branches, and deploy requests
+      - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
+      - Read PlanetScale CLI output and help users interpret results
+    install_mechanism: >
+      Skill files are loaded into agent context when a matching PlanetScale/pscale task is detected.
+      Automation scripts are executed directly via shell (bash). No network access beyond pscale CLI calls.
+      Scripts do not use eval or dynamic code execution; all pscale arguments are passed as discrete tokens.
+    requires:
+      credentials:
+        - name: PLANETSCALE_SERVICE_TOKEN_ID
+          description: >
+            PlanetScale service token ID for CI/CD authentication. Optional — interactive login
+            via 'pscale auth login' can be used instead. Token stored in environment variable only;
+            this skill does not read, store, or transmit credentials beyond passing them to pscale CLI.
+          required: false
+        - name: PLANETSCALE_SERVICE_TOKEN
+          description: >
+            PlanetScale service token secret for CI/CD authentication. Optional — interactive login
+            via 'pscale auth login' can be used instead. Token stored in environment variable only;
+            this skill does not read, store, or transmit credentials beyond passing them to pscale CLI.
+          required: false
 ---
 
 # PlanetScale CLI Skills

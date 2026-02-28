@@ -30,8 +30,19 @@ EXAMPLES:
 
 EXIT CODES:
   0   Success
-  1   Error (missing args, pscale command failed)
+  1   Error (missing args, invalid input, pscale command failed)
 EOF
+}
+
+# Validate that a value contains only safe characters for PlanetScale names
+# Allowed: alphanumeric, hyphens, underscores, dots
+validate_safe_name() {
+  local value="$1"
+  local param="$2"
+  if [[ ! "$value" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+    echo "❌ Error: $param contains invalid characters. Only alphanumeric, hyphens, underscores, and dots are allowed."
+    exit 1
+  fi
 }
 
 # Parse arguments
@@ -77,9 +88,11 @@ if [[ -z "$DATABASE" ]] || [[ -z "$BRANCH" ]]; then
   exit 1
 fi
 
-# Build pscale command
-CMD="pscale branch create \"$DATABASE\" \"$BRANCH\" --from \"$FROM\""
-[[ -n "$ORG" ]] && CMD="$CMD --org \"$ORG\""
+# Validate all inputs to prevent shell injection
+validate_safe_name "$DATABASE" "--database"
+validate_safe_name "$BRANCH" "--branch"
+validate_safe_name "$FROM" "--from"
+[[ -n "$ORG" ]] && validate_safe_name "$ORG" "--org"
 
 echo "📦 Creating PlanetScale branch..."
 echo "  Database: $DATABASE"
@@ -88,8 +101,12 @@ echo "  From: $FROM"
 [[ -n "$ORG" ]] && echo "  Org: $ORG"
 echo ""
 
-# Execute
-eval $CMD
+# Execute pscale directly (no eval — arguments passed as discrete tokens)
+if [[ -n "$ORG" ]]; then
+  pscale branch create "$DATABASE" "$BRANCH" --from "$FROM" --org "$ORG"
+else
+  pscale branch create "$DATABASE" "$BRANCH" --from "$FROM"
+fi
 
 echo ""
 echo "✅ Branch created successfully!"

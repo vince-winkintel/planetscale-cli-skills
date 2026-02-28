@@ -14,7 +14,7 @@ OPTIONS:
   --database <name>       Database name (required)
   --branch <name>         Branch name (required)
   --deploy                Auto-deploy after creating deploy request
-  --org <name>            Organization name (optional)
+  --org <name>            Organization name (optional; alphanumeric, hyphens, underscores, dots only)
   -h, --help              Show this help message
 
 EXAMPLES:
@@ -37,6 +37,16 @@ EXIT CODES:
   0   Success
   1   Error (missing args, pscale command failed)
 EOF
+}
+
+# Validate that a value contains only safe characters for PlanetScale names
+validate_safe_name() {
+  local value="$1"
+  local param="$2"
+  if [[ ! "$value" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+    echo "❌ Error: $param contains invalid characters. Only alphanumeric, hyphens, underscores, and dots are allowed."
+    exit 1
+  fi
 }
 
 # Parse arguments
@@ -82,9 +92,14 @@ if [[ -z "$DATABASE" ]] || [[ -z "$BRANCH" ]]; then
   exit 1
 fi
 
-# Build org flag
-ORG_FLAG=""
-[[ -n "$ORG" ]] && ORG_FLAG="--org $ORG"
+# Validate inputs to prevent shell injection
+validate_safe_name "$DATABASE" "--database"
+validate_safe_name "$BRANCH" "--branch"
+[[ -n "$ORG" ]] && validate_safe_name "$ORG" "--org"
+
+# Build org args array (safe: no eval, no string interpolation into commands)
+ORG_ARGS=()
+[[ -n "$ORG" ]] && ORG_ARGS=(--org "$ORG")
 
 echo "🚀 Starting schema migration workflow..."
 echo "  Database: $DATABASE"
@@ -94,7 +109,7 @@ echo ""
 
 # Step 1: Create deploy request
 echo "📝 Creating deploy request..."
-DR_OUTPUT=$(pscale deploy-request create "$DATABASE" "$BRANCH" $ORG_FLAG --format json)
+DR_OUTPUT=$(pscale deploy-request create "$DATABASE" "$BRANCH" "${ORG_ARGS[@]}" --format json)
 DR_NUMBER=$(echo "$DR_OUTPUT" | grep -oP '"number":\s*\K\d+' | head -1)
 
 if [[ -z "$DR_NUMBER" ]]; then
@@ -107,23 +122,23 @@ echo ""
 
 # Step 2: Show diff
 echo "📊 Deploy request diff:"
-pscale deploy-request diff "$DATABASE" "$DR_NUMBER" $ORG_FLAG || true
+pscale deploy-request diff "$DATABASE" "$DR_NUMBER" "${ORG_ARGS[@]}" || true
 echo ""
 
 # Step 3: Deploy if requested
 if [[ "$AUTO_DEPLOY" == true ]]; then
   echo "🚀 Deploying..."
-  pscale deploy-request deploy "$DATABASE" "$DR_NUMBER" $ORG_FLAG
+  pscale deploy-request deploy "$DATABASE" "$DR_NUMBER" "${ORG_ARGS[@]}"
   echo "✅ Deployment complete!"
 else
   echo "⏸️  Deploy request created but not deployed (use --deploy to auto-deploy)"
   echo ""
   echo "To deploy manually:"
-  echo "  pscale deploy-request deploy $DATABASE $DR_NUMBER $ORG_FLAG"
+  echo "  pscale deploy-request deploy $DATABASE $DR_NUMBER ${ORG_ARGS[*]}"
 fi
 
 echo ""
 
 # Step 4: Show final status
 echo "📋 Deploy request status:"
-pscale deploy-request show "$DATABASE" "$DR_NUMBER" $ORG_FLAG
+pscale deploy-request show "$DATABASE" "$DR_NUMBER" "${ORG_ARGS[@]}"

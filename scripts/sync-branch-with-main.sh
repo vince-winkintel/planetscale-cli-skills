@@ -33,6 +33,16 @@ EXIT CODES:
 EOF
 }
 
+# Validate that a value contains only safe characters for PlanetScale names
+validate_safe_name() {
+  local value="$1"
+  local param="$2"
+  if [[ ! "$value" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+    echo "❌ Error: $param contains invalid characters. Only alphanumeric, hyphens, underscores, and dots are allowed."
+    exit 1
+  fi
+}
+
 # Parse arguments
 DATABASE=""
 BRANCH=""
@@ -71,9 +81,14 @@ if [[ -z "$DATABASE" ]] || [[ -z "$BRANCH" ]]; then
   exit 1
 fi
 
-# Build org flag
-ORG_FLAG=""
-[[ -n "$ORG" ]] && ORG_FLAG="--org $ORG"
+# Validate inputs to prevent shell injection
+validate_safe_name "$DATABASE" "--database"
+validate_safe_name "$BRANCH" "--branch"
+[[ -n "$ORG" ]] && validate_safe_name "$ORG" "--org"
+
+# Build org args array (safe: no eval, no string interpolation into commands)
+ORG_ARGS=()
+[[ -n "$ORG" ]] && ORG_ARGS=(--org "$ORG")
 
 echo "🔄 Syncing branch with main..."
 echo "  Database: $DATABASE"
@@ -81,8 +96,8 @@ echo "  Branch: $BRANCH"
 [[ -n "$ORG" ]] && echo "  Org: $ORG"
 echo ""
 
-# Refresh schema
-pscale branch refresh-schema "$DATABASE" "$BRANCH" $ORG_FLAG
+# Refresh schema (arguments passed as discrete tokens, no eval)
+pscale branch refresh-schema "$DATABASE" "$BRANCH" "${ORG_ARGS[@]}"
 
 echo ""
 echo "✅ Branch schema refreshed!"
