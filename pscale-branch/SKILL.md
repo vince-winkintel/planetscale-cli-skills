@@ -28,6 +28,14 @@ pscale branch diff <database> <branch-name>
 # View schema
 pscale branch schema <database> <branch-name>
 
+# Inspect live branch connections (Postgres and Vitess)
+pscale branch connections show <database> <branch-name> --format json
+pscale branch connections top <database> <branch-name>
+
+# Inspect Vitess routing rules
+pscale branch routing-rules get <database> <branch-name>
+pscale branch vtctld get-routing-rules <database> <branch-name>
+
 # Delete branch
 pscale branch delete <database> <branch-name>
 
@@ -78,6 +86,44 @@ pscale branch schema <database> <branch-name>
 # Export schema to file
 pscale branch schema <database> <branch-name> > schema.sql
 ```
+
+### Connection inspection and safe termination
+
+`pscale branch connections` replaced the older MySQL-only process view with a shared Postgres/Vitess connection view. Prefer JSON output for agent workflows so action IDs are explicit and not truncated.
+
+```bash
+# Inspect current connections once
+pscale branch connections show <database> <branch-name> --format json
+
+# Watch live connection activity
+pscale branch connections top <database> <branch-name>
+
+# Cancel a query only after confirming the query_id with the user
+pscale branch connections kill <database> <branch-name> <query-id> --query
+
+# Terminate a connection only after explicit user approval
+pscale branch connections kill <database> <branch-name> <connection-id>
+
+# Postgres only: terminate a transaction after explicit user approval
+pscale branch connections kill-transaction <database> <branch-name> <transaction-id>
+```
+
+Treat `kill` and `kill-transaction` as destructive operational actions: show the selected row, explain the effect, get confirmation, run exactly one action, then verify with `connections show`.
+
+### Routing rules
+
+```bash
+# Read routing rules from the branch schema snapshot
+pscale branch routing-rules get <database> <branch-name>
+
+# Vitess only: read live routing rules from vtctld/current cluster state
+pscale branch vtctld get-routing-rules <database> <branch-name>
+
+# Update routing rules from a file
+pscale branch routing-rules update <database> <branch-name> --routing-rules routing-rules.json
+```
+
+Use `vtctld get-routing-rules` when debugging propagation/live cluster state; use `routing-rules get` when you need the schema snapshot contract.
 
 ### Branch Cleanup
 
