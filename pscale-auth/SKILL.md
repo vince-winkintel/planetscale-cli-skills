@@ -13,6 +13,9 @@ Manage authentication for the PlanetScale CLI.
 # Login to PlanetScale (opens browser)
 pscale auth login
 
+# Login in automation-friendly JSON mode
+pscale auth login --format json
+
 # Logout
 pscale auth logout
 
@@ -32,6 +35,14 @@ pscale auth login
 
 **Best for:** Local development, first-time setup
 
+For agentic or scripted onboarding, prefer JSON output so required user actions can be parsed and relayed without scraping human text:
+
+```bash
+pscale auth login --format json
+```
+
+If JSON output indicates user action is required, relay only the required action/URL to the user and do not print or store credentials.
+
 ### 2. Service Tokens (CI/CD)
 
 For automated environments:
@@ -45,6 +56,16 @@ pscale database list --org <org>
 **Best for:** CI/CD pipelines, automation, production deployments
 
 See `pscale-service-token` skill for token creation.
+
+### 3. API token flags/env
+
+Recent `pscale` global flags also accept API-token based auth for automation:
+
+```bash
+pscale database list --org <org> --api-token <token>
+```
+
+Prefer environment/secret-manager injection over putting tokens in shell history. Never commit tokens to skill repos or scripts.
 
 ## Workflows
 

@@ -28,6 +28,9 @@ pscale branch diff <database> <branch-name>
 # View schema
 pscale branch schema <database> <branch-name>
 
+# Resize a Postgres branch cluster
+pscale branch resize <database> <branch-name> --cluster-size PS_10_GCP_X86
+
 # Inspect live branch connections (Postgres and Vitess)
 pscale branch connections show <database> <branch-name> --format json
 pscale branch connections top <database> <branch-name>
@@ -110,6 +113,20 @@ pscale branch connections kill-transaction <database> <branch-name> <transaction
 ```
 
 Treat `kill` and `kill-transaction` as destructive operational actions: show the selected row, explain the effect, get confirmation, run exactly one action, then verify with `connections show`.
+
+### Resize a Postgres branch
+
+`pscale branch resize` changes a Postgres branch's cluster size. Confirm the target org/database/branch and desired SKU before resizing.
+
+```bash
+# List valid Postgres cluster sizes first
+pscale size cluster list --engine postgresql --org <org>
+
+# Resize the branch cluster
+pscale branch resize <database> <branch-name> --org <org> --cluster-size PS_10_GCP_X86
+```
+
+Treat resize as an operational capacity/cost-affecting change. Verify with `pscale branch show <database> <branch-name> --org <org>` after the command completes.
 
 ### Routing rules
 

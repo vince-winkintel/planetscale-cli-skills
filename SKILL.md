@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database branches, deploy requests, schema migrations, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, deploy requests, databases, backups, and 10+ other pscale commands. Triggers on pscale, PlanetScale CLI, database branch, deploy request, schema migration, PlanetScale automation.
+description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database branches, deploy requests, schema migrations, SQL queries, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, deploy requests, SQL, databases, backups, and other pscale commands. Triggers on pscale, PlanetScale CLI, database branch, deploy request, schema migration, pscale sql, PlanetScale automation.
 requirements:
   binaries:
     - pscale
@@ -16,10 +16,10 @@ metadata:
   openclaw:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
-      Scope is limited to: database and branch management, deploy requests, backups, passwords,
+      Scope is limited to: database and branch management, deploy requests, non-interactive SQL queries, backups, passwords,
       service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, and deploy requests
+      - Run pscale CLI commands to manage PlanetScale databases, branches, deploy requests, and non-interactive SQL queries
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -58,6 +58,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **branch** | `pscale-branch` | Create, delete, promote, diff, list database branches |
 | **deploy-request** | `pscale-deploy-request` | Create, review, deploy, revert schema changes |
 | **database** | `pscale-database` | Create, list, show, delete databases |
+| **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
 | **backup** | `pscale-backup` | Create, list, show, delete branch backups |
 | **password** | `pscale-password` | Create, list, delete connection passwords |
 | **org** | `pscale-org` | List, show, switch organizations |
@@ -175,6 +176,9 @@ pscale deploy-request deploy <database> <number>
 pscale database create <database> --org <org>
 pscale database list
 pscale shell <database> <branch>
+
+# Non-interactive read query for agents/scripts
+pscale sql <database> <branch> --org <org> --format json --query "SELECT 1"
 ```
 
 ## Related Skills
