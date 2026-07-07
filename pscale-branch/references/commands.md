@@ -16,6 +16,7 @@ Available Commands:
   list            List all branches of a database
   promote         Promote a new branch from a database
   refresh-schema  Refresh the schema for a database branch
+  resize          Resize a Postgres branch's cluster
   routing-rules   Fetch or update your keyspace routing rules
   safe-migrations Enable or disable safe migrations on a branch
   schema          Show the schema of a branch
@@ -38,6 +39,30 @@ Global Flags:
 
 Use "pscale branch [command] --help" for more information about a command.
 
+```
+
+## pscale branch resize
+
+```text
+Resize a Postgres branch's cluster
+
+Usage:
+  pscale branch resize <database> <branch> [flags]
+
+Flags:
+      --cluster-size string   New cluster size for the branch (a fully-qualified SKU name, e.g. PS_10_GCP_X86). Use 'pscale size cluster list --engine postgresql' to see the valid sizes.
+  -h, --help                  help for resize
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 ```
 
 ## pscale branch connections

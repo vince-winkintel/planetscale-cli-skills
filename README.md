@@ -7,7 +7,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 🎯 What This Skill Provides
 
-- **8 sub-skills** covering all major `pscale` commands
+- **9 sub-skills** covering all major `pscale` commands
 - **3 automation scripts** for common workflows (create branch, deploy schema, sync)
 - **Decision trees** for common questions (branch vs deploy request, tokens vs passwords)
 - **Troubleshooting sections** for self-service problem solving
@@ -79,6 +79,7 @@ pscale branch create my-database feature-branch --from main
 | **pscale-branch** | Create, diff, promote branches | `pscale branch create/list/diff` |
 | **pscale-deploy-request** | Deploy schema changes safely | `pscale deploy-request create/deploy` |
 | **pscale-database** | Manage databases, open shells | `pscale database list`, `pscale shell` |
+| **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
 | **pscale-backup** | Create and restore backups | `pscale backup create/list` |
 | **pscale-password** | Connection passwords | `pscale password create/list` |
 | **pscale-org** | Switch organizations | `pscale org list/switch` |
@@ -162,6 +163,17 @@ deploy-schema:
           --database ${{ secrets.DATABASE }} \
           --branch ${{ github.ref_name }} \
           --deploy
+```
+
+### Non-interactive SQL for agents/scripts
+
+```bash
+# Default role is reader; use JSON for machine-readable results
+pscale sql my-db main --org my-org --format json --query "SELECT 1"
+
+# Writes require an explicit write-capable role; destructive SQL also needs --force
+# and should only be run after explicit user approval.
+pscale sql my-db main --org my-org --role admin --query "UPDATE users SET disabled = true WHERE id = 123"
 ```
 
 ### Drizzle ORM Integration
