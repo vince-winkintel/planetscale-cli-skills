@@ -308,6 +308,7 @@ Usage:
   pscale branch vtctld [command]
 
 Available Commands:
+  get-shard              Get a shard record for a branch
   get-routing-rules      Get live routing rules for a branch
   list-keyspaces         List vtctld keyspaces for a branch
   list-tablets           List tablets for a branch, grouped by keyspace and shard
@@ -336,6 +337,32 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale branch vtctld [command] --help" for more information about a command.
+
+```
+
+## pscale branch vtctld get-shard
+
+```text
+Get a live shard record from the cluster via vtctld, including tablet controls and denied tables.
+
+Usage:
+  pscale branch vtctld get-shard <database> <branch> [flags]
+
+Flags:
+  -h, --help              help for get-shard
+      --keyspace string   Keyspace name
+      --shard string      Shard name (e.g. "-" for unsharded)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 
 ```
 

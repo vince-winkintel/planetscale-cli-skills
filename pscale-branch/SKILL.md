@@ -35,6 +35,7 @@ pscale branch connections top <database> <branch-name>
 # Inspect Vitess routing rules
 pscale branch routing-rules get <database> <branch-name>
 pscale branch vtctld get-routing-rules <database> <branch-name>
+pscale branch vtctld get-shard <database> <branch-name> --keyspace <keyspace> --shard <shard>
 
 # Delete branch
 pscale branch delete <database> <branch-name>
@@ -124,6 +125,22 @@ pscale branch routing-rules update <database> <branch-name> --routing-rules rout
 ```
 
 Use `vtctld get-routing-rules` when debugging propagation/live cluster state; use `routing-rules get` when you need the schema snapshot contract.
+
+### Vitess shard inspection
+
+`pscale branch vtctld get-shard` reads a live shard record from vtctld, including tablet controls and denied tables. It is Vitess-only and requires both `--keyspace` and `--shard`.
+
+```bash
+# Inspect an unsharded keyspace
+pscale branch vtctld get-shard <database> <branch-name> \
+  --keyspace main \
+  --shard '-'
+
+# Inspect a sharded keyspace shard
+pscale branch vtctld get-shard <database> <branch-name> \
+  --keyspace commerce \
+  --shard '-80'
+```
 
 ### Branch Cleanup
 
