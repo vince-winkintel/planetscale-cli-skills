@@ -76,7 +76,7 @@ pscale branch create my-database feature-branch --from main
 | Skill | Use When | Common Commands |
 |-------|----------|----------------|
 | **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
-| **pscale-branch** | Create, diff, promote branches | `pscale branch create/list/diff` |
+| **pscale-branch** | Create, diff, promote branches, download query pattern reports | `pscale branch create/list/diff/query-patterns` |
 | **pscale-deploy-request** | Deploy schema changes safely | `pscale deploy-request create/deploy` |
 | **pscale-database** | Manage databases, open shells | `pscale database list`, `pscale shell` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
