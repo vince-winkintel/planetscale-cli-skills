@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, delete, promote, diff, and manage PlanetScale database branches. Use when creating development branches for schema changes, viewing schema diffs, promoting branches to production, or managing branch lifecycle. Essential for schema migration workflows. Triggers on branch, create branch, schema diff, promote branch, development branch, database branch.
+description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches. Use when creating development branches for schema changes, viewing schema diffs, downloading query pattern reports, promoting branches to production, or managing branch lifecycle. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, query pattern report, promote branch, development branch, database branch.
 ---
 
 # pscale branch
@@ -34,6 +34,9 @@ pscale branch resize <database> <branch-name> --cluster-size PS_10_GCP_X86
 # Inspect live branch connections (Postgres and Vitess)
 pscale branch connections show <database> <branch-name> --format json
 pscale branch connections top <database> <branch-name>
+
+# Download a branch query patterns CSV report
+pscale branch query-patterns download <database> <branch-name> --output query-patterns.csv
 
 # Inspect Vitess routing rules
 pscale branch routing-rules get <database> <branch-name>
@@ -113,6 +116,21 @@ pscale branch connections kill-transaction <database> <branch-name> <transaction
 ```
 
 Treat `kill` and `kill-transaction` as destructive operational actions: show the selected row, explain the effect, get confirmation, run exactly one action, then verify with `connections show`.
+
+### Query pattern reports
+
+`pscale branch query-patterns download` generates a branch-level query patterns report, polls until PlanetScale finishes it, and downloads the resulting CSV. Use it for query-shape analysis before tuning indexes, schema, or application query patterns.
+
+```bash
+# Download with an explicit output path
+pscale branch query-patterns download <database> <branch-name> --org <org> --output query-patterns.csv
+
+# If --output is omitted, pscale writes a timestamped file in the current directory:
+# query-patterns-<organization>-<database>-<branch>-<timestamp>.csv
+pscale branch query-patterns download <database> <branch-name> --org <org>
+```
+
+The command requires Query Insights to be enabled for the database. A not-found error can mean either the branch does not exist or Query Insights is disabled. Prefer an explicit `--output` path in automation so downstream analysis can find the CSV deterministically.
 
 ### Resize a Postgres branch
 
