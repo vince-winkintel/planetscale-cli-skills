@@ -46,7 +46,8 @@ pscale sql <database> <branch> --org <org> --role admin --force --query "DELETE 
 2. For reads, prefer `--format json` and keep the default `reader` role.
 3. For writes, confirm the target and exact SQL with the user before running.
 4. Never add `--force` without explicit approval for the exact destructive query.
-5. Return a concise summary and include row counts/results as appropriate.
+5. On pscale v0.296.0+, JSON-mode failures use a structured error envelope; parse the machine-readable `code`/message fields instead of scraping colored human output.
+6. Return a concise summary and include row counts/results as appropriate.
 
 ## Flag placement
 
@@ -58,4 +59,4 @@ pscale sql <database> <branch> --org <org> --format json --query "SELECT 1"
 
 ## References
 
-See [references/commands.md](references/commands.md) for current `pscale sql --help` output captured from pscale v0.293.0.
+See [references/commands.md](references/commands.md) for current `pscale sql --help` output captured from pscale v0.298.0.
