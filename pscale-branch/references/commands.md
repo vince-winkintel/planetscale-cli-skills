@@ -246,6 +246,29 @@ Global Flags:
 
 ```
 
+## pscale branch infra
+
+```text
+Show infrastructure (pods) for a branch
+
+Usage:
+  pscale branch infra <database> <branch> [flags]
+
+Flags:
+  -h, --help   help for infra
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+```
+
 ## pscale branch query-patterns
 
 ```text
@@ -285,7 +308,7 @@ Usage:
 
 Flags:
   -h, --help            help for download
-      --output string   Output file for the query patterns report. Defaults to the current directory as query-patterns-<organization>-<database>-<branch>-<timestamp>.csv.
+      --output string   Output file name, or - to write to stdout. Defaults to query-patterns-<organization>-<database>-<branch>-<timestamp>.csv.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

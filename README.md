@@ -7,7 +7,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 🎯 What This Skill Provides
 
-- **9 sub-skills** covering all major `pscale` commands
+- **10 sub-skills** covering all major `pscale` commands
 - **3 automation scripts** for common workflows (create branch, deploy schema, sync)
 - **Decision trees** for common questions (branch vs deploy request, tokens vs passwords)
 - **Troubleshooting sections** for self-service problem solving
@@ -76,10 +76,11 @@ pscale branch create my-database feature-branch --from main
 | Skill | Use When | Common Commands |
 |-------|----------|----------------|
 | **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
-| **pscale-branch** | Create, diff, promote branches, download query pattern reports | `pscale branch create/list/diff/query-patterns` |
+| **pscale-branch** | Create, diff, promote branches, inspect branch infra, download or stream query pattern reports | `pscale branch create/list/diff/infra/query-patterns` |
 | **pscale-deploy-request** | Deploy schema changes safely | `pscale deploy-request create/deploy` |
 | **pscale-database** | Manage databases, open shells | `pscale database list`, `pscale shell` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
+| **pscale-import-d1** | Import Cloudflare D1 exports into PlanetScale Postgres | `pscale import d1 lint/start/verify` |
 | **pscale-backup** | Create and restore backups | `pscale backup create/list` |
 | **pscale-password** | Connection passwords | `pscale password create/list` |
 | **pscale-org** | Switch organizations | `pscale org list/switch` |
@@ -174,6 +175,18 @@ pscale sql my-db main --org my-org --format json --query "SELECT 1"
 # Writes require an explicit write-capable role; destructive SQL also needs --force
 # and should only be run after explicit user approval.
 pscale sql my-db main --org my-org --role admin --query "UPDATE users SET disabled = true WHERE id = 123"
+```
+
+### Cloudflare D1 Import
+
+```bash
+# Export D1 with wrangler, then lint and dry-run before loading PlanetScale
+pscale import d1 lint --input ./d1-export.sql --format json
+pscale import d1 start my-db migration-branch --input ./d1-export.sql --dry-run --format json
+
+# After reviewing the migration ID and warnings, run and verify the import
+pscale import d1 start my-db migration-branch --input ./d1-export.sql --migration-id <id> --format json
+pscale import d1 verify my-db migration-branch --migration-id <id> --input ./d1-export.sql --format json
 ```
 
 ### Drizzle ORM Integration

@@ -22,6 +22,9 @@ pscale branch list <database>
 # Show branch details
 pscale branch show <database> <branch-name>
 
+# Inspect branch infrastructure/pods (supports Postgres and Vitess)
+pscale branch infra <database> <branch-name> --format json
+
 # View schema diff
 pscale branch diff <database> <branch-name>
 
@@ -37,6 +40,9 @@ pscale branch connections top <database> <branch-name>
 
 # Download a branch query patterns CSV report
 pscale branch query-patterns download <database> <branch-name> --output query-patterns.csv
+
+# Stream the CSV to stdout for pipelines
+pscale branch query-patterns download <database> <branch-name> --output - > query-patterns.csv
 
 # Inspect Vitess routing rules
 pscale branch routing-rules get <database> <branch-name>
@@ -94,6 +100,16 @@ pscale branch schema <database> <branch-name>
 pscale branch schema <database> <branch-name> > schema.sql
 ```
 
+### Branch infrastructure
+
+`pscale branch infra` shows branch infrastructure/pod state. In pscale v0.298.0 it supports Postgres branches as well as Vitess. Prefer JSON output when an agent needs to inspect or compare infrastructure state.
+
+```bash
+pscale branch infra <database> <branch-name> --org <org> --format json
+```
+
+Use this for read-only diagnostics. Do not infer that a schema/deploy operation is safe solely from infra output; combine it with branch status, schema diff, and deploy-request checks.
+
 ### Connection inspection and safe termination
 
 `pscale branch connections` replaced the older MySQL-only process view with a shared Postgres/Vitess connection view. Prefer JSON output for agent workflows so action IDs are explicit and not truncated.
@@ -128,9 +144,12 @@ pscale branch query-patterns download <database> <branch-name> --org <org> --out
 # If --output is omitted, pscale writes a timestamped file in the current directory:
 # query-patterns-<organization>-<database>-<branch>-<timestamp>.csv
 pscale branch query-patterns download <database> <branch-name> --org <org>
+
+# Use --output - to write the CSV to stdout for shell pipelines
+pscale branch query-patterns download <database> <branch-name> --org <org> --output - > query-patterns.csv
 ```
 
-The command requires Query Insights to be enabled for the database. A not-found error can mean either the branch does not exist or Query Insights is disabled. Prefer an explicit `--output` path in automation so downstream analysis can find the CSV deterministically.
+The command requires Query Insights to be enabled for the database. A not-found error can mean either the branch does not exist or Query Insights is disabled. Prefer an explicit `--output` path in automation so downstream analysis can find the CSV deterministically; use `--output -` when a pipeline should consume the CSV from stdout.
 
 ### Resize a Postgres branch
 
