@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches. Use when creating development branches for schema changes, viewing schema diffs, downloading query pattern reports, promoting branches to production, or managing branch lifecycle. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, query pattern report, promote branch, development branch, database branch.
+description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches and Vitess workflows. Use when creating development branches for schema changes, viewing schema diffs, downloading query pattern reports, promoting branches to production, managing branch lifecycle, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, query pattern report, promote branch, development branch, database branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -48,6 +48,15 @@ pscale branch query-patterns download <database> <branch-name> --output - > quer
 pscale branch routing-rules get <database> <branch-name>
 pscale branch vtctld get-routing-rules <database> <branch-name>
 pscale branch vtctld get-shard <database> <branch-name> --keyspace <keyspace> --shard <shard>
+
+# Create a Vitess MoveTables workflow whose generated sequence tables live in a global keyspace
+pscale branch vtctld move-tables create <database> <branch-name> \
+  --workflow <workflow> \
+  --source-keyspace <source-keyspace> \
+  --target-keyspace <target-keyspace> \
+  --all-tables \
+  --sharded-auto-increment-handling REPLACE \
+  --global-keyspace <unsharded-global-keyspace>
 
 # Delete branch
 pscale branch delete <database> <branch-name>
@@ -102,7 +111,7 @@ pscale branch schema <database> <branch-name> > schema.sql
 
 ### Branch infrastructure
 
-`pscale branch infra` shows branch infrastructure/pod state. In pscale v0.298.0 it supports Postgres branches as well as Vitess. Prefer JSON output when an agent needs to inspect or compare infrastructure state.
+`pscale branch infra` shows branch infrastructure/pod state for Postgres and Vitess branches. Prefer JSON output when an agent needs to inspect or compare infrastructure state.
 
 ```bash
 pscale branch infra <database> <branch-name> --org <org> --format json
@@ -195,6 +204,23 @@ pscale branch vtctld get-shard <database> <branch-name> \
   --keyspace commerce \
   --shard '-80'
 ```
+
+### Vitess MoveTables and global sequences
+
+`pscale branch vtctld move-tables create` supports `--global-keyspace`. Use it with `--sharded-auto-increment-handling REPLACE` when backing sequence tables for sharded auto-increment columns must be created in a specific unsharded keyspace.
+
+```bash
+pscale branch vtctld move-tables create <database> <branch-name> \
+  --workflow move-commerce \
+  --source-keyspace source \
+  --target-keyspace commerce \
+  --tables orders,order_items \
+  --sharded-auto-increment-handling REPLACE \
+  --global-keyspace global \
+  --stop-after-copy
+```
+
+This command creates a data-movement workflow and starts it automatically unless `--auto-start=false` is supplied. Before running it, confirm the database, branch, source and target keyspaces, table selection, workflow name, and global keyspace with the user. Prefer `--stop-after-copy` or `--auto-start=false` when the workflow requires review before traffic switching.
 
 ### Branch Cleanup
 

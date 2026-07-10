@@ -7,9 +7,9 @@ description: Import Cloudflare D1 SQLite exports into PlanetScale Postgres with 
 
 Import a Cloudflare D1 database export into PlanetScale Postgres using `pscale import d1`.
 
-## What changed in pscale v0.295.0+
+## Capabilities
 
-PlanetScale CLI v0.295.0 introduced the `pscale import d1` command group for offline Cloudflare D1 migrations. It lints a D1 SQL export, converts SQLite DDL to PostgreSQL DDL, loads data into a PlanetScale Postgres branch, stores local migration state, and verifies the import.
+The `pscale import d1` command group supports offline Cloudflare D1 migrations. It lints a D1 SQL export, converts SQLite DDL to PostgreSQL DDL, loads data into a PlanetScale Postgres branch, stores local migration state, and verifies the import.
 
 All commands support `--format json` through the global pscale flag; use JSON for agent automation.
 
@@ -24,6 +24,12 @@ pscale import d1 doctor --format json
 ```
 
 `start` requires `pgloader` on `PATH`. For small databases, `--method psql` uses `psql` for schema and `pgloader` for data; for larger exports, use `--method pgloader`.
+
+### SQLite configuration isolation
+
+pscale isolates its internal `sqlite3` calls from `~/.sqliterc` and forces batch, no-header output. User settings such as `.headers on` or `.mode column` therefore do not corrupt D1 import row-count and verification parsing. Integer parsing is strict, stderr stays separate from parsed output, and unusual SQLite identifiers are quoted correctly.
+
+If a D1 import or verification fails with unexpected SQLite output, upgrade pscale to the current release and rerun the same migration step. Treat an `unexpected output` error on a current release as a real parsing/data problem, and preserve the reported output and stderr when troubleshooting.
 
 ## Recommended migration workflow
 
@@ -110,4 +116,4 @@ Use the same export file and target branch unless intentionally restarting the m
 
 ## References
 
-See `references/commands.md` for the `pscale import d1` command reference captured from pscale v0.298.0 help.
+See `references/commands.md` for the current `pscale import d1` command reference.

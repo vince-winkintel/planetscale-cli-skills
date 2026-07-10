@@ -442,6 +442,46 @@ Use "pscale branch vtctld [command] --help" for more information about a command
 
 ```
 
+## pscale branch vtctld move-tables create
+
+```text
+Create a MoveTables workflow
+
+Usage:
+  pscale branch vtctld move-tables create <database> <branch> [flags]
+
+Flags:
+      --all-tables                               Move all tables from the source keyspace
+      --atomic-copy                              Use atomic copy for the workflow
+      --auto-start                               Automatically start the workflow after creation (default true)
+      --cells strings                            Cells to restrict the workflow to (comma-separated)
+      --defer-secondary-keys                     Defer secondary keys during the copy phase (default true)
+      --exclude-tables strings                   Tables to exclude from the move (comma-separated)
+      --global-keyspace string                   Unsharded keyspace in which to create the backing sequence tables when --sharded-auto-increment-handling is REPLACE
+  -h, --help                                     help for create
+      --on-ddl string                            DDL handling strategy (IGNORE, STOP, EXEC, EXEC_IGNORE)
+      --sharded-auto-increment-handling string   Auto increment handling for sharded keyspaces
+      --source-keyspace string                   Source keyspace (required)
+      --source-time-zone string                  Source time zone
+      --stop-after-copy                          Stop the workflow after the copy phase
+      --tables strings                           Tables to move (comma-separated)
+      --tablet-types strings                     Tablet types to use for the workflow (comma-separated)
+      --target-keyspace string                   Target keyspace (required)
+      --tenant-id string                         Tenant ID
+      --workflow string                          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+```
+
 ## pscale branch vtctld get-shard
 
 ```text
