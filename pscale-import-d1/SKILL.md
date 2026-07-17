@@ -31,6 +31,12 @@ pscale isolates its internal `sqlite3` calls from `~/.sqliterc` and forces batch
 
 If a D1 import or verification fails with unexpected SQLite output, upgrade pscale to the current release and rerun the same migration step. Treat an `unexpected output` error on a current release as a real parsing/data problem, and preserve the reported output and stderr when troubleshooting.
 
+### Schema conversion behavior
+
+The current converter preserves and translates more SQLite schema semantics, including column- and table-level `CHECK` constraints, named constraints, generated columns, `NUMERIC`/`DECIMAL` precision, and common computed defaults such as `date('now')`, `time('now')`, `randomblob()`, UUID generators, and `CAST(unixepoch() AS TEXT)`. SQLite `VIRTUAL` generated columns are materialized as PostgreSQL `STORED` generated columns because PostgreSQL 16 supports only stored generated columns.
+
+Still review `convert-schema` output before loading. Expression or partial indexes, views, triggers, and other constructs reported by `lint` can require manual migration decisions; do not assume a successful conversion is semantically identical without inspecting constraints, defaults, generated expressions, foreign-key types, and indexes.
+
 ## Recommended migration workflow
 
 ```bash

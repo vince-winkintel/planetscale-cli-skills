@@ -16,8 +16,11 @@ pscale branch create <database> <branch-name>
 # Create branch from specific source
 pscale branch create <database> <branch-name> --from <source-branch>
 
-# List all branches
+# List the default page (up to 100 branches)
 pscale branch list <database>
+
+# Page through larger branch sets
+pscale branch list <database> --page 2 --per-page 100 --format json
 
 # Show branch details
 pscale branch show <database> <branch-name>
@@ -66,6 +69,15 @@ pscale branch promote <database> <branch-name>
 ```
 
 ## Workflows
+
+### Paginate branch inventory
+
+`pscale branch list` returns one page with up to 100 branches by default. For databases with larger branch inventories, request subsequent pages explicitly with `--page`; use `--format json` for automation and stop when a page is empty.
+
+```bash
+pscale branch list <database> --page 1 --per-page 100 --format json
+pscale branch list <database> --page 2 --per-page 100 --format json
+```
 
 ### Schema Migration Workflow (Standard)
 
