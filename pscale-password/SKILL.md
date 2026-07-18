@@ -13,8 +13,11 @@ Create, list, filter, renew, and delete branch passwords for database connection
 # Create password
 pscale password create <database> <branch> <password-name>
 
-# List the default page (up to 100 passwords)
-pscale password list <database> <branch>
+# List the default page (up to 100 passwords); omit branch to audit all branches
+pscale password list <database> [branch]
+
+# Audit renewable passwords across all branches
+pscale password list <database> --status renewable --format json
 
 # Filter and paginate passwords
 pscale password list <database> <branch> \
@@ -23,6 +26,9 @@ pscale password list <database> <branch> \
   --page 1 \
   --per-page 100 \
   --format json
+
+# Renew password
+pscale password renew <database> <branch> <password-id>
 
 # Delete password
 pscale password delete <database> <branch> <password-id>
@@ -58,6 +64,8 @@ pscale password delete my-db main <password-id>
 ### Postgres role filtering
 
 Postgres databases use roles instead of Vitess branch passwords. Role listing supports the same pagination and name filtering, with statuses `active`, `renewable`, `disabled`, and `expired`.
+
+This workflow intentionally lives here because no dedicated `pscale-role` skill exists, and both command groups manage branch credentials.
 
 ```bash
 pscale role list <database> <branch> \
