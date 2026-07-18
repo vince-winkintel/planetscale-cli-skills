@@ -42,6 +42,35 @@ Use "pscale branch [command] --help" for more information about a command.
 
 ```
 
+## pscale branch list
+
+```text
+List all branches of a database
+
+Usage:
+  pscale branch list <database> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+  -h, --help           help for list
+      --page int       Page number to fetch
+      --per-page int   Number of results per page (default 100)
+  -w, --web            List branches in your web browser.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+```
+
 ## pscale branch resize
 
 ```text
