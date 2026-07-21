@@ -1,0 +1,9 @@
+1.0.8
+
+Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- PlanetScale CLI v0.304.0
+  - Reviewed upstream compare `v0.303.0...v0.304.0` on 2026-07-21.
+  - Added Postgres branch parameter discovery plus combined size, replica, and parameter change requests.
+  - Added asynchronous resize status/wait/cancel lifecycle guidance and restart/cost safety checks.
+  - Recorded the corrected root `--api-url` behavior for `pscale auth check`; no existing auth workflow required content changes.

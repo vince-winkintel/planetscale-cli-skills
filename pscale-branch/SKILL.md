@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches and Vitess workflows. Use when creating development branches for schema changes, viewing schema diffs, downloading query pattern reports, promoting branches to production, managing branch lifecycle, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, query pattern report, promote branch, development branch, database branch, MoveTables, global keyspace.
+description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches, Postgres parameters, and Vitess workflows. Use when creating development branches for schema changes, viewing schema diffs, downloading query pattern reports, changing Postgres branch size, replicas, or parameters, promoting branches to production, managing branch lifecycle, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, query pattern report, resize branch, Postgres parameters, promote branch, development branch, database branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -34,8 +34,19 @@ pscale branch diff <database> <branch-name>
 # View schema
 pscale branch schema <database> <branch-name>
 
-# Resize a Postgres branch cluster
-pscale branch resize <database> <branch-name> --cluster-size PS_10_GCP_X86
+# Inspect configurable Postgres parameters before changing them
+pscale branch parameters list <database> <branch-name> --format json
+
+# Queue one Postgres branch change request for size, replicas, and/or parameters
+pscale branch resize <database> <branch-name> \
+  --cluster-size PS_10_GCP_X86 \
+  --replicas 2 \
+  --parameters pgconf.max_connections=500 \
+  --wait
+
+# Inspect or cancel the latest queued change request
+pscale branch resize status <database> <branch-name> --format json
+pscale branch resize cancel <database> <branch-name> --format json
 
 # Inspect live branch connections (Postgres and Vitess)
 pscale branch connections show <database> <branch-name> --format json
@@ -172,19 +183,33 @@ pscale branch query-patterns download <database> <branch-name> --org <org> --out
 
 The command requires Query Insights to be enabled for the database. A not-found error can mean either the branch does not exist or Query Insights is disabled. Prefer an explicit `--output` path in automation so downstream analysis can find the CSV deterministically; use `--output -` when a pipeline should consume the CSV from stdout.
 
-### Resize a Postgres branch
+### Change a Postgres branch
 
-`pscale branch resize` changes a Postgres branch's cluster size. Confirm the target org/database/branch and desired SKU before resizing.
+`pscale branch resize` queues one asynchronous change request that can combine cluster size, replica count, and configuration parameter changes. At least one of `--cluster-size`, `--replicas`, or repeatable `--parameters namespace.name=value` is required. This command rejects MySQL databases; use `pscale keyspace resize` for Vitess keyspaces.
 
 ```bash
-# List valid Postgres cluster sizes first
+# Inspect the parameter catalog first. The bare `parameters` form is equivalent.
+pscale branch parameters list <database> <branch-name> --org <org> --format json
+pscale branch parameters list <database> <branch-name> --org <org> --namespace pgconf --format json
+
+# List valid Postgres cluster sizes
 pscale size cluster list --engine postgresql --org <org>
 
-# Resize the branch cluster
-pscale branch resize <database> <branch-name> --org <org> --cluster-size PS_10_GCP_X86
+# Combine desired changes into one request and wait up to 20 minutes
+pscale branch resize <database> <branch-name> --org <org> --format json \
+  --cluster-size PS_10_GCP_X86 \
+  --replicas 2 \
+  --parameters pgconf.max_connections=500 \
+  --wait --wait-timeout 20m
+
+# Without --wait, inspect the latest request before assuming completion
+pscale branch resize status <database> <branch-name> --org <org> --format json
+
+# Cancel only while the change request is still queued
+pscale branch resize cancel <database> <branch-name> --org <org> --format json
 ```
 
-Treat resize as an operational capacity/cost-affecting change. Verify with `pscale branch show <database> <branch-name> --org <org>` after the command completes.
+Review the parameter catalog's `restart` and `immutable` fields before proposing a change. Surface restart impact and capacity/cost impact to the user, then obtain approval before running `resize`. Request states include `queued`, `pending`, `resizing`, `completed`, and `canceled`; only the last two are terminal. A JSON no-op returns `{"result":"no_change","branch":"<branch>"}` rather than a change request. After completion, verify with both `resize status` and `branch show`.
 
 ### Routing rules
 

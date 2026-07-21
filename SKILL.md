@@ -55,7 +55,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | Command | Skill | Use When |
 |---------|-------|----------|
 | **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
-| **branch** | `pscale-branch` | Create, delete, promote, diff, list branches, inspect branch infra, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
+| **branch** | `pscale-branch` | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
 | **deploy-request** | `pscale-deploy-request` | Create, review, deploy, revert schema changes |
 | **database** | `pscale-database` | Create, list, show, delete databases |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
@@ -179,6 +179,8 @@ pscale auth logout
 pscale branch create <database> <branch> [--from <source-branch>]
 pscale branch list <database>
 pscale branch delete <database> <branch>
+pscale branch parameters list <database> <branch> --format json
+pscale branch resize status <database> <branch> --format json
 
 # Deploy requests
 pscale deploy-request create <database> <branch>
