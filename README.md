@@ -16,6 +16,26 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 📦 Installation
 
+### Agent Skills (`npx skills`)
+
+This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 10 standalone `pscale-*` skills.
+
+```bash
+# List all discoverable skills without installing
+npx skills add vince-winkintel/planetscale-cli-skills --list
+
+# Interactive picker
+npx skills add vince-winkintel/planetscale-cli-skills
+
+# Install everything
+npx skills add vince-winkintel/planetscale-cli-skills --all
+
+# Install only selected skills
+npx skills add vince-winkintel/planetscale-cli-skills \
+  --skill planetscale-cli-skills \
+  --skill pscale-import-d1
+```
+
 ### Via ClawHub
 
 ```bash

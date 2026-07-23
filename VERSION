@@ -2,6 +2,11 @@
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.305.0
+  - Reviewed upstream release and compare `v0.304.0...v0.305.0` on 2026-07-23.
+  - Updated D1 migration guidance for inferred boolean `CHECK` literal conversion and supported `strftime()` current-time/default mappings.
+  - Documented that unsupported `strftime()` formats/modifiers on inferred non-text columns are omitted rather than guessed and therefore require schema review.
+  - Fixed Agent Skills collection discovery by moving the orchestrator under `planetscale-cli-skills/`, linking all standalone skills, and bundling referenced helper scripts with selective installs.
 - PlanetScale CLI v0.304.0
   - Reviewed upstream compare `v0.303.0...v0.304.0` on 2026-07-21.
   - Added Postgres branch parameter discovery plus combined size, replica, and parameter change requests.

@@ -54,16 +54,16 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 
 | Command | Skill | Use When |
 |---------|-------|----------|
-| **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
-| **branch** | `pscale-branch` | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
-| **deploy-request** | `pscale-deploy-request` | Create, review, deploy, revert schema changes |
-| **database** | `pscale-database` | Create, list, show, delete databases |
-| **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
-| **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
-| **backup** | `pscale-backup` | Create, list, show, delete branch backups |
-| **password** | `pscale-password` | Create, list, delete connection passwords |
-| **org** | `pscale-org` | List, show, switch organizations |
-| **service-token** | `pscale-service-token` | Create, manage CI/CD service tokens |
+| **auth** | [`pscale-auth`](../pscale-auth) | Login, logout, service tokens, authentication management |
+| **branch** | [`pscale-branch`](../pscale-branch) | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
+| **deploy-request** | [`pscale-deploy-request`](../pscale-deploy-request) | Create, review, deploy, revert schema changes |
+| **database** | [`pscale-database`](../pscale-database) | Create, list, show, delete databases |
+| **sql** | [`pscale-sql`](../pscale-sql) | Run non-interactive SQL queries with JSON output and ephemeral credentials |
+| **import d1** | [`pscale-import-d1`](../pscale-import-d1) | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
+| **backup** | [`pscale-backup`](../pscale-backup) | Create, list, show, delete branch backups |
+| **password** | [`pscale-password`](../pscale-password) | Create, list, delete connection passwords |
+| **org** | [`pscale-org`](../pscale-org) | List, show, switch organizations |
+| **service-token** | [`pscale-service-token`](../pscale-service-token) | Create, manage CI/CD service tokens |
 
 ## Decision Trees
 
