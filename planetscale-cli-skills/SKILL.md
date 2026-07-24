@@ -49,6 +49,12 @@ Comprehensive `pscale` command reference and workflows for managing PlanetScale 
 
 The PlanetScale CLI brings database branches, deploy requests, and schema migrations to your fingertips. This skill provides command references, automation scripts, and decision trees for all `pscale` operations.
 
+## Configuration and credential safety
+
+- Directory-local `.pscale.yml` files are project configuration, not trusted credential configuration. The CLI accepts only `org`, `database`, and `branch` from them and warns while ignoring keys such as API endpoints or tokens.
+- Keep API URLs and credentials in the user config, environment/secret manager, or explicit approved flags. Never commit them to a repository-local config.
+- `pscale api` follows cross-host redirects without forwarding authentication or caller-supplied headers. Even with this protection, pass secret-bearing headers only to an explicitly verified API host and do not expose them in logs.
+
 ## Sub-Skills
 
 | Command | Skill | Use When |

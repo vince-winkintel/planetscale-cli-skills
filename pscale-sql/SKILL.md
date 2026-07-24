@@ -29,7 +29,7 @@ pscale sql <database> <branch> --org <org> --format json --dbname app --query "S
 
 - Default role is `reader`.
 - Use `--role writer`, `--role readwriter`, or `--role admin` only when the user explicitly asked for a write-capable operation.
-- Destructive SQL containing `DELETE`, `DROP`, or `TRUNCATE` is blocked unless `--force` is passed.
+- Destructive SQL containing `DELETE`, `DROP`, or `TRUNCATE` is blocked unless `--force` is passed. MySQL executable comments such as `/*! DROP TABLE ... */` and version-gated `/*!80000 DELETE ... */` are live SQL and are included in this safety check; do not treat them as inert comments.
 - Agents must ask for explicit user approval before using `--force`; show the exact query and target database/branch/org first.
 
 ```bash

@@ -1,7 +1,12 @@
-1.0.8
+1.0.9
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.306.0
+  - Reviewed the upstream release and compare `v0.305.0...v0.306.0` on 2026-07-24.
+  - Added guidance for the hardened destructive-SQL gate, including MySQL executable comments.
+  - Documented project `.pscale.yml` key allowlisting and safer OAuth help/override handling.
+  - Updated D1 conversion guidance for validated defaults, foreign-key action tails, and malformed trailing SQL.
 - PlanetScale CLI v0.305.0
   - Reviewed upstream release and compare `v0.304.0...v0.305.0` on 2026-07-23.
   - Updated D1 migration guidance for inferred boolean `CHECK` literal conversion and supported `strftime()` current-time/default mappings.
