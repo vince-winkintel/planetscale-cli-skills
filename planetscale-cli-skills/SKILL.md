@@ -4,14 +4,13 @@ description: Comprehensive PlanetScale CLI (pscale) command reference and workfl
 requirements:
   binaries:
     - pscale
-  binaries_optional:
-    - grep
+    - jq
   env_optional:
     - PLANETSCALE_SERVICE_TOKEN_ID
     - PLANETSCALE_SERVICE_TOKEN
   notes: |
     Requires PlanetScale CLI authentication via 'pscale auth login' (stores token in ~/.config/planetscale/).
-    Scripts require PCRE-enabled grep (grep -oP) - may need adjustment on BSD/macOS systems.
+    Automation scripts use jq for structure-aware parsing of pscale JSON output.
 metadata:
   openclaw:
     purpose: >
@@ -54,16 +53,16 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 
 | Command | Skill | Use When |
 |---------|-------|----------|
-| **auth** | [`pscale-auth`](../pscale-auth) | Login, logout, service tokens, authentication management |
-| **branch** | [`pscale-branch`](../pscale-branch) | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
-| **deploy-request** | [`pscale-deploy-request`](../pscale-deploy-request) | Create, review, deploy, revert schema changes |
-| **database** | [`pscale-database`](../pscale-database) | Create, list, show, delete databases |
-| **sql** | [`pscale-sql`](../pscale-sql) | Run non-interactive SQL queries with JSON output and ephemeral credentials |
-| **import d1** | [`pscale-import-d1`](../pscale-import-d1) | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
-| **backup** | [`pscale-backup`](../pscale-backup) | Create, list, show, delete branch backups |
-| **password** | [`pscale-password`](../pscale-password) | Create, list, delete connection passwords |
-| **org** | [`pscale-org`](../pscale-org) | List, show, switch organizations |
-| **service-token** | [`pscale-service-token`](../pscale-service-token) | Create, manage CI/CD service tokens |
+| **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
+| **branch** | `pscale-branch` | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
+| **deploy-request** | `pscale-deploy-request` | Create, review, deploy, revert schema changes |
+| **database** | `pscale-database` | Create, list, show, delete databases |
+| **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
+| **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
+| **backup** | `pscale-backup` | Create, list, show, delete branch backups |
+| **password** | `pscale-password` | Create, list, delete connection passwords |
+| **org** | `pscale-org` | List, show, switch organizations |
+| **service-token** | `pscale-service-token` | Create, manage CI/CD service tokens |
 
 ## Decision Trees
 
@@ -150,8 +149,9 @@ pscale service-token create --org <org>
 export PLANETSCALE_SERVICE_TOKEN_ID=<token-id>
 export PLANETSCALE_SERVICE_TOKEN=<token>
 
-# Deploy via CI/CD
-pscale deploy-request create <database> <branch> --auto-approve
+# Create and deploy via CI/CD after review/approval gates pass
+pscale deploy-request create <database> <branch> --format json
+pscale deploy-request deploy <database> <deploy-request-number>
 ```
 
 ### Cloudflare D1 to PlanetScale Postgres import
@@ -211,7 +211,7 @@ See `scripts/` directory for token-efficient automation:
 
 - `create-branch-for-mr.sh` - Create PlanetScale branch matching your MR/PR branch name
 - `deploy-schema-change.sh` - Complete schema migration workflow
-- `sync-branch-with-main.sh` - Sync development branch with main
+- `sync-branch-with-main.sh` - Create a replacement branch from main/base for conflict resolution
 
 Scripts execute without loading into context (~90% token savings).
 

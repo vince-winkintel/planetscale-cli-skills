@@ -141,11 +141,14 @@ pscale shell <database> <branch-name>
 # Close conflicting deploy request
 pscale deploy-request close <database> <number>
 
-# Refresh branch schema
-pscale branch refresh-schema <database> <branch-name>
+# Create a fresh branch from the current base branch
+pscale branch create <database> <new-branch-name> --from main
+
+# Reapply your schema changes to the new branch, then verify the diff
+pscale branch diff <database> <new-branch-name>
 
 # Create new deploy request
-pscale deploy-request create <database> <branch-name>
+pscale deploy-request create <database> <new-branch-name>
 ```
 
 ### Deploy fails midway
@@ -210,7 +213,7 @@ See `scripts/deploy-schema-change.sh` for complete automation:
 ./scripts/deploy-schema-change.sh \
   --database my-database \
   --branch feature-schema-v2 \
-  --auto-approve
+  --deploy
 ```
 
 ## Integration with Drizzle

@@ -82,31 +82,33 @@ Create deploy request and optionally deploy schema changes.
 
 ### 🔄 sync-branch-with-main.sh
 
-Refresh development branch schema with main branch.
+Create a replacement development branch from the current base branch.
 
 **Usage:**
 ```bash
-./scripts/sync-branch-with-main.sh --database <db> --branch <name> [--org <org>]
+./scripts/sync-branch-with-main.sh --database <db> --branch <name> --new-branch <name> [--from <source>] [--org <org>]
 ```
 
 **Examples:**
 ```bash
-# Sync branch with main
+# Create a replacement branch from main
 ./scripts/sync-branch-with-main.sh \
   --database my-database \
-  --branch feature-branch
+  --branch feature-branch \
+  --new-branch feature-branch-rebased
 
 # With organization
 ./scripts/sync-branch-with-main.sh \
   --database my-db \
   --branch dev-branch \
+  --new-branch dev-branch-rebased \
   --org my-org
 ```
 
 **What it does:**
-- Refreshes branch schema to match main
-- Useful when main has been updated
-- Prevents deployment conflicts
+- Creates a new branch from `main` or the branch named by `--from`
+- Leaves the existing branch unchanged
+- Supports PlanetScale's documented conflict-resolution flow: re-branch from the base branch, reapply schema changes, then create a new deploy request
 
 ---
 
@@ -125,6 +127,7 @@ Complete multi-step workflows in single commands.
 
 ### All Scripts
 - `pscale` CLI installed and in PATH
+- `jq` installed for deploy request JSON parsing
 - Authenticated (`pscale auth login` or service tokens)
 
 ### For Service Token Auth
@@ -175,18 +178,19 @@ pnpm drizzle-kit introspect
 ### Sync Stale Branch Before Deploy
 
 ```bash
-# If main has been updated since branch creation
+# If main has been updated since branch creation, create a fresh branch from main
 ./scripts/sync-branch-with-main.sh \
   --database my-database \
-  --branch old-feature-branch
+  --branch old-feature-branch \
+  --new-branch old-feature-branch-rebased
 
-# Verify diff shows only your changes
-pscale branch diff my-database old-feature-branch
+# Reapply your schema changes, then verify diff shows only your changes
+pscale branch diff my-database old-feature-branch-rebased
 
 # Then deploy
 ./scripts/deploy-schema-change.sh \
   --database my-database \
-  --branch old-feature-branch \
+  --branch old-feature-branch-rebased \
   --deploy
 ```
 
@@ -244,6 +248,19 @@ pnpm drizzle-kit introspect
 
 ## Contributing
 
+Root scripts in this directory are canonical. Skill-local copies exist so selective Agent Skills installs remain self-contained:
+
+- `scripts/create-branch-for-mr.sh` → `planetscale-cli-skills/scripts/`, `pscale-branch/scripts/`
+- `scripts/deploy-schema-change.sh` → `planetscale-cli-skills/scripts/`, `pscale-deploy-request/scripts/`
+- `scripts/sync-branch-with-main.sh` → `planetscale-cli-skills/scripts/`
+
+After editing a canonical script, run:
+
+```bash
+./scripts/sync-canonical-scripts.sh --sync
+./scripts/sync-canonical-scripts.sh --check
+```
+
 When adding new scripts:
 1. Include `--help` flag with examples
 2. Use `set -e` for bash scripts (exit on error)
@@ -257,7 +274,7 @@ When adding new scripts:
 | Script | Requires | Optional |
 |--------|----------|----------|
 | create-branch-for-mr.sh | pscale, auth | org flag |
-| deploy-schema-change.sh | pscale, auth | org flag |
+| deploy-schema-change.sh | pscale, jq, auth | org flag |
 | sync-branch-with-main.sh | pscale, auth | org flag |
 
 All scripts work with both interactive auth (`pscale auth login`) and service token auth (env vars).

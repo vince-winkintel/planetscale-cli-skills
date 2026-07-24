@@ -2,7 +2,7 @@
 
 Comprehensive `pscale` command reference and automation workflows for managing PlanetScale databases via terminal.
 
-[![ClawHub](https://img.shields.io/badge/ClawHub-planetscale--cli--skills-blue)](https://clawhub.com/skills/planetscale-cli-skills)
+[![ClawHub](https://img.shields.io/badge/ClawHub-planetscale--cli--skills-blue)](https://clawhub.ai/skills/planetscale-cli-skills)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## 🎯 What This Skill Provides
@@ -19,6 +19,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 ### Agent Skills (`npx skills`)
 
 This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 10 standalone `pscale-*` skills.
+Each skill lives in its own directory with its own `SKILL.md`; there is intentionally no root `SKILL.md` so Agent Skills can discover every sibling instead of stopping at the repository root.
 
 ```bash
 # List all discoverable skills without installing
@@ -41,6 +42,8 @@ npx skills add vince-winkintel/planetscale-cli-skills \
 ```bash
 clawhub install planetscale-cli-skills
 ```
+
+Publish ClawHub updates from the `planetscale-cli-skills/` directory. The live listing remains on its last published version until that folder is published; repository changes alone do not refresh it. Publishing from a skill folder matches ClawHub's required “folder with `SKILL.md`” format while preserving this repository's multi-skill layout for Agent Skills selective installs.
 
 ### Via Git
 
@@ -67,6 +70,8 @@ sudo mv pscale /usr/local/bin/
 scoop bucket add pscale https://github.com/planetscale/scoop-bucket.git
 scoop install pscale
 ```
+
+Automation scripts that parse `pscale --format json` output also require `jq`.
 
 ### Authenticate
 
@@ -133,12 +138,13 @@ Complete schema deployment workflow:
 
 ### sync-branch-with-main.sh
 
-Refresh development branch with main:
+Create a replacement branch from the current base branch when production/base has changed:
 
 ```bash
 ./scripts/sync-branch-with-main.sh \
   --database my-db \
-  --branch feature-branch
+  --branch feature-branch \
+  --new-branch feature-branch-rebased
 ```
 
 ## 🌊 Common Workflows
@@ -272,7 +278,7 @@ Use case?
 
 - [PlanetScale CLI Docs](https://planetscale.com/docs/reference/planetscale-cli)
 - [PlanetScale GitHub](https://github.com/planetscale/cli)
-- [ClawHub Page](https://clawhub.com/skills/planetscale-cli-skills)
+- [ClawHub Page](https://clawhub.ai/skills/planetscale-cli-skills)
 
 ## 🤝 Contributing
 
@@ -289,5 +295,5 @@ MIT License - see [LICENSE](LICENSE) file.
 ## 🙏 Acknowledgments
 
 - Built for [OpenClaw](https://openclaw.ai) AI agents
-- Optimized using [skill-creator](https://clawhub.com/skills/skill-creator) patterns
+- Optimized using [skill-creator](https://clawhub.ai/skills/skill-creator) patterns
 - Inspired by [gitlab-cli-skills](https://github.com/vince-winkintel/gitlab-cli-skills)
