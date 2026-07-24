@@ -43,7 +43,7 @@ npx skills add vince-winkintel/planetscale-cli-skills \
 clawhub install planetscale-cli-skills
 ```
 
-Publish ClawHub updates from the `planetscale-cli-skills/` directory. The live listing remains on its last published version until that folder is published; repository changes alone do not refresh it. Publishing from a skill folder matches ClawHub's required “folder with `SKILL.md`” format while preserving this repository's multi-skill layout for Agent Skills selective installs.
+ClawHub releases preserve the existing full-collection install shape. Build the registry package from the release tag, copy `planetscale-cli-skills/SKILL.md` to package-root `SKILL.md`, remove the now-redundant nested orchestrator directory, and retain all standalone `pscale-*` skill directories. Do not publish the repository root directly or publish only `planetscale-cli-skills/`; either choice would break one of the supported discovery/install paths. The live listing remains on its last published version until the transformed package is published.
 
 ### Via Git
 
