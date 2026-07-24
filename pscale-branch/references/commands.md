@@ -14,10 +14,11 @@ Available Commands:
   diff            Show the diff of a branch
   lint            Lints the schema for a branch
   list            List all branches of a database
+  parameters      List the configuration parameters of a Postgres branch
   promote         Promote a new branch from a database
   query-patterns  Download query pattern reports for a branch
   refresh-schema  Refresh the schema for a database branch
-  resize          Resize a Postgres branch's cluster
+  resize          Change a Postgres branch's cluster size, replicas, or parameters
   routing-rules   Fetch or update your keyspace routing rules
   safe-migrations Enable or disable safe migrations on a branch
   schema          Show the schema of a branch
@@ -40,6 +41,22 @@ Global Flags:
 
 Use "pscale branch [command] --help" for more information about a command.
 
+```
+
+Unless a command-specific help block repeats them inline, every `pscale branch`
+subcommand accepts these global flags:
+
+```text
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 ```
 
 ## pscale branch list
@@ -71,29 +88,84 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 ```
 
+## pscale branch parameters
+
+```text
+List the configuration parameters of a Postgres branch, including their
+current and default values. Values from a queued change request are reflected.
+
+To change parameters, use 'pscale branch resize <database> <branch> --parameters namespace.name=value'.
+
+Usage:
+  pscale branch parameters <database> <branch> [flags]
+  pscale branch parameters [command]
+
+Aliases:
+  parameters, params
+
+Available Commands:
+  list        List the configuration parameters of a Postgres branch
+
+Flags:
+      --extension          Only show parameters that configure an extension (--extension=false hides them).
+  -h, --help               help for parameters
+      --internal           Only show internal (immutable) parameters (--internal=false hides them).
+      --namespace string   Only show parameters in this namespace (e.g. pgconf, pgbouncer, patroni).
+```
+
+`pscale branch parameters list <database> <branch>` accepts the same flags. The bare `parameters <database> <branch>` form is an alias for `parameters list`. Prefer `--format json` before a change so `restart`, `immutable`, current, and default values remain explicit.
+
 ## pscale branch resize
 
 ```text
-Resize a Postgres branch's cluster
+Change a Postgres branch's cluster size, replica count, and/or configuration
+parameters. All requested changes are combined into a single change request
+that is applied asynchronously. Use "pscale branch resize status" to track it
+and "pscale branch resize cancel" to cancel it while queued.
 
 Usage:
   pscale branch resize <database> <branch> [flags]
+  pscale branch resize [command]
+
+Examples:
+  pscale branch resize mydb main --cluster-size PS_10_GCP_X86
+  pscale branch resize mydb main --parameters pgconf.max_connections=200
+  pscale branch resize mydb main --cluster-size PS_20_GCP_X86 --replicas 2 --parameters pgconf.max_connections=500 --wait
+
+Available Commands:
+  cancel      Cancel the queued change request for a Postgres branch
+  status      Show the latest change request for a Postgres branch
 
 Flags:
-      --cluster-size string   New cluster size for the branch (a fully-qualified SKU name, e.g. PS_10_GCP_X86). Use 'pscale size cluster list --engine postgresql' to see the valid sizes.
-  -h, --help                  help for resize
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
+      --cluster-size string      New cluster size for the branch (a fully-qualified SKU name, e.g. PS_10_GCP_X86). Use 'pscale size cluster list --engine postgresql' to see the valid sizes.
+  -h, --help                     help for resize
+      --parameters stringArray   Set a configuration parameter as namespace.name=value (e.g. pgconf.max_connections=200). Repeatable. Use 'pscale branch parameters list' to see available parameters.
+      --replicas int             Desired number of replicas for the branch.
+      --wait                     Wait for the change request to complete before returning.
+      --wait-timeout duration    Maximum time to wait for the change request to complete with --wait. (default 10m0s)
 ```
+
+At least one change flag is required. Parameter changes are validated against the catalog; unknown and immutable parameters fail. Values marked `restart` restart the database when applied. Without `--wait`, poll `resize status`; `queued`, `pending`, and `resizing` are non-terminal, while `completed` and `canceled` are terminal.
+
+## pscale branch resize status
+
+```text
+Show the latest change request for a Postgres branch
+
+Usage:
+  pscale branch resize status <database> <branch> [flags]
+```
+
+## pscale branch resize cancel
+
+```text
+Cancel the queued change request for a Postgres branch
+
+Usage:
+  pscale branch resize cancel <database> <branch> [flags]
+```
+
+Cancel is an operational write. Confirm the target and latest request state before running it, then re-run `resize status` to verify the result.
 
 ## pscale branch connections
 

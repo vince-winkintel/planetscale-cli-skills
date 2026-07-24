@@ -2,7 +2,7 @@
 
 Comprehensive `pscale` command reference and automation workflows for managing PlanetScale databases via terminal.
 
-[![ClawHub](https://img.shields.io/badge/ClawHub-planetscale--cli--skills-blue)](https://clawhub.com/skills/planetscale-cli-skills)
+[![ClawHub](https://img.shields.io/badge/ClawHub-planetscale--cli--skills-blue)](https://clawhub.ai/skills/planetscale-cli-skills)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## 🎯 What This Skill Provides
@@ -16,11 +16,34 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 📦 Installation
 
+### Agent Skills (`npx skills`)
+
+This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 10 standalone `pscale-*` skills.
+Each skill lives in its own directory with its own `SKILL.md`; there is intentionally no root `SKILL.md` so Agent Skills can discover every sibling instead of stopping at the repository root.
+
+```bash
+# List all discoverable skills without installing
+npx skills add vince-winkintel/planetscale-cli-skills --list
+
+# Interactive picker
+npx skills add vince-winkintel/planetscale-cli-skills
+
+# Install everything
+npx skills add vince-winkintel/planetscale-cli-skills --all
+
+# Install only selected skills
+npx skills add vince-winkintel/planetscale-cli-skills \
+  --skill planetscale-cli-skills \
+  --skill pscale-import-d1
+```
+
 ### Via ClawHub
 
 ```bash
 clawhub install planetscale-cli-skills
 ```
+
+ClawHub releases preserve the existing full-collection install shape. Build the registry package from the release tag, copy `planetscale-cli-skills/SKILL.md` to package-root `SKILL.md`, remove the now-redundant nested orchestrator directory, and retain all standalone `pscale-*` skill directories. Do not publish the repository root directly or publish only `planetscale-cli-skills/`; either choice would break one of the supported discovery/install paths. The live listing remains on its last published version until the transformed package is published.
 
 ### Via Git
 
@@ -47,6 +70,8 @@ sudo mv pscale /usr/local/bin/
 scoop bucket add pscale https://github.com/planetscale/scoop-bucket.git
 scoop install pscale
 ```
+
+Automation scripts that parse `pscale --format json` output also require `jq`.
 
 ### Authenticate
 
@@ -76,7 +101,7 @@ pscale branch create my-database feature-branch --from main
 | Skill | Use When | Common Commands |
 |-------|----------|----------------|
 | **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
-| **pscale-branch** | Create, diff, promote branches, inspect branch infra, download/stream query pattern reports, manage Vitess MoveTables workflows | `pscale branch create/list/diff/infra/query-patterns/vtctld` |
+| **pscale-branch** | Create, diff, promote branches, manage Postgres size/replicas/parameters, inspect branch infra, download/stream query pattern reports, manage Vitess MoveTables workflows | `pscale branch create/list/diff/parameters/resize/infra/query-patterns/vtctld` |
 | **pscale-deploy-request** | Deploy schema changes safely | `pscale deploy-request create/deploy` |
 | **pscale-database** | Manage databases, open shells | `pscale database list`, `pscale shell` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
@@ -113,12 +138,13 @@ Complete schema deployment workflow:
 
 ### sync-branch-with-main.sh
 
-Refresh development branch with main:
+Create a replacement branch from the current base branch when production/base has changed:
 
 ```bash
 ./scripts/sync-branch-with-main.sh \
   --database my-db \
-  --branch feature-branch
+  --branch feature-branch \
+  --new-branch feature-branch-rebased
 ```
 
 ## 🌊 Common Workflows
@@ -252,7 +278,7 @@ Use case?
 
 - [PlanetScale CLI Docs](https://planetscale.com/docs/reference/planetscale-cli)
 - [PlanetScale GitHub](https://github.com/planetscale/cli)
-- [ClawHub Page](https://clawhub.com/skills/planetscale-cli-skills)
+- [ClawHub Page](https://clawhub.ai/skills/planetscale-cli-skills)
 
 ## 🤝 Contributing
 
@@ -269,5 +295,5 @@ MIT License - see [LICENSE](LICENSE) file.
 ## 🙏 Acknowledgments
 
 - Built for [OpenClaw](https://openclaw.ai) AI agents
-- Optimized using [skill-creator](https://clawhub.com/skills/skill-creator) patterns
+- Optimized using [skill-creator](https://clawhub.ai/skills/skill-creator) patterns
 - Inspired by [gitlab-cli-skills](https://github.com/vince-winkintel/gitlab-cli-skills)
