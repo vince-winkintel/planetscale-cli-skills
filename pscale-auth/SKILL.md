@@ -43,6 +43,8 @@ pscale auth login --format json
 
 If JSON output indicates user action is required, relay only the required action/URL to the user and do not print or store credentials.
 
+The CLI resolves its built-in OAuth client values at runtime and omits their values from `pscale auth login --help`. Do not scrape, record, or reproduce OAuth credentials from help output. Treat `--client-id` and `--client-secret` as advanced overrides: use them only when the user explicitly supplies a trusted custom OAuth client, and pass the secret through a secret-safe mechanism rather than shell history or logs.
+
 ### 2. Service Tokens (CI/CD)
 
 For automated environments:

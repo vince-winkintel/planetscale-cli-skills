@@ -37,6 +37,8 @@ The current converter preserves and translates more SQLite schema semantics, inc
 
 Supported `strftime()` current-time defaults are mapped according to the inferred destination type: common ISO/date formats on timestamp-like columns, `%s` epoch seconds on numeric columns, and safe day/hour/minute/second or `start of day|month|year` modifiers. `utc` and `localtime` modifiers are treated as no-ops in this UTC-oriented mapping. Unsupported formats, time values, or modifiers such as `weekday N` and calendar-month arithmetic are not guessed; on an inferred non-text destination the converter can omit that default, so inspect the generated DDL and restore an equivalent PostgreSQL expression deliberately when needed.
 
+Defaults and foreign-key action clauses are emitted only when they match validated literal or clause forms. Malformed or untrusted expressions are omitted instead of being copied verbatim into executable PostgreSQL DDL, and parsing stops at the balanced end of each `CREATE TABLE` body so trailing statements are not treated as schema content. Treat an omitted default, reference action, or invalid foreign key as a migration warning: inspect the generated DDL and restore only a reviewed PostgreSQL equivalent.
+
 Still review `convert-schema` output before loading. Expression or partial indexes, views, triggers, and other constructs reported by `lint` can require manual migration decisions; do not assume a successful conversion is semantically identical without inspecting constraints, defaults, generated expressions, foreign-key types, and indexes.
 
 ## Recommended migration workflow
