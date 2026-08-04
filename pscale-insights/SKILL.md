@@ -29,7 +29,7 @@ pscale insights anomalies <database> <branch> --org <org> --format json
 pscale insights recommendations <database> --org <org> --format json
 ```
 
-`--org` is required. Prefer `--format json` for agent workflows so full normalized SQL, metrics, recommendation details, and proposed DDL remain machine-readable.
+Always pass `--org` explicitly in agent workflows so the organization target is unambiguous. Prefer `--format json` so full normalized SQL, metrics, recommendation details, and proposed DDL remain machine-readable.
 
 ## Query ranking
 

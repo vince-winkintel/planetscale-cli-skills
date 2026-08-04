@@ -285,6 +285,7 @@ Rules:
 - `--throttle-app` and `--unthrottle-app` are mutually exclusive.
 - `--app-name` and `--app-metrics` must be passed together; `--app-name` cannot be empty.
 - `--throttle-app-ratio` is between `0.00` and `1.00` and defaults to `1`; `--throttle-app-duration` defaults to one hour.
+- `--threshold` changes the replication-lag threshold (in seconds) for the keyspace's default check; treat it as a keyspace-wide mutation that needs the same explicit approval as an app rule change.
 - After a write, re-run `throttler status` on the relevant tablets and verify the returned policy. Do not assume one tablet proves cluster-wide propagation when the branch has multiple tablets.
 
 ### Vitess MoveTables and global sequences
