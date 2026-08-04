@@ -14,7 +14,7 @@ Available Commands:
   recommendations List schema recommendations (unused/duplicate indexes, bloat, missing indexes)
 
 Persistent flag:
-  --org string    The organization for the current user (required)
+  --org string    The organization for the current user
 ```
 
 All commands also accept the root output flag:

@@ -34,7 +34,7 @@ pscale inspect <check> <database> <branch> [flags]
 ## Persistent target flags
 
 ```text
---org string        Organization for the current user (required)
+--org string        The organization for the current user
 --dbname string     PostgreSQL database to inspect (default "postgres")
 --keyspace string   Vitess keyspace, optionally with shard/tablet target
 --replica           Run checks against a replica instead of the primary
