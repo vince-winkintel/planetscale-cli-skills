@@ -54,13 +54,14 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Directory-local `.pscale.yml` files are project configuration, not trusted credential configuration. The CLI accepts only `org`, `database`, and `branch` from them and warns while ignoring keys such as API endpoints or tokens.
 - Keep API URLs and credentials in the user config, environment/secret manager, or explicit approved flags. Never commit them to a repository-local config.
 - `pscale api` follows cross-host redirects without forwarding authentication or caller-supplied headers. Even with this protection, pass secret-bearing headers only to an explicitly verified API host and do not expose them in logs.
+- When `--format json` is active, API error codes are preserved in the top-level `code` field instead of being collapsed to `COMMAND_FAILED`. Branch automation should branch on exact codes when present; for `schema_mutation_blocked`, wait for the active vtctld mutation or deploy to finish before retrying.
 
 ## Sub-Skills
 
 | Command | Skill | Use When |
 |---------|-------|----------|
 | **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
-| **branch** | `pscale-branch` | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
+| **branch** | `pscale-branch` | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, manage Vitess tablet throttling, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
 | **deploy-request** | `pscale-deploy-request` | Create, review, deploy, revert schema changes |
 | **database** | `pscale-database` | Create, list, show, delete databases |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |

@@ -543,6 +543,76 @@ Use "pscale branch vtctld [command] --help" for more information about a command
 
 ```
 
+## pscale branch vtctld throttler
+
+```text
+Inspect and configure the tablet throttler
+
+Usage:
+  pscale branch vtctld throttler [command]
+
+Available Commands:
+  check         Issue a throttler check against a single tablet
+  status        Get the throttler status for a single tablet
+  update-config Update the throttler configuration for a keyspace
+
+Flags:
+  -h, --help   help for throttler
+```
+
+## pscale branch vtctld throttler status
+
+```text
+Get the throttler status for a single tablet, identified by its alias. Discover tablet aliases with `pscale branch vtctld list-tablets`.
+
+Usage:
+  pscale branch vtctld throttler status <database> <branch> [flags]
+
+Flags:
+  -h, --help                  help for status
+      --tablet-alias string   Alias of the tablet to probe (e.g. "zone1-0000000100") (required)
+```
+
+## pscale branch vtctld throttler check
+
+```text
+Issue a throttler check against a single tablet, identified by its alias. Discover tablet aliases with `pscale branch vtctld list-tablets`.
+
+Usage:
+  pscale branch vtctld throttler check <database> <branch> [flags]
+
+Flags:
+      --app-name string           App to issue the check on behalf of (e.g. "online-ddl"). Defaults to the throttler's default app.
+  -h, --help                      help for check
+      --ok-if-not-exists          Return OK even if the requested metric does not exist
+      --scope string              Scope of the check, either "shard" or "self". Defaults to the throttler's default scope.
+      --skip-request-heartbeats   Do not renew the throttler's heartbeat lease while serving this check
+      --tablet-alias string       Alias of the tablet to check (e.g. "zone1-0000000100") (required)
+```
+
+## pscale branch vtctld throttler update-config
+
+```text
+Update the tablet throttler configuration for a keyspace. Omit --enabled to leave the keyspace enable state unchanged. Flag behavior mirrors vtctldclient UpdateThrottlerConfig: --throttle-app and --unthrottle-app are mutually exclusive; --app-name and --app-metrics are required together.
+
+Usage:
+  pscale branch vtctld throttler update-config <database> <branch> [flags]
+
+Flags:
+      --app-metrics strings              Metrics to check for --app-name (e.g. lag,loadavg)
+      --app-name string                  App name for which to assign checked metrics (requires --app-metrics)
+      --enabled                          Enable (true) or disable (false) the throttler for the keyspace. Omit to leave unchanged.
+  -h, --help                             help for update-config
+      --keyspace string                  Keyspace whose throttler config to update (required)
+      --threshold float                  Replication lag threshold in seconds for the default check
+      --throttle-app string              App name to throttle (e.g. "rowstreamer")
+      --throttle-app-duration duration   Duration after which the --throttle-app rule expires (default 1h0m0s)
+      --throttle-app-ratio float         Ratio to throttle the app specified by --throttle-app (0.00-1.00) (default 1)
+      --unthrottle-app string            App name whose throttled-app rule should be removed
+```
+
+`--throttle-app` and `--unthrottle-app` are mutually exclusive. `--app-name` and `--app-metrics` are required together.
+
 ## pscale branch vtctld move-tables create
 
 ```text

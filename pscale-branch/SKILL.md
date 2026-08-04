@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches, Postgres parameters, and Vitess workflows. Use when creating development branches for schema changes, viewing schema diffs, downloading query pattern reports, changing Postgres branch size, replicas, or parameters, promoting branches to production, managing branch lifecycle, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, query pattern report, resize branch, Postgres parameters, promote branch, development branch, database branch, MoveTables, global keyspace.
+description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches, Postgres parameters, Vitess tablet throttling, and Vitess workflows. Use when creating development branches for schema changes, viewing schema diffs, downloading query pattern reports, changing Postgres branch size, replicas, or parameters, inspecting or changing tablet throttler app rules and metrics, promoting branches to production, managing branch lifecycle, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, query pattern report, resize branch, Postgres parameters, tablet throttler, throttle app, app metrics, promote branch, development branch, database branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -58,10 +58,15 @@ pscale branch query-patterns download <database> <branch-name> --output query-pa
 # Stream the CSV to stdout for pipelines
 pscale branch query-patterns download <database> <branch-name> --output - > query-patterns.csv
 
-# Inspect Vitess routing rules
+# Inspect Vitess routing rules and tablet state
 pscale branch routing-rules get <database> <branch-name>
 pscale branch vtctld get-routing-rules <database> <branch-name>
 pscale branch vtctld get-shard <database> <branch-name> --keyspace <keyspace> --shard <shard>
+pscale branch vtctld list-tablets <database> <branch-name> --format json
+
+# Inspect one tablet's throttler state before proposing a change
+pscale branch vtctld throttler status <database> <branch-name> \
+  --tablet-alias <zone-tablet-alias> --format json
 
 # Create a Vitess MoveTables workflow whose generated sequence tables live in a global keyspace
 pscale branch vtctld move-tables create <database> <branch-name> \
@@ -241,6 +246,46 @@ pscale branch vtctld get-shard <database> <branch-name> \
   --keyspace commerce \
   --shard '-80'
 ```
+
+### Vitess tablet throttler configuration
+
+`pscale branch vtctld throttler update-config` mutates a Vitess keyspace's tablet-throttler policy. Inspect tablet aliases and current state first, show the exact keyspace/app/metrics/rule to the user, and obtain explicit approval before changing it.
+
+```bash
+# Discover tablets and inspect current throttler state
+pscale branch vtctld list-tablets <database> <branch> --org <org> --format json
+pscale branch vtctld throttler status <database> <branch> --org <org> \
+  --tablet-alias <zone-tablet-alias> --format json
+
+# Temporarily throttle an app at 50% for 30 minutes
+pscale branch vtctld throttler update-config <database> <branch> --org <org> \
+  --keyspace <keyspace> \
+  --throttle-app rowstreamer \
+  --throttle-app-ratio 0.5 \
+  --throttle-app-duration 30m \
+  --format json
+
+# Remove one app throttle rule
+pscale branch vtctld throttler update-config <database> <branch> --org <org> \
+  --keyspace <keyspace> --unthrottle-app rowstreamer --format json
+
+# Assign the metrics checked for one app
+pscale branch vtctld throttler update-config <database> <branch> --org <org> \
+  --keyspace <keyspace> --app-name vreplication \
+  --app-metrics lag,loadavg --format json
+
+# Change the keyspace's overall enable state explicitly
+pscale branch vtctld throttler update-config <database> <branch> --org <org> \
+  --keyspace <keyspace> --enabled=false --format json
+```
+
+Rules:
+
+- Omit `--enabled` to preserve the current enable state; use `--enabled=true` or `--enabled=false` only for an approved state change.
+- `--throttle-app` and `--unthrottle-app` are mutually exclusive.
+- `--app-name` and `--app-metrics` must be passed together; `--app-name` cannot be empty.
+- `--throttle-app-ratio` is between `0.00` and `1.00` and defaults to `1`; `--throttle-app-duration` defaults to one hour.
+- After a write, re-run `throttler status` on the relevant tablets and verify the returned policy. Do not assume one tablet proves cluster-wide propagation when the branch has multiple tablets.
 
 ### Vitess MoveTables and global sequences
 
