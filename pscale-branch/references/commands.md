@@ -24,6 +24,7 @@ Available Commands:
   schema          Show the schema of a branch
   show            Show a specific branch of a database
   switch          Switches the current project to use the specified branch
+  vtgate          Manage VTGate size for a Vitess branch
 
 Flags:
   -h, --help         help for branch
@@ -501,6 +502,78 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 ```
+
+## pscale branch vtgate
+
+```text
+Manage VTGate size for a Vitess branch
+
+Usage:
+  pscale branch vtgate [command]
+
+Available Commands:
+  resize      Resize VTGates for a Vitess production branch
+  show        Show the current VTGate configuration for a Vitess branch
+```
+
+## pscale branch vtgate show
+
+```text
+Show the current VTGate configuration for a Vitess branch
+
+Usage:
+  pscale branch vtgate show <database> <branch> [flags]
+```
+
+Use `--format json` to preserve `vtgate_size`, per-availability-zone `vtgate_count`, `vtgate_autoscaling`, `vtgate_max_count`, and `vtgate_target_cpu_utilization` for agent review.
+
+## pscale branch vtgate resize
+
+```text
+Resize the VTGate SKU, count, and/or autoscaling for a Vitess production branch.
+
+Development branches cannot be resized. Use "pscale branch vtgate resize status"
+to track a resize and "pscale branch vtgate resize cancel" to cancel one while
+queued.
+
+Usage:
+  pscale branch vtgate resize <database> <branch> [flags]
+  pscale branch vtgate resize [command]
+
+Available Commands:
+  cancel      Cancel a queued VTGate resize for a Vitess branch
+  status      Show the latest VTGate resize for a Vitess branch
+
+Flags:
+  -h, --help                                help for resize
+      --vtgate-autoscaling                  Enable or disable VTGate autoscaling (use --vtgate-autoscaling=false to disable)
+      --vtgate-count int                    Number of VTGates per availability zone (minimum when autoscaling is enabled)
+      --vtgate-max-count int                Maximum VTGates per availability zone when autoscaling is enabled
+      --vtgate-size string                  VTGate size SKU (e.g. VTG_320, VTG_1280)
+      --vtgate-target-cpu-utilization int   Target CPU utilization percent when autoscaling is enabled
+```
+
+At least one resize flag is required. Omitted flags are not sent as changes; boolean disablement therefore requires explicit `--vtgate-autoscaling=false`.
+
+## pscale branch vtgate resize status
+
+```text
+Show the latest VTGate resize for a Vitess branch
+
+Usage:
+  pscale branch vtgate resize status <database> <branch> [flags]
+```
+
+## pscale branch vtgate resize cancel
+
+```text
+Cancel a queued VTGate resize for a Vitess branch
+
+Usage:
+  pscale branch vtgate resize cancel <database> <branch> [flags]
+```
+
+Cancel is an operational write. Confirm the target and latest request state before running it, then re-run `resize status` and `vtgate show` to verify the result and applied configuration.
 
 ## pscale branch vtctld
 

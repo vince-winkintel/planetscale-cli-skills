@@ -1,7 +1,12 @@
-1.0.9
+1.0.10
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.312.0
+  - Reviewed releases v0.310.0, v0.311.0, and v0.312.0 plus upstream compare `v0.309.0...v0.312.0` on 2026-08-06.
+  - Added Vitess production-branch VTGate show, resize, status, cancel, fixed-count, and autoscaling guidance.
+  - Added Vitess read-only-region discovery, region-scoped dump, and region-scoped password workflows, including reader defaults and mutually exclusive routing flags.
+  - Re-captured the affected help from the checksum-verified v0.312.0 macOS arm64 release binary; v0.311.0 only disabled AUR packaging and required no skill workflow change.
 - PlanetScale CLI v0.308.0
   - Reviewed the upstream release and compare `v0.307.0...v0.308.0` on 2026-08-04.
   - Documented tablet throttler app throttle/unthrottle rules, expiry/ratio controls, checked-metric assignment, and the new omit-to-preserve behavior for `--enabled`.

@@ -27,6 +27,27 @@ Global Flags:
 
 Use "pscale password [command] --help" for more information about a command.
 
+## pscale password create
+
+```text
+Create password to access a branch's data
+
+Usage:
+  pscale password create <database> <branch> <name> [flags]
+
+Aliases:
+  create, p
+
+Flags:
+  -h, --help                      help for create
+      --read-only-region string   Create a password scoped to a Vitess read-only region (region slug, display name, or id). List regions with: pscale keyspace read-only-regions <database> <branch> <keyspace>.
+      --replica                   When enabled, the password will route all reads to the branch's primary replicas and all read-only regions.
+      --role string               Role defines the access level, allowed values are: reader, writer, readwriter, admin. Defaults to 'reader' for replica and read-only region passwords, otherwise defaults to 'admin'.
+      --ttl duration              TTL defines the time to live for the password. Durations such as "30m", "24h", or bare integers such as "3600" (seconds) are accepted. The default TTL is 0s, which means the password will never expire. (default 0s)
+```
+
+`--read-only-region` and `--replica` are mutually exclusive. A region-scoped password defaults to `reader`, requires the selected region to be ready, and is labeled as a read-only-region credential in create output.
+
 ## pscale password list
 
 ```text

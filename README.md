@@ -101,15 +101,15 @@ pscale branch create my-database feature-branch --from main
 | Skill | Use When | Common Commands |
 |-------|----------|----------------|
 | **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
-| **pscale-branch** | Create, diff, promote branches, manage Postgres size/replicas/parameters, inspect branch infra, manage Vitess tablet throttling, download/stream query pattern reports, manage Vitess MoveTables workflows | `pscale branch create/list/diff/parameters/resize/infra/query-patterns/vtctld` |
+| **pscale-branch** | Create, diff, promote branches, manage Postgres size/replicas/parameters, resize Vitess VTGates, inspect branch infra, manage Vitess tablet throttling, download/stream query pattern reports, manage Vitess MoveTables workflows | `pscale branch create/list/diff/parameters/resize/vtgate/infra/query-patterns/vtctld` |
 | **pscale-deploy-request** | Deploy schema changes safely | `pscale deploy-request create/deploy` |
-| **pscale-database** | Manage databases, open shells | `pscale database list`, `pscale shell` |
+| **pscale-database** | Manage databases, open shells, and dump Vitess data from primary or read-only regions | `pscale database list/dump`, `pscale keyspace read-only-regions`, `pscale shell` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
 | **pscale-insights** | Analyze production query performance, errors, anomalies, and schema recommendations | `pscale insights queries/errors/anomalies/recommendations` |
 | **pscale-inspect** | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostics | `pscale inspect all/locks/seq-scans/bloat` |
 | **pscale-import-d1** | Import Cloudflare D1 exports into PlanetScale Postgres | `pscale import d1 lint/start/verify` |
 | **pscale-backup** | Create and restore backups | `pscale backup create/list` |
-| **pscale-password** | Connection passwords | `pscale password create/list` |
+| **pscale-password** | Connection passwords, including Vitess read-only-region credentials | `pscale password create/list` |
 | **pscale-org** | Switch organizations | `pscale org list/switch` |
 | **pscale-service-token** | CI/CD authentication | `pscale service-token create` |
 
