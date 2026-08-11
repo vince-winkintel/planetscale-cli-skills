@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database branches, VTGate sizing, read-only regions, deploy requests, schema migrations, SQL queries, diagnostics, query insights, Cloudflare D1 imports, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, and other pscale commands. Triggers on pscale, PlanetScale CLI, database branch, VTGate resize, read-only region, deploy request, schema migration, pscale sql, pscale insights, pscale inspect, query performance, database diagnostics, pscale import d1, Cloudflare D1 migration, PlanetScale automation.
+description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database settings, Postgres IP restrictions, database branches, VTGate sizing, read-only regions, deploy requests, schema migrations, SQL queries, diagnostics, query insights, backup policies, authentication-attempt exports, Cloudflare D1 imports, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, database settings, IP restriction, database branch, VTGate resize, read-only region, deploy request, schema migration, pscale sql, pscale insights, pscale inspect, backup policy, auth attempts, query performance, database diagnostics, pscale import d1, Cloudflare D1 migration, PlanetScale automation.
 requirements:
   binaries:
     - pscale
@@ -64,12 +64,13 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
 | **branch** | `pscale-branch` | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, resize Vitess VTGates, manage Vitess tablet throttling, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
 | **deploy-request** | `pscale-deploy-request` | Create, review, deploy, revert schema changes |
-| **database** | `pscale-database` | Create, list, show, delete, and dump databases, including Vitess read-only-region dumps |
+| **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage PostgreSQL IP restrictions and Vitess read-only regions |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
 | **insights** | `pscale-insights` | Analyze production query statistics, errors, anomalies, and schema recommendations |
 | **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostic checks |
 | **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
-| **backup** | `pscale-backup` | Create, list, show, delete branch backups |
+| **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; manage scheduled backup policies |
+| **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
 | **password** | `pscale-password` | Create, list, delete, and scope Vitess connection passwords to read-only regions |
 | **org** | `pscale-org` | List, show, switch organizations |
 | **service-token** | `pscale-service-token` | Create, manage CI/CD service tokens |
@@ -195,6 +196,7 @@ pscale branch vtgate show <database> <branch> --format json
 
 # Discover and use a Vitess read-only region
 pscale keyspace read-only-regions <database> <branch> <keyspace> --format json
+pscale keyspace read-only-regions add <database> <branch> <keyspace> <region> --cluster-size <size> --replicas <count>
 pscale password create <database> <branch> <name> --read-only-region <region> --format json
 
 # Deploy requests
@@ -205,7 +207,13 @@ pscale deploy-request deploy <database> <number>
 # Database operations
 pscale database create <database> --org <org>
 pscale database list
+pscale database show <database> --format json
+pscale database ip-restriction list <database> --format json
 pscale shell <database> <branch>
+
+# Backup policies and authentication-attempt exports
+pscale backup policy list <database> --format json
+pscale audit-log auth-attempts download --org <org> --since 24h --outcome deny
 
 # Non-interactive read query for agents/scripts
 pscale sql <database> <branch> --org <org> --format json --query "SELECT 1"

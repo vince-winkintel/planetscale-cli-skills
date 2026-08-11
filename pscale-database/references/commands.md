@@ -1,4 +1,4 @@
-Create, read, delete, and dump/restore databases
+Create, read, update, delete, and dump/restore databases
 
 Usage:
   pscale database [command]
@@ -9,10 +9,12 @@ Aliases:
 Available Commands:
   create       Create a database instance
   delete       Delete a database instance
-  dump         Backup and dump your database (Vitess databases only)
-  list         List databases
-  restore-dump Restore your database from a local dump directory (Vitess databases only)
-  show         Retrieve information about a database
+  dump           Backup and dump your database (Vitess databases only)
+  ip-restriction Manage Postgres IP restrictions
+  list           List databases
+  restore-dump   Restore your database from a local dump directory (Vitess databases only)
+  show           Retrieve information about a database, including settings
+  update         Update a database's settings
 
 Flags:
   -h, --help         help for database
@@ -39,6 +41,12 @@ This command is only supported for Vitess databases.
 
 Usage:
   pscale keyspace read-only-regions <database> <branch> <keyspace> [flags]
+  pscale keyspace read-only-regions [command]
+
+Available Commands:
+  add         Add a read-only region to a keyspace
+  remove      Remove a read-only region from a keyspace
+  update      Update a keyspace's read-only region
 ```
 
 JSON output includes each region's identifying fields plus cluster size and replica count. Use a ready region's slug, display name, or ID with `database dump --read-only-region`.
@@ -73,3 +81,54 @@ Flags:
 ```
 
 `--read-only-region` cannot be combined with `--rdonly` or `--replica`. The command rejects regions that are not ready and creates a short-lived reader credential scoped to the selected region; it does not fall back to the primary region.
+
+## pscale database update
+
+```text
+Usage:
+  pscale database update <database> [flags]
+
+Flags:
+      --allow-data-branching            Allow seeding branches with data (Vitess only)
+      --allow-foreign-key-constraints   Allow foreign key constraints (Vitess only)
+      --automatic-migrations            Copy migration data to new branches and deploy requests (Vitess only)
+      --default-branch string           The default branch of the database (PostgreSQL and Vitess)
+      --insights-raw-queries            Collect full SQL queries for Insights (Vitess only)
+      --migration-framework string      Migration framework for the database (Vitess only)
+      --migration-table-name string     Migration table name for the database (Vitess only)
+      --new-name string                 Rename the database (PostgreSQL and Vitess)
+      --production-branch-web-console   Allow the web console on the production branch (PostgreSQL and Vitess)
+      --require-approval-for-deploy     Require admin approval for deploy requests (Vitess only)
+      --restrict-branch-region          Limit branch creation to the database region (PostgreSQL and Vitess)
+```
+
+Only supplied flags are sent. Set booleans explicitly, for example `--require-approval-for-deploy=true` or `=false`.
+
+## pscale database ip-restriction
+
+```text
+Usage:
+  pscale database ip-restriction [command]
+
+Aliases:
+  ip-restriction, cidr, cidrs
+
+Available Commands:
+  create      Create an IP restriction entry
+  delete      Delete an IP restriction entry
+  list        List IP restriction entries for a Postgres database
+  show        Show an IP restriction entry
+  update      Update an IP restriction entry
+```
+
+Create requires `--cidrs` with repeatable or comma-separated IPv4 CIDRs; optional `--schema`, `--role`, and `--description` scope the entry. Update replaces only supplied fields. Delete accepts `--force` but should be treated as destructive because entries apply across all database branches.
+
+## pscale keyspace read-only-regions writes
+
+```text
+pscale keyspace read-only-regions add <database> <branch> <keyspace> <region> [--cluster-size <size>] [--replicas <count>]
+pscale keyspace read-only-regions update <database> <branch> <keyspace> <region> [--cluster-size <size>] [--replicas <count>]
+pscale keyspace read-only-regions remove <database> <branch> <keyspace> <region>
+```
+
+These commands are Vitess-only. `add` uses a slug from `pscale region list`; update/remove require a region already configured on the keyspace. Verify the resulting list after every write.
