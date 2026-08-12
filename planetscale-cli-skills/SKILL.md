@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database settings, Postgres IP restrictions, database branches, VTGate sizing, read-only regions, deploy requests, schema migrations, SQL queries, diagnostics, query insights, backup policies, authentication-attempt exports, Cloudflare D1 imports, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, database settings, IP restriction, database branch, VTGate resize, read-only region, deploy request, schema migration, pscale sql, pscale insights, pscale inspect, backup policy, auth attempts, query performance, database diagnostics, pscale import d1, Cloudflare D1 migration, PlanetScale automation.
+description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database settings, Postgres IP restrictions, dedicated PgBouncers, database branches, VTGate sizing, read-only regions, deploy requests, schema migrations, SQL queries, diagnostics, query insights, backup policies, authentication-attempt exports, Cloudflare D1 imports, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, PgBouncers, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, database settings, IP restriction, pgbouncer, database branch, VTGate resize, read-only region, deploy request, schema migration, pscale sql, pscale insights, pscale inspect, backup policy, auth attempts, query performance, database diagnostics, pscale import d1, Cloudflare D1 migration, PlanetScale automation.
 requirements:
   binaries:
     - pscale
@@ -15,11 +15,11 @@ metadata:
   openclaw:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
-      Scope is limited to: database and branch management, VTGate sizing, Vitess read-only-region access, deploy requests,
+      Scope is limited to: database and branch management, dedicated PostgreSQL PgBouncers, VTGate sizing, Vitess read-only-region access, deploy requests,
       non-interactive SQL queries, query insights, read-only diagnostics, Cloudflare D1 imports, backups, passwords,
       service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, deploy requests, D1 imports, non-interactive SQL queries, query insights, and read-only diagnostics
+      - Run pscale CLI commands to manage PlanetScale databases, branches, dedicated PgBouncers, deploy requests, D1 imports, non-interactive SQL queries, query insights, and read-only diagnostics
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -72,6 +72,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; manage scheduled backup policies |
 | **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
 | **password** | `pscale-password` | Create, list, delete, and scope Vitess connection passwords to read-only regions |
+| **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers |
 | **org** | `pscale-org` | List, show, switch organizations |
 | **service-token** | `pscale-service-token` | Create, manage CI/CD service tokens |
 
@@ -203,6 +204,10 @@ pscale password create <database> <branch> <name> --read-only-region <region> --
 pscale deploy-request create <database> <branch>
 pscale deploy-request list <database>
 pscale deploy-request deploy <database> <number>
+
+# Dedicated PostgreSQL PgBouncers
+pscale pgbouncer list <database> <branch> --format json
+pscale pgbouncer show <database> <branch> <name> --format json
 
 # Database operations
 pscale database create <database> --org <org>

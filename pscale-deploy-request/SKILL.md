@@ -25,6 +25,9 @@ pscale deploy-request diff <database> <number>
 # Deploy (apply changes)
 pscale deploy-request deploy <database> <number>
 
+# Explicit strategy (parallel requires database support and approval)
+pscale deploy-request deploy <database> <number> --strategy parallel --wait
+
 # Close without deploying
 pscale deploy-request close <database> <number>
 
@@ -60,6 +63,23 @@ pscale deploy-request deploy my-database 1
 
 # 7. Verify deployment
 pscale deploy-request show my-database 1
+```
+
+### Select serial or parallel deployment
+
+`pscale deploy-request deploy` accepts `--strategy serial|parallel`. Omit the
+flag to keep the default serial strategy. Before selecting `parallel`, confirm
+that parallel deployments are enabled and appropriate for the target database,
+review the deploy-request diff, and obtain the same production-change approval
+required for deployment itself. Do not use parallel merely to make an unknown
+migration finish sooner.
+
+```bash
+# Preserve the default
+pscale deploy-request deploy <database> <number> --strategy serial
+
+# Use only after eligibility and operational impact are confirmed
+pscale deploy-request deploy <database> <number> --strategy parallel --wait
 ```
 
 ### Review Before Deploy

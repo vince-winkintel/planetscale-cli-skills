@@ -37,3 +37,18 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale deploy-request [command] --help" for more information about a command.
+
+## pscale deploy-request deploy
+
+```text
+Deploy a specific deploy request
+
+Usage:
+  pscale deploy-request deploy <database> <number|branch> [flags]
+
+Flags:
+  -h, --help              help for deploy
+      --instant           If enabled, the schema migrations from this deploy request will be applied using MySQL’s built-in ALGORITHM=INSTANT option. Deployment will be faster, but cannot be reverted.
+      --strategy string   Deployment strategy: "serial" (default) or "parallel".
+      --wait              wait until the branch is deployed
+```

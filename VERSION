@@ -2,6 +2,11 @@
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.314.0
+  - Reviewed the upstream release and compare `v0.313.0...v0.314.0` on 2026-08-12.
+  - Added standalone dedicated PostgreSQL PgBouncer list/show/create/resize/status/cancel/delete guidance, including target, size, replicas-per-cell, parameter, asynchronous-state, no-op, and destructive-delete safety.
+  - Documented the now-visible `pscale deploy-request deploy --strategy serial|parallel` flag and the need to confirm database eligibility before selecting parallel deployment.
+  - Re-captured affected help from the checksum-verified v0.314.0 macOS arm64 release binary.
 - PlanetScale CLI v0.313.0
   - Reviewed the upstream release and compare `v0.312.0...v0.313.0` on 2026-08-11.
   - Added database settings show/update and PostgreSQL IP-restriction CRUD guidance, with engine-specific flags, explicit boolean values, pre-write inspection, and destructive-delete checks.
