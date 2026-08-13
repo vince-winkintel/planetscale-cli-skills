@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database settings, Postgres IP restrictions, dedicated PgBouncers, database branches, VTGate sizing, read-only regions, deploy requests, schema migrations, SQL queries, diagnostics, query insights, backup policies, authentication-attempt exports, Cloudflare D1 imports, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, PgBouncers, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, database settings, IP restriction, pgbouncer, database branch, VTGate resize, read-only region, deploy request, schema migration, pscale sql, pscale insights, pscale inspect, backup policy, auth attempts, query performance, database diagnostics, pscale import d1, Cloudflare D1 migration, PlanetScale automation.
+description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database settings, Postgres IP restrictions, dedicated PgBouncers, database branches, VTGate sizing, read-only regions, deploy requests, schema migrations, SQL queries, diagnostics, query insights, query samples, query tags, backup policies, authentication-attempt exports, Cloudflare D1 imports, or any PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, PgBouncers, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, database settings, IP restriction, pgbouncer, database branch, VTGate resize, read-only region, deploy request, schema migration, pscale sql, pscale insights, query samples, query tags, pscale inspect, backup policy, auth attempts, query performance, database diagnostics, pscale import d1, Cloudflare D1 migration, PlanetScale automation.
 requirements:
   binaries:
     - pscale
@@ -226,6 +226,8 @@ pscale sql <database> <branch> --org <org> --format json --query "SELECT 1"
 # Point-in-time diagnostics plus server-side production-traffic analysis
 pscale inspect all <database> <branch> --org <org> --format json
 pscale insights queries <database> <branch> --org <org> --sort p99Latency --period 1h --format json
+pscale insights queries samples <database> <branch> <fingerprint> --org <org> --keyspace <keyspace> --format json
+pscale insights tags summaries <database> <branch> --org <org> --tags app --sort totalTime --format json
 pscale insights recommendations <database> --org <org> --format json
 
 # Cloudflare D1 import dry-run

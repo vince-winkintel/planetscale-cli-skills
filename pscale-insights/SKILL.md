@@ -1,6 +1,6 @@
 ---
 name: pscale-insights
-description: Query PlanetScale server-side performance insights, query errors, anomalies, and schema recommendations. Use when ranking slow or expensive queries, investigating production query failures or resource anomalies, reviewing index/schema recommendations, or when a user asks for pscale insights. Triggers on pscale insights, query insights, slow queries, query errors, anomalies, schema recommendations, missing indexes, unused indexes, database bloat.
+description: Query PlanetScale server-side performance insights, execution samples, query tags, errors, anomalies, and schema recommendations. Use when ranking slow or expensive queries, drilling into individual executions, attributing load by sqlcommenter or system tags, investigating production query failures or resource anomalies, reviewing or dismissing index/schema recommendations, or when a user asks for pscale insights. Triggers on pscale insights, query insights, query samples, query tags, sqlcommenter, slow queries, query errors, anomalies, schema recommendations, missing indexes, unused indexes, database bloat.
 ---
 
 # pscale insights
@@ -13,16 +13,25 @@ Use PlanetScale's server-side analysis of production traffic to investigate quer
 # Rank queries by cumulative execution time (default sort)
 pscale insights queries <database> <branch> --org <org> --format json
 
-# Find inefficient read patterns over the last 24 hours
+# Find inefficient read patterns over the last day
 pscale insights queries <database> <branch> --org <org> \
-  --sort rowsReadPerReturned --period 24h --limit 25 --format json
+  --sort rowsReadPerReturned --period 1d --limit 25 --format json
 
 # Find high-tail-latency queries over the last hour
 pscale insights queries <database> <branch> --org <org> \
   --sort p99Latency --period 1h --format json
 
+# Drill into recent executions using fingerprint and keyspace from the query list
+pscale insights queries samples <database> <branch> <fingerprint> --org <org> \
+  --keyspace <keyspace> --period 1h --limit 25 --format json
+
+# Attribute load by friendly query-tag names from the Insights UI
+pscale insights tags <database> <branch> --org <org> --format json
+pscale insights tags summaries <database> <branch> --org <org> \
+  --tags username --tags app --sort totalTime --format json
+
 # Inspect aggregated query failures and detected resource anomalies
-pscale insights errors <database> <branch> --org <org> --period 24h --format json
+pscale insights errors <database> <branch> --org <org> --period 1d --format json
 pscale insights anomalies <database> <branch> --org <org> --format json
 
 # Review database-level schema recommendations and their proposed DDL
@@ -40,16 +49,39 @@ Always pass `--org` explicitly in agent workflows so the organization target is 
 - `p50Latency`, `p99Latency`, `maxLatency`
 - `cpuTime`, `ioTime`, `lastRun`
 
-Use `--dir asc|desc`, `--limit <n>`, and an API-supported period such as `1h` or `24h` to keep comparisons explicit. Do not compare differently scoped periods as though they represented the same workload.
+Use `--dir asc|desc`, `--limit <n>`, and an API-supported period such as `1h` or `1d` to keep comparisons explicit. Do not compare differently scoped periods as though they represented the same workload.
+
+## Execution samples
+
+Each JSON record from `pscale insights queries` includes a `fingerprint` and `keyspace`. Pass both to `queries samples`; `--keyspace` is required because the same fingerprint can exist in more than one keyspace.
+
+Samples expose individual executions, including start time, duration, user, rows read/returned, normalized SQL, errors, and attached tags. Use them to validate whether an aggregate represents one outlier or a recurring pattern. Query samples can contain sensitive SQL context, usernames, addresses, or tag values, so do not paste raw output into public issues or logs without review.
+
+## Query tags
+
+Use `pscale insights tags` to list observed sqlcommenter and system tag keys. The command returns friendly names matching the PlanetScale Insights UI, such as `app`, `controller`, and `username`.
+
+```bash
+# Show values observed for one friendly tag name
+pscale insights tags show <database> <branch> app --org <org> --period 1h --format json
+
+# Group workload by one or more repeatable tag keys
+pscale insights tags summaries <database> <branch> --org <org> \
+  --tags app --tags controller --sort p99Latency --period 1d --format json
+```
+
+List tags before using `show` or `summaries`. Pass friendly names, not internal `S...`/`B...` IDs. If a friendly name exists in both sources, disambiguate it as `sql:<name>` or `system:<name>`. Optional `--fingerprint` and `--keyspace` filters on `tags` narrow attribution to the intended query or keyspace.
 
 ## Investigation workflow
 
 1. Confirm the organization, database, branch, and time window.
 2. Rank queries by the metric related to the symptom (`totalTime`, `p99Latency`, `rowsReadPerReturned`, or `errorCount`).
-3. Inspect `errors` and `anomalies` for the same branch and time window.
-4. Run `pscale inspect all <database> <branch> --org <org> --format json` for live connection-level evidence.
-5. Review database-level `recommendations` for index, bloat, and sequence-risk findings.
-6. Summarize evidence separately from proposed changes.
+3. Use the returned fingerprint and keyspace to inspect recent `queries samples` when execution-level evidence is needed.
+4. List and summarize query tags to attribute the workload to applications, controllers, users, or other observed dimensions.
+5. Inspect `errors` and `anomalies` for the same branch and time window.
+6. Run `pscale inspect all <database> <branch> --org <org> --format json` for live connection-level evidence.
+7. Review database-level `recommendations` for index, bloat, and sequence-risk findings.
+8. Summarize evidence separately from proposed changes.
 
 A not-found response for branch-scoped insights can mean the database/branch does not exist **or** Query Insights is not enabled. Verify both before concluding that there is no data.
 
@@ -62,6 +94,8 @@ Recommendations can include ready-to-apply DDL in JSON output. Treat that DDL as
 - Review lock/runtime impact and use a branch plus deploy-request workflow where supported.
 - Obtain explicit user approval before executing schema changes.
 - Verify the result and keep a rollback plan.
+
+Dismissal is also a write: `pscale insights recommendations dismiss <database> <number>`. Confirm the organization, database, and recommendation sequence number from the current list, explain why the finding is inapplicable, and obtain explicit approval before dismissing it. Prefer an informative `--reason`; use `--force` only for already-approved non-interactive execution, then verify the recommendation state.
 
 ## Related skills
 

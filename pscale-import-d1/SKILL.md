@@ -39,6 +39,8 @@ Supported `strftime()` current-time defaults are mapped according to the inferre
 
 Defaults and foreign-key action clauses are emitted only when they match validated literal or clause forms. Malformed or untrusted expressions are omitted instead of being copied verbatim into executable PostgreSQL DDL, and parsing stops at the balanced end of each `CREATE TABLE` body so trailing statements are not treated as schema content. Treat an omitted default, reference action, or invalid foreign key as a migration warning: inspect the generated DDL and restore only a reviewed PostgreSQL equivalent.
 
+Foreign keys are applied after tables, data, and indexes rather than relying on `CREATE TABLE` order. This supports cyclic relationships, case-insensitive target matching, schema-qualified and quoted/bracketed references, and column-less references that resolve to the parent primary key; composite foreign-key columns map positionally to the corresponding parent columns. Replay-safe constraint replacement uses `DROP CONSTRAINT IF EXISTS` before `ADD CONSTRAINT`, and generated names are bounded for PostgreSQL. Still inspect lint and converted DDL for unresolved targets, type coercions, actions, and the exact parent-column mapping before a real import.
+
 Still review `convert-schema` output before loading. Expression or partial indexes, views, triggers, and other constructs reported by `lint` can require manual migration decisions; do not assume a successful conversion is semantically identical without inspecting constraints, defaults, generated expressions, foreign-key types, and indexes.
 
 ## Recommended migration workflow

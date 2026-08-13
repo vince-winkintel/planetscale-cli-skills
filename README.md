@@ -105,7 +105,7 @@ pscale branch create my-database feature-branch --from main
 | **pscale-deploy-request** | Deploy schema changes safely | `pscale deploy-request create/deploy` |
 | **pscale-database** | Manage settings, PostgreSQL IP restrictions, shells, and Vitess read-only regions/dumps | `pscale database show/update/ip-restriction`, `pscale keyspace read-only-regions`, `pscale shell` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
-| **pscale-insights** | Analyze production query performance, errors, anomalies, and schema recommendations | `pscale insights queries/errors/anomalies/recommendations` |
+| **pscale-insights** | Analyze production query performance, execution samples, tags, errors, anomalies, and schema recommendations | `pscale insights queries/tags/errors/anomalies/recommendations` |
 | **pscale-inspect** | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostics | `pscale inspect all/locks/seq-scans/bloat` |
 | **pscale-import-d1** | Import Cloudflare D1 exports into PlanetScale Postgres | `pscale import d1 lint/start/verify` |
 | **pscale-backup** | Create/restore backups and manage scheduled policies | `pscale backup create/list/policy` |
@@ -215,6 +215,8 @@ pscale inspect all my-db main --org my-org --format json
 
 # Server-side analysis of production traffic
 pscale insights queries my-db main --org my-org --sort p99Latency --period 1h --format json
+pscale insights queries samples my-db main <fingerprint> --org my-org --keyspace <keyspace> --format json
+pscale insights tags summaries my-db main --org my-org --tags app --sort totalTime --format json
 pscale insights errors my-db main --org my-org --period 1h --format json
 pscale insights recommendations my-db --org my-org --format json
 ```
