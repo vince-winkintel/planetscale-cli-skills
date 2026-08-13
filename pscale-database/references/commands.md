@@ -7,8 +7,8 @@ Aliases:
   database, db
 
 Available Commands:
-  create       Create a database instance
-  delete       Delete a database instance
+  create         Create a database instance
+  delete         Delete a database instance
   dump           Backup and dump your database (Vitess databases only)
   ip-restriction Manage Postgres IP restrictions
   list           List databases
@@ -31,6 +31,8 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale database [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 
 ## pscale keyspace read-only-regions
 

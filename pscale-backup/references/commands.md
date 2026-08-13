@@ -29,6 +29,8 @@ Use "pscale backup [command] --help" for more information about a command.
 
 ## pscale backup policy
 
+The `create`, `update`, and `delete` help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.315.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
+
 ```text
 Usage:
   pscale backup policy [command]
@@ -39,6 +41,108 @@ Available Commands:
   list        List backup policies for a database
   show        Show a backup policy
   update      Update a backup policy
+```
+
+### pscale backup policy create
+
+```text
+Create a scheduled backup policy for production or development branches.
+
+Custom schedules beyond the included defaults may incur additional backup storage charges.
+
+Usage:
+  pscale backup policy create <database> [flags]
+
+Flags:
+      --frequency-unit string   Frequency unit: hour, day, week, or month (required) (required)
+      --frequency-value int     Frequency value (required) (required)
+  -h, --help                    help for create
+      --name string             Optional name for the backup policy
+      --retention-unit string   Retention unit: hour, day, week, month, or year (required) (required)
+      --retention-value int     Retention period value (required) (required)
+      --schedule-day int        Day of week (0=Sunday … 6=Saturday); used for weekly/monthly schedules
+      --schedule-time string    Schedule time of day in HH:MM format (required) (required)
+      --schedule-week int       Week of month (0=first … 3=fourth); used for monthly schedules
+      --target string           Branch target: production or development (required) (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+### pscale backup policy update
+
+```text
+Update a backup policy.
+
+Only flags you pass are sent to the API. Required system policies may reject
+some changes.
+
+Usage:
+  pscale backup policy update <database> <policy-id> [flags]
+
+Flags:
+      --frequency-unit string   Frequency unit: hour, day, week, or month
+      --frequency-value int     Frequency value
+  -h, --help                    help for update
+      --name string             Name for the backup policy
+      --retention-unit string   Retention unit: hour, day, week, month, or year
+      --retention-value int     Retention period value
+      --schedule-day int        Day of week (0=Sunday … 6=Saturday)
+      --schedule-time string    Schedule time of day in HH:MM format
+      --schedule-week int       Week of month (0=first … 3=fourth)
+      --target string           Branch target: production or development
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+### pscale backup policy delete
+
+```text
+Delete a custom backup policy. Required default system policies cannot be deleted.
+
+Usage:
+  pscale backup policy delete <database> <policy-id> [flags]
+
+Aliases:
+  delete, rm
+
+Flags:
+      --force   Delete a backup policy without confirmation
+  -h, --help    help for delete
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 Create usage is `pscale backup policy create <database>` and requires target, frequency value/unit, schedule time, and retention value/unit. Update usage is `pscale backup policy update <database> <policy-id>` and sends only supplied flags. Delete usage is `pscale backup policy delete <database> <policy-id>`; `--force` skips confirmation, and required default system policies cannot be deleted.

@@ -16,10 +16,10 @@ metadata:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
       Scope is limited to: database and branch management, dedicated PostgreSQL PgBouncers, VTGate sizing, Vitess read-only-region access, deploy requests,
-      non-interactive SQL queries, query insights, read-only diagnostics, Cloudflare D1 imports, backups, passwords,
-      service tokens, and organization management via the pscale CLI tool.
+      non-interactive SQL queries, query insights, read-only diagnostics, Cloudflare D1 imports, backups, audit-log exports, passwords,
+      authentication-attempt exports, service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, dedicated PgBouncers, deploy requests, D1 imports, non-interactive SQL queries, query insights, and read-only diagnostics
+      - Run pscale CLI commands to manage PlanetScale databases, branches, dedicated PgBouncers, deploy requests, D1 imports, non-interactive SQL queries, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -66,7 +66,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **deploy-request** | `pscale-deploy-request` | Create, review, deploy, revert schema changes |
 | **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage PostgreSQL IP restrictions and Vitess read-only regions |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
-| **insights** | `pscale-insights` | Analyze production query statistics, errors, anomalies, and schema recommendations |
+| **insights** | `pscale-insights` | Analyze production query statistics, execution samples, query tags, errors, anomalies, and schema recommendations |
 | **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostic checks |
 | **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
 | **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; manage scheduled backup policies |

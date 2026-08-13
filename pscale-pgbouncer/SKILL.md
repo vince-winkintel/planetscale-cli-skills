@@ -20,6 +20,8 @@ This command group rejects Vitess databases. Use JSON output to preserve the exa
 
 `--target` is required and accepts `primary`, `replica`, or `replica_az_affinity`. `--name` is optional and auto-generated when omitted; explicit names are at most 12 characters, and `primary` and `replica` are reserved. If `--size` is omitted, the API selects a default SKU.
 
+Provenance: PlanetScale CLI v0.315.0 documents the explicit-name limit and reserved names in `internal/cmd/pgbouncer/create.go` (`CreateCmd` long help), also visible in the tagged source at https://github.com/planetscale/cli/blob/v0.315.0/internal/cmd/pgbouncer/create.go.
+
 ```bash
 pscale pgbouncer create <database> <branch> \
   --org <org> \
