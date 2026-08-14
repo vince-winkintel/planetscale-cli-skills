@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, and manage PlanetScale databases, settings, and PostgreSQL IP restrictions. Use when creating databases, inspecting or changing database settings, managing Postgres CIDR allowlists, opening database shells, managing Vitess read-only regions, or dumping Vitess data from a primary, replica, rdonly tablet, or separate read-only region. Triggers on database, create database, database settings, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, and manage PlanetScale databases, keyspaces, settings, and PostgreSQL IP restrictions. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, managing Postgres CIDR allowlists, opening database shells, managing Vitess read-only regions, or dumping Vitess data from a primary, replica, rdonly tablet, or separate read-only region. Triggers on database, create database, keyspace delete, database settings, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -27,6 +27,9 @@ pscale database ip-restriction list <database> --format json
 
 # Delete database
 pscale database delete <database>
+
+# Delete a Vitess keyspace (destructive; inspect and approve first)
+pscale keyspace delete <database> <branch> <keyspace>
 
 # Open database shell
 pscale shell <database> <branch>
@@ -143,6 +146,29 @@ pscale keyspace read-only-regions remove <database> <branch> <keyspace> <region>
 pscale keyspace read-only-regions <database> <branch> <keyspace> \
   --org <org> --format json
 ```
+
+### Delete a Vitess keyspace
+
+Keyspace deletion is destructive. Confirm the organization, database, branch, exact keyspace, routing/workflow dependencies, and recovery plan before asking for approval.
+
+```bash
+# Inspect the target and related branch state first
+pscale keyspace show <database> <branch> <keyspace> --org <org> --format json
+pscale branch vtctld get-keyspace-routing-rules <database> <branch> --org <org> --format json
+pscale branch vtctld list-workflows <database> <branch> --org <org> \
+  --keyspace <keyspace> --format json
+
+# Interactive deletion requires typing database/branch/keyspace exactly
+pscale keyspace delete <database> <branch> <keyspace> --org <org>
+
+# Non-interactive deletion only after explicit approval
+pscale keyspace delete <database> <branch> <keyspace> --org <org> --force --format json
+
+# Verify absence and inspect remaining keyspaces
+pscale keyspace list <database> <branch> --org <org> --format json
+```
+
+Without `--force`, the CLI first verifies the keyspace exists and requires a TTY confirmation of `<database>/<branch>/<keyspace>`. JSON/CSV or headless execution requires `--force`; never add it simply to bypass the safety prompt.
 
 ## Troubleshooting
 

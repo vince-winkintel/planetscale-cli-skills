@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches, Postgres parameters, Vitess VTGate capacity, tablet throttling, and Vitess workflows. Use when creating development branches for schema changes, viewing schema diffs, downloading query pattern reports, changing Postgres branch size, replicas, or parameters, inspecting or resizing VTGates on a Vitess production branch, inspecting or changing tablet throttler app rules and metrics, promoting branches to production, managing branch lifecycle, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, query pattern report, resize branch, Postgres parameters, VTGate, VTGate autoscaling, tablet throttler, throttle app, app metrics, promote branch, development branch, database branch, MoveTables, global keyspace.
+description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches, Postgres parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, and Vitess workflows. Use when creating development branches for schema changes, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -72,6 +72,7 @@ pscale branch query-patterns download <database> <branch-name> --output - > quer
 # Inspect Vitess routing rules and tablet state
 pscale branch routing-rules get <database> <branch-name>
 pscale branch vtctld get-routing-rules <database> <branch-name>
+pscale branch vtctld get-keyspace-routing-rules <database> <branch-name> --format json
 pscale branch vtctld get-shard <database> <branch-name> --keyspace <keyspace> --shard <shard>
 pscale branch vtctld list-tablets <database> <branch-name> --format json
 
@@ -265,11 +266,20 @@ pscale branch routing-rules get <database> <branch-name>
 # Vitess only: read live routing rules from vtctld/current cluster state
 pscale branch vtctld get-routing-rules <database> <branch-name>
 
+# Vitess only: read live keyspace-to-keyspace routing rules
+pscale branch vtctld get-keyspace-routing-rules <database> <branch-name> --format json
+
 # Update routing rules from a file
 pscale branch routing-rules update <database> <branch-name> --routing-rules routing-rules.json
+
+# Replace live keyspace routing rules (approved write)
+pscale branch vtctld apply-keyspace-routing-rules <database> <branch-name> \
+  --rules-file keyspace-routing-rules.json --format json
 ```
 
 Use `vtctld get-routing-rules` when debugging propagation/live cluster state; use `routing-rules get` when you need the schema snapshot contract.
+
+Keyspace routing rules are a separate live map of `from_keyspace` to `to_keyspace`. Before replacing them, save `get-keyspace-routing-rules` output, validate every entry includes both fields, show the complete proposed replacement, and obtain explicit approval. `apply-keyspace-routing-rules` requires exactly one of `--rules` or `--rules-file`; an empty `rules` array clears all live keyspace routing rules. By default the command rebuilds SrvVSchema objects; use `--cells` only to scope that rebuild deliberately, and use `--skip-rebuild` only with an explicit propagation plan. Re-run `get-keyspace-routing-rules` after the write and compare the full returned set.
 
 ### Vitess shard inspection
 
