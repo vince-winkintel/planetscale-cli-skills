@@ -577,6 +577,8 @@ Cancel is an operational write. Confirm the target and latest request state befo
 
 ## pscale branch vtctld
 
+The parent and keyspace-routing-rule help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.317.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
+
 ```text
 Run vtctld commands against a branch. This command is only supported for Vitess databases.
 
@@ -584,19 +586,23 @@ Usage:
   pscale branch vtctld [command]
 
 Available Commands:
-  get-shard              Get a shard record for a branch
-  get-routing-rules      Get live routing rules for a branch
-  list-keyspaces         List vtctld keyspaces for a branch
-  list-tablets           List tablets for a branch, grouped by keyspace and shard
-  list-workflows         List vtctld workflows for a branch
-  lookup-vindex          Manage Lookup Vindex operations
-  materialize            Manage Materialize workflows
-  move-tables            Manage MoveTables workflows
-  planned-reparent-shard Reparent a shard to a new primary
-  start-workflow         Start a workflow on a branch
-  stop-workflow          Stop a workflow on a branch
-  throttler              Inspect and configure the tablet throttler
-  vdiff                  Manage VDiff operations
+  apply-keyspace-routing-rules Replace live keyspace routing rules for a branch
+  get-keyspace-routing-rules   Get live keyspace routing rules for a branch
+  get-routing-rules            Get live routing rules for a branch
+  get-shard                    Get a shard record for a branch
+  list-keyspaces               List vtctld keyspaces for a branch
+  list-tablets                 List tablets for a branch, grouped by keyspace and shard
+  list-workflows               List vtctld workflows for a branch
+  lookup-vindex                Manage Lookup Vindex operations
+  materialize                  Manage Materialize workflows
+  move-tables                  Manage MoveTables workflows
+  planned-reparent-shard       Reparent a shard to a new primary
+  refresh-state-by-shard       Reload tablet records for all tablets in a shard
+  set-shard-tablet-control     Update shard tablet controls for a branch
+  start-workflow               Start a workflow on a branch
+  stop-workflow                Stop a workflow on a branch
+  throttler                    Inspect and configure the tablet throttler
+  vdiff                        Manage VDiff operations
 
 Flags:
   -h, --help   help for vtctld
@@ -614,6 +620,61 @@ Global Flags:
 
 Use "pscale branch vtctld [command] --help" for more information about a command.
 
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld get-keyspace-routing-rules
+
+```text
+Get live keyspace routing rules for a branch
+
+Usage:
+  pscale branch vtctld get-keyspace-routing-rules <database> <branch> [flags]
+
+Flags:
+  -h, --help   help for get-keyspace-routing-rules
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld apply-keyspace-routing-rules
+
+```text
+Replace live keyspace routing rules for a branch
+
+Usage:
+  pscale branch vtctld apply-keyspace-routing-rules <database> <branch> [flags]
+
+Flags:
+      --cells strings       Limit SrvVSchema rebuilding to these cells
+  -h, --help                help for apply-keyspace-routing-rules
+      --rules string        Keyspace routing rules as JSON
+      --rules-file string   Path to keyspace routing rules JSON
+      --skip-rebuild        Skip rebuilding SrvVSchema objects
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 ## pscale branch vtctld throttler

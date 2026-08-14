@@ -1,7 +1,12 @@
-1.0.12
+1.0.13
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.317.0
+  - Reviewed upstream releases v0.316.0 and v0.317.0 plus compares `v0.315.0...v0.316.0` and `v0.316.0...v0.317.0` on 2026-08-14.
+  - Added deploy-request queue, deployment, operation, review, storage-readiness, force-cutover, and per-deploy throttler workflows.
+  - Added keyspace deletion and live keyspace-routing-rule inspection/replacement guidance with destructive-write approval and post-write verification requirements.
+  - Re-captured the complete affected keyspace, vtctld, and deploy-request help surfaces from the checksum-verified v0.317.0 macOS arm64 release binary.
 - PlanetScale CLI v0.315.0
   - Reviewed the upstream release and compare `v0.314.0...v0.315.0` on 2026-08-13.
   - Added query execution-sample and query-tag list/show/summary workflows, including required fingerprint/keyspace drill-down, friendly tag-name disambiguation, privacy cautions, and attribution guidance.

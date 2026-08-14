@@ -1,6 +1,6 @@
 ---
 name: pscale-deploy-request
-description: Create, review, deploy, and revert schema changes via deploy requests. Use when deploying schema migrations to production, reviewing database changes before deployment, managing deploy request lifecycle, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy schema, review deployment, revert deployment, production migration.
+description: Create, review, inspect, deploy, throttle, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, managing per-deploy throttling, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, deploy operations, storage check, force cutover, deploy throttler, review deployment, revert deployment, production migration.
 ---
 
 # pscale deploy-request
@@ -21,6 +21,15 @@ pscale deploy-request show <database> <number>
 
 # View deploy request diff
 pscale deploy-request diff <database> <number>
+
+# Inspect reviews, storage, deployment, and operation progress
+pscale deploy-request reviews <database> <number> --format json
+pscale deploy-request storage-check <database> <number> --format json
+pscale deploy-request deployment <database> <number> --format json
+pscale deploy-request operations <database> <number> --format json
+
+# Inspect the database-wide deployment queue
+pscale deploy-request queue <database> --format json
 
 # Deploy (apply changes)
 pscale deploy-request deploy <database> <number>
@@ -81,6 +90,69 @@ pscale deploy-request deploy <database> <number> --strategy serial
 # Use only after eligibility and operational impact are confirmed
 pscale deploy-request deploy <database> <number> --strategy parallel --wait
 ```
+
+### Inspect readiness and progress
+
+Use the read-only inspection commands before and during deployment rather than inferring state from `show` alone:
+
+```bash
+# Before deployment: confirm reviews and capacity
+pscale deploy-request reviews <database> <number> --org <org> --format json
+pscale deploy-request storage-check <database> <number> --org <org> --format json
+
+# Understand queue placement and deployment state
+pscale deploy-request queue <database> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+
+# Track table/keyspace operations, including progress and ETA
+pscale deploy-request operations <database> <number> --org <org> --format json
+```
+
+Treat `enough_storage: false`, a paused queue, a non-deployable deployment, or an unresolved required review as a stop condition. Do not deploy merely because one inspection endpoint is clear. During a migration, use operation state, `progress_percentage`, and `eta_seconds` as observations, not promises.
+
+### Manage per-deploy throttling
+
+This throttler is scoped to one deploy request; it is separate from the database/tablet throttler under `pscale branch vtctld throttler`. Inspect the current eligible keyspaces and configuration first. Updating it changes live migration behavior and requires explicit approval.
+
+```bash
+pscale deploy-request throttler show <database> <number> --org <org> --format json
+
+# One ratio for every eligible keyspace
+pscale deploy-request throttler update <database> <number> --org <org> \
+  --ratio 50 --format json
+
+# Or individual ratios; this mode cannot be combined with --ratio
+pscale deploy-request throttler update <database> <number> --org <org> \
+  --configuration commerce=50 \
+  --configuration lookup=25 \
+  --format json
+
+pscale deploy-request throttler show <database> <number> --org <org> --format json
+```
+
+Ratios are integers from `0` through `95`: `0` effectively disables throttling and `95` slows migrations the most. Pass exactly one mode. After an approved update, re-run `throttler show` and verify every keyspace ratio.
+
+### Force a blocked cutover
+
+`force-cutover` is only accepted when the deployment is in `in_progress_cutover`. It skips PlanetScale's wait (up to one hour) and kills long-running transactions blocking the table lock. This is an emergency operational write, not a routine acceleration option.
+
+```bash
+# Diagnose first
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request operations <database> <number> --org <org> --format json
+
+# After explicit approval in an interactive terminal
+pscale deploy-request force-cutover <database> <number> --org <org>
+
+# Non-interactive execution only after the same approval
+pscale deploy-request force-cutover <database> <number> --org <org> --force --format json
+
+# Verify that cutover resumes/completes
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request operations <database> <number> --org <org> --format json
+```
+
+Before approval, identify the blocking deployment, explain that transactions will be killed, and confirm the expected application impact. Do not use `--force` merely to bypass an unavailable prompt.
 
 ### Review Before Deploy
 
