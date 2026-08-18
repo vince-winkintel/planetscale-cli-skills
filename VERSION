@@ -1,7 +1,12 @@
-1.0.13
+1.0.14
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.320.0
+  - Reviewed upstream releases v0.319.0 and v0.320.0 plus compare `v0.317.0...v0.320.0` on 2026-08-18; no v0.318.0 release exists.
+  - Added standalone read-only maintenance schedule/list/show/window guidance for Vitess Enterprise databases, including IDs, pending-version/deadline interpretation, week-of-month output, and JSON-first review.
+  - Added database-level Vitess migration throttler show/update guidance, distinguishing future deploy defaults from per-deploy and vtctld throttlers and requiring explicit approval plus post-write verification.
+  - Documented non-zero propagation for dump cursor/worker failures and re-captured all affected maintenance/database-throttler help from the checksum-verified v0.320.0 macOS arm64 release binary.
 - PlanetScale CLI v0.317.0
   - Reviewed upstream releases v0.316.0 and v0.317.0 plus compares `v0.315.0...v0.316.0` and `v0.316.0...v0.317.0` on 2026-08-14.
   - Added deploy-request queue, deployment, operation, review, storage-readiness, force-cutover, and per-deploy throttler workflows.

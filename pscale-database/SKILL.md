@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, and manage PlanetScale databases, keyspaces, settings, and PostgreSQL IP restrictions. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, managing Postgres CIDR allowlists, opening database shells, managing Vitess read-only regions, or dumping Vitess data from a primary, replica, rdonly tablet, or separate read-only region. Triggers on database, create database, keyspace delete, database settings, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, and database-level Vitess migration throttling. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, keyspace delete, database settings, database throttler, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -18,6 +18,9 @@ pscale database create <database> --org <org>
 
 # Show database details
 pscale database show <database> --format json
+
+# Inspect database-level defaults for future Vitess deploy requests
+pscale database throttler show <database> --org <org> --format json
 
 # Update one setting; boolean flags require an explicit value
 pscale database update <database> --require-approval-for-deploy=true
@@ -94,6 +97,31 @@ pscale database update <database> --org <org> --insights-raw-queries=false
 
 The CLI rejects Vitess-only flags for PostgreSQL databases. `--default-branch`, `--new-name`, `--production-branch-web-console`, and `--restrict-branch-region` work for both engines. Renaming or changing a default branch can affect automation and connection workflows; confirm the database and proposed diff before executing, then re-run `database show` to verify.
 
+### Database-level Vitess migration throttler
+
+This configuration sets the default migration-throttling ratio for future deploy requests on a Vitess database. It is distinct from both `pscale deploy-request throttler` for one deploy request and `pscale branch vtctld throttler` for tablet/keyspace throttler policy.
+
+```bash
+# Inspect current database defaults and eligible keyspaces
+pscale database throttler show <database> --org <org> --format json
+
+# Apply one ratio to all eligible keyspaces after explicit approval
+pscale database throttler update <database> --org <org> \
+  --ratio 25 \
+  --format json
+
+# Or set reviewed per-keyspace ratios; the flag is repeatable
+pscale database throttler update <database> --org <org> \
+  --configuration commerce=20 \
+  --configuration analytics=10 \
+  --format json
+
+# Verify the resulting defaults
+pscale database throttler show <database> --org <org> --format json
+```
+
+Pass exactly one update mode: `--ratio` or one or more `--configuration keyspace=ratio` values. Ratios range from 0 through 95; 0 effectively disables migration throttling, while 95 slows migrations the most. Because a change affects future schema deployment behavior, show the current configuration and complete proposed values, obtain explicit approval, then verify the returned and re-read configuration. The command rejects PostgreSQL databases.
+
 ### PostgreSQL IP restrictions
 
 IP restrictions apply at the database level across all branches. List and inspect existing entries first, use IPv4 CIDRs (a single address is `/32`), and omit `--schema` or `--role` to apply the rule to all schemas or roles.
@@ -131,6 +159,8 @@ pscale database dump <database> <branch> \
 ```
 
 This workflow is Vitess-only. `--read-only-region` cannot be combined with `--replica` or `--rdonly`; those flags target tablet types in the primary region. Confirm the output path does not already exist and that local disk has sufficient space before starting a dump. If the selected region is not ready, wait rather than silently falling back to the primary region.
+
+Current dump behavior propagates cursor-close and worker errors as a non-zero exit instead of logging and continuing. Treat any failed dump as incomplete even if some files exist; do not restore or publish partial output, and rerun into a fresh directory after resolving the underlying error.
 
 ### Manage Vitess read-only regions
 

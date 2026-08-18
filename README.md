@@ -7,7 +7,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 🎯 What This Skill Provides
 
-- **14 sub-skills** covering all major `pscale` commands
+- **15 sub-skills** covering all major `pscale` commands
 - **3 automation scripts** for common workflows (create branch, deploy schema, sync)
 - **Decision trees** for common questions (branch vs deploy request, tokens vs passwords)
 - **Troubleshooting sections** for self-service problem solving
@@ -18,7 +18,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ### Agent Skills (`npx skills`)
 
-This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 14 standalone `pscale-*` skills.
+This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 15 standalone `pscale-*` skills.
 Each skill lives in its own directory with its own `SKILL.md`; there is intentionally no root `SKILL.md` so Agent Skills can discover every sibling instead of stopping at the repository root.
 
 ```bash
@@ -103,7 +103,8 @@ pscale branch create my-database feature-branch --from main
 | **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
 | **pscale-branch** | Create, diff, promote branches, manage Postgres size/replicas/parameters, resize Vitess VTGates, inspect branch infra, manage live routing rules and tablet throttling, download/stream query pattern reports, manage Vitess MoveTables workflows | `pscale branch create/list/diff/parameters/resize/vtgate/infra/query-patterns/vtctld` |
 | **pscale-deploy-request** | Deploy schema changes safely; inspect queues, operations, reviews, storage, and throttling | `pscale deploy-request create/deploy/queue/operations/storage-check/throttler` |
-| **pscale-database** | Manage settings, PostgreSQL IP restrictions, shells, Vitess keyspaces, and read-only regions/dumps | `pscale database show/update/ip-restriction`, `pscale keyspace delete/read-only-regions`, `pscale shell` |
+| **pscale-database** | Manage settings, database-level Vitess throttler defaults, PostgreSQL IP restrictions, shells, keyspaces, and read-only regions/dumps | `pscale database show/update/throttler/ip-restriction`, `pscale keyspace delete/read-only-regions`, `pscale shell` |
+| **pscale-maintenance** | Inspect Vitess Enterprise maintenance schedules and windows | `pscale maintenance list/show/windows` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
 | **pscale-insights** | Analyze production query performance, execution samples, tags, errors, anomalies, and schema recommendations | `pscale insights queries/tags/errors/anomalies/recommendations` |
 | **pscale-inspect** | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostics | `pscale inspect all/locks/seq-scans/bloat` |

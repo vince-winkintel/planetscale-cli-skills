@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, database settings, keyspace deletion or routing, Postgres IP restrictions, dedicated PgBouncers, database branches, VTGate sizing, deploy queues or operations, storage readiness, force cutover, deploy throttling, schema migrations, SQL queries, diagnostics, query insights, backup policies, Cloudflare D1 imports, or other PlanetScale terminal operations. Routes to specialized sub-skills for auth, branches, PgBouncers, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, keyspace delete, keyspace routing rules, database settings, IP restriction, pgbouncer, database branch, VTGate resize, deploy request, deploy queue, force cutover, deploy throttler, schema migration, pscale sql, pscale insights, pscale inspect, backup policy, database diagnostics, pscale import d1, PlanetScale automation.
+description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, maintenance schedules, database throttling, database settings, keyspace deletion or routing, Postgres IP restrictions, dedicated PgBouncers, database branches, VTGate sizing, deploy queues or operations, storage readiness, force cutover, deploy throttling, schema migrations, SQL queries, diagnostics, query insights, backup policies, Cloudflare D1 imports, or other PlanetScale terminal operations. Routes to specialized sub-skills for auth, maintenance, branches, PgBouncers, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, pscale maintenance, maintenance window, database throttler, keyspace delete, keyspace routing rules, database settings, IP restriction, pgbouncer, database branch, VTGate resize, deploy request, deploy queue, force cutover, deploy throttler, schema migration, pscale sql, pscale insights, pscale inspect, backup policy, database diagnostics, pscale import d1, PlanetScale automation.
 requirements:
   binaries:
     - pscale
@@ -15,11 +15,11 @@ metadata:
   openclaw:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
-      Scope is limited to: database and branch management, dedicated PostgreSQL PgBouncers, VTGate sizing, Vitess read-only-region access, deploy requests,
+      Scope is limited to: database and branch management, maintenance schedule inspection, dedicated PostgreSQL PgBouncers, VTGate sizing, Vitess read-only-region access, deploy requests,
       non-interactive SQL queries, query insights, read-only diagnostics, Cloudflare D1 imports, backups, audit-log exports, passwords,
       authentication-attempt exports, service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, dedicated PgBouncers, deploy requests, D1 imports, non-interactive SQL queries, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
+      - Run pscale CLI commands to manage PlanetScale databases, branches, maintenance inspection, dedicated PgBouncers, deploy requests, D1 imports, non-interactive SQL queries, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -64,7 +64,8 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
 | **branch** | `pscale-branch` | Create, delete, promote, diff, list branches, inspect branch infra, manage Postgres size/replicas/parameters, resize Vitess VTGates, manage live keyspace routing rules and tablet throttling, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
 | **deploy-request** | `pscale-deploy-request` | Create, review, inspect queues/operations, check storage, throttle, deploy, force cutover, and revert schema changes |
-| **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; delete Vitess keyspaces; manage PostgreSQL IP restrictions and Vitess read-only regions |
+| **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level Vitess throttler defaults, keyspaces, PostgreSQL IP restrictions, and read-only regions |
+| **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise maintenance schedules, pending versions, deadlines, and historical windows |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
 | **insights** | `pscale-insights` | Analyze production query statistics, execution samples, query tags, errors, anomalies, and schema recommendations |
 | **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostic checks |
@@ -216,7 +217,12 @@ pscale database create <database> --org <org>
 pscale database list
 pscale database show <database> --format json
 pscale database ip-restriction list <database> --format json
+pscale database throttler show <database> --org <org> --format json
 pscale shell <database> <branch>
+
+# Maintenance schedules and windows (Vitess Enterprise)
+pscale maintenance list <database> --org <org> --format json
+pscale maintenance windows <database> <schedule-id> --org <org> --format json
 
 # Backup policies and authentication-attempt exports
 pscale backup policy list <database> --format json
