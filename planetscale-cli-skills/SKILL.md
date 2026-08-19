@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, maintenance schedules, database throttling, database settings, keyspace deletion or routing, Postgres IP restrictions, dedicated PgBouncers, database branches, VTGate sizing, deploy queues or operations, storage readiness, force cutover, deploy throttling, schema migrations, SQL queries, diagnostics, query insights, backup policies, Cloudflare D1 imports, or other PlanetScale terminal operations. Routes to specialized sub-skills for auth, maintenance, branches, PgBouncers, deploy requests, SQL, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, pscale maintenance, maintenance window, database throttler, keyspace delete, keyspace routing rules, database settings, IP restriction, pgbouncer, database branch, VTGate resize, deploy request, deploy queue, force cutover, deploy throttler, schema migration, pscale sql, pscale insights, pscale inspect, backup policy, database diagnostics, pscale import d1, PlanetScale automation.
+description: Comprehensive PlanetScale CLI (pscale) command reference and workflows for database management via terminal. Use when user mentions PlanetScale CLI, pscale commands, maintenance schedules, database throttling, database settings, keyspace deletion or routing, Postgres IP restrictions, dedicated PgBouncers, database branches, VTGate sizing, deploy queues or operations, storage readiness, force cutover, deploy throttling, schema migrations, SQL queries, performance metrics, diagnostics, query insights, backup policies, Cloudflare D1 imports, or other PlanetScale terminal operations. Routes to specialized sub-skills for auth, maintenance, branches, PgBouncers, deploy requests, SQL, metrics, insights, inspection, D1 imports, databases, backups, audit logs, and other pscale commands. Triggers on pscale, PlanetScale CLI, pscale maintenance, maintenance window, database throttler, keyspace delete, keyspace routing rules, database settings, IP restriction, pgbouncer, database branch, VTGate resize, deploy request, deploy queue, force cutover, deploy throttler, schema migration, pscale sql, pscale metrics, performance report, pscale insights, pscale inspect, backup policy, database diagnostics, pscale import d1, PlanetScale automation.
 requirements:
   binaries:
     - pscale
@@ -16,10 +16,10 @@ metadata:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
       Scope is limited to: database and branch management, maintenance schedule inspection, dedicated PostgreSQL PgBouncers, VTGate sizing, Vitess read-only-region access, deploy requests,
-      non-interactive SQL queries, query insights, read-only diagnostics, Cloudflare D1 imports, backups, audit-log exports, passwords,
+      non-interactive SQL queries, historical/current performance metrics, query insights, read-only diagnostics, Cloudflare D1 imports, backups, audit-log exports, passwords,
       authentication-attempt exports, service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, maintenance inspection, dedicated PgBouncers, deploy requests, D1 imports, non-interactive SQL queries, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
+      - Run pscale CLI commands to manage PlanetScale databases, branches, maintenance inspection, dedicated PgBouncers, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -67,6 +67,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level Vitess throttler defaults, keyspaces, PostgreSQL IP restrictions, and read-only regions |
 | **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise maintenance schedules, pending versions, deadlines, and historical windows |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
+| **metrics** | `pscale-metrics` | Query historical/current branch metrics and engine-aware grouped performance reports |
 | **insights** | `pscale-insights` | Analyze production query statistics, execution samples, query tags, errors, anomalies, and schema recommendations |
 | **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostic checks |
 | **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
@@ -231,8 +232,10 @@ pscale audit-log auth-attempts download --org <org> --since 24h --outcome deny
 # Non-interactive read query for agents/scripts
 pscale sql <database> <branch> --org <org> --format json --query "SELECT 1"
 
-# Point-in-time diagnostics plus server-side production-traffic analysis
+# Point-in-time diagnostics, branch metrics, and query-fingerprint analysis
 pscale inspect all <database> <branch> --org <org> --format json
+pscale metrics report <database> <branch> --org <org> --period 1d --format json
+pscale metrics show <database> <branch> --org <org> --metric queries --metric latency_p99 --period 1h --format json
 pscale insights queries <database> <branch> --org <org> --sort p99Latency --period 1h --format json
 pscale insights queries samples <database> <branch> <fingerprint> --org <org> --keyspace <keyspace> --format json
 pscale insights tags summaries <database> <branch> --org <org> --tags app --sort totalTime --format json

@@ -1,7 +1,12 @@
-1.0.14
+1.0.15
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.321.0
+  - Reviewed the upstream release and compare `v0.320.0...v0.321.0` on 2026-08-19.
+  - Added standalone `pscale-metrics` guidance for historical series, current values, and engine-aware grouped performance reports across JSON, CSV, and human output.
+  - Documented time-range exclusivity, positive-step validation, metric/dimension filtering, output interpretation, and correlation with Insights and live inspection.
+  - Re-captured the complete metrics parent/subcommand help surface from the checksum-verified v0.321.0 macOS arm64 release binary.
 - PlanetScale CLI v0.320.0
   - Reviewed upstream releases v0.319.0 and v0.320.0 plus compare `v0.317.0...v0.320.0` on 2026-08-18; no v0.318.0 release exists.
   - Added standalone read-only maintenance schedule/list/show/window guidance for Vitess Enterprise databases, including IDs, pending-version/deadline interpretation, week-of-month output, and JSON-first review.
