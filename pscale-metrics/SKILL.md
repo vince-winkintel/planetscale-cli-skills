@@ -11,7 +11,7 @@ Use PlanetScale's branch metrics service for read-only time-series, current-valu
 
 - Authenticate with `pscale auth check --format json`.
 - Identify the exact organization, database, and branch.
-- Pass `--org`; it is required for every metrics command.
+- Pass `--org` explicitly rather than relying on the configured default organization.
 - Confirm the time window before comparing or reporting values.
 
 ## Start with a curated report
@@ -54,7 +54,7 @@ pscale metrics show <database> <branch> \
   --format csv
 ```
 
-At least one `--metric` is required; repeat it or pass comma-separated names. Human output summarizes each series with latest/minimum/average/maximum values and a compact trend. JSON preserves the complete API response. CSV preserves each timestamped sample and its series labels.
+At least one `--metric` is required; repeat it or pass comma-separated names. When `--period` is omitted, `show` defaults to `12h`. Human output summarizes each series with latest/minimum/average/maximum values and a compact trend. JSON preserves the complete API response. CSV preserves each timestamped sample and its series labels.
 
 Use optional filters only when the target is known: `--tablet-type`, `--keyspace`, `--shard`, `--role`, `--container`, `--pod`/`--pods`, `--query-id`, `--fingerprint`, `--budget-id`, `--rule-id`, or `--search`. Narrowing filters can legitimately produce an empty result; verify scope before interpreting emptiness as healthy behavior.
 

@@ -1,6 +1,6 @@
 Create, review, diff, inspect, throttle, revert, and manage deploy requests.
 
-The help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.317.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
+The help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.321.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
 
 ## pscale deploy-request
 

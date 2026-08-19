@@ -11,7 +11,7 @@ Inspect read-only maintenance schedule and window data for Vitess databases on E
 
 - Authenticate with `pscale auth check --format json`.
 - Identify the exact organization and Vitess database.
-- Pass `--org` on every maintenance command; it is required.
+- Pass `--org` explicitly rather than relying on the configured default organization.
 - Prefer `--format json` for automation and preserve schedule IDs as opaque values.
 
 ## Inspect schedules

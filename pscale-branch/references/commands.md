@@ -577,7 +577,7 @@ Cancel is an operational write. Confirm the target and latest request state befo
 
 ## pscale branch vtctld
 
-The parent and keyspace-routing-rule help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.317.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
+The parent and keyspace-routing-rule help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.321.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
 
 ```text
 Run vtctld commands against a branch. This command is only supported for Vitess databases.

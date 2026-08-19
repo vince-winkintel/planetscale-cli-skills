@@ -1,4 +1,4 @@
-> The parent database and database-throttler help blocks below were captured from the checksum-verified PlanetScale CLI v0.320.0 macOS arm64 release binary and match after normalizing only trailing whitespace.
+> The parent database and database-throttler help blocks below were captured from the checksum-verified PlanetScale CLI v0.321.0 macOS arm64 release binary and match after normalizing only trailing whitespace.
 
 ```text
 Create, read, update, delete, and dump/restore databases
@@ -235,7 +235,7 @@ These commands are Vitess-only. `add` uses a slug from `pscale region list`; upd
 
 ## pscale keyspace
 
-The keyspace parent, list, show, and delete help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.317.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
+The keyspace parent, list, show, and delete help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.321.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
 
 ```text
 List, show, and manage keyspaces.

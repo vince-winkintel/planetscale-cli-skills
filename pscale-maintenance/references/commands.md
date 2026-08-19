@@ -1,6 +1,6 @@
 # pscale maintenance command reference
 
-> Complete affected help surfaces captured from the checksum-verified PlanetScale CLI v0.320.0 macOS arm64 release binary. The fences match the binary after normalizing only trailing whitespace.
+> Complete affected help surfaces captured from the checksum-verified PlanetScale CLI v0.321.0 macOS arm64 release binary. The fences match the binary after normalizing only trailing whitespace.
 
 ## pscale maintenance
 

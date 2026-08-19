@@ -172,7 +172,7 @@ Agents: run "pscale agent-guide --format json" for machine-readable guidance, or
 
 ## Scope and output behavior
 
-- All metrics commands require `--org` plus `<database> <branch>` on the selected subcommand.
+- Pass `--org` explicitly to avoid relying on the configured default organization; each selected subcommand also takes `<database> <branch>`.
 - `show` and `instant` require one or more `--metric` values.
 - `--from` and `--to` must be used together and cannot be combined with `--period`; `--steps`, when set, must be greater than zero.
 - Human `show` output summarizes each returned series; CSV emits every timestamped sample; JSON preserves the complete metrics API response.
