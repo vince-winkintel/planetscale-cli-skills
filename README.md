@@ -7,7 +7,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 🎯 What This Skill Provides
 
-- **16 sub-skills** covering all major `pscale` commands
+- **17 sub-skills** covering all major `pscale` commands
 - **3 automation scripts** for common workflows (create branch, deploy schema, sync)
 - **Decision trees** for common questions (branch vs deploy request, tokens vs passwords)
 - **Troubleshooting sections** for self-service problem solving
@@ -18,7 +18,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ### Agent Skills (`npx skills`)
 
-This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 16 standalone `pscale-*` skills.
+This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 17 standalone `pscale-*` skills.
 Each skill lives in its own directory with its own `SKILL.md`; there is intentionally no root `SKILL.md` so Agent Skills can discover every sibling instead of stopping at the repository root.
 
 ```bash
@@ -101,13 +101,14 @@ pscale branch create my-database feature-branch --from main
 | Skill | Use When | Common Commands |
 |-------|----------|----------------|
 | **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
-| **pscale-branch** | Create, diff, promote branches, manage Postgres size/replicas/parameters, resize Vitess VTGates, inspect branch infra, manage live routing rules and tablet throttling, download/stream query pattern reports, manage Vitess MoveTables workflows | `pscale branch create/list/diff/parameters/resize/vtgate/infra/query-patterns/vtctld` |
-| **pscale-deploy-request** | Deploy schema changes safely; inspect queues, operations, reviews, storage, and throttling | `pscale deploy-request create/deploy/queue/operations/storage-check/throttler` |
-| **pscale-database** | Manage settings, database-level Vitess throttler defaults, PostgreSQL IP restrictions, shells, keyspaces, and read-only regions/dumps | `pscale database show/update/throttler/ip-restriction`, `pscale keyspace delete/read-only-regions`, `pscale shell` |
+| **pscale-branch** | Create, rename, protect, diff, promote, and switchover branches; manage Postgres size/replicas/parameters, resize Vitess VTGates, inspect branch infra, manage live routing rules and tablet throttling, download/stream query pattern reports, manage Vitess MoveTables workflows | `pscale branch create/update/switchover/diff/parameters/resize/vtgate/infra/query-patterns/vtctld` |
+| **pscale-deploy-request** | Deploy schema changes safely; inspect queues, operations, reviews, storage, and throttling; unblock failed deploy/revert queues | `pscale deploy-request create/deploy/unblock/queue/operations/storage-check/throttler` |
+| **pscale-database** | Manage settings, database-level Vitess throttler and aggressive-cutover defaults, PostgreSQL IP restrictions, shells, keyspaces, and read-only regions/dumps | `pscale database show/update/throttler/aggressive-cutover/ip-restriction`, `pscale keyspace delete/read-only-regions`, `pscale shell` |
 | **pscale-maintenance** | Inspect Vitess Enterprise maintenance schedules and windows | `pscale maintenance list/show/windows` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
 | **pscale-metrics** | Query historical/current branch metrics and engine-aware performance reports | `pscale metrics show/instant/report` |
-| **pscale-insights** | Analyze production query performance, execution samples, tags, errors, anomalies, and schema recommendations | `pscale insights queries/tags/errors/anomalies/recommendations` |
+| **pscale-insights** | Analyze production query performance, execution samples, tags, error details, anomaly correlations, and schema recommendations | `pscale insights queries/tags/errors/errors show/anomalies/anomalies show/recommendations` |
+| **pscale-traffic-control** | Inventory and safely manage Postgres Traffic Control budgets and matching rules | `pscale traffic-control budget list/show/create/update/delete`, `pscale traffic-control rule create/delete` |
 | **pscale-inspect** | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostics | `pscale inspect all/locks/seq-scans/bloat` |
 | **pscale-import-d1** | Import Cloudflare D1 exports into PlanetScale Postgres | `pscale import d1 lint/start/verify` |
 | **pscale-backup** | Create/restore backups and manage scheduled policies | `pscale backup create/list/policy` |
@@ -224,7 +225,12 @@ pscale insights queries my-db main --org my-org --sort p99Latency --period 1h --
 pscale insights queries samples my-db main <fingerprint> --org my-org --keyspace <keyspace> --format json
 pscale insights tags summaries my-db main --org my-org --tags app --sort totalTime --format json
 pscale insights errors my-db main --org my-org --period 1h --format json
+pscale insights errors show my-db main <full-error-fingerprint> --org my-org --period 1h --format json
+pscale insights anomalies show my-db main <anomaly-id> --org my-org --format json
 pscale insights recommendations my-db --org my-org --format json
+
+# Inventory Postgres Traffic Control budgets and their rules
+pscale traffic-control budget list my-db main --org my-org --format json
 ```
 
 `pscale metrics` provides historical/current branch telemetry, `pscale insights` provides query-fingerprint analysis, and `pscale inspect` provides live target-specific checks. For inspection, choose `--dbname` for PostgreSQL or `--keyspace <keyspace>/<shard>` for Vitess when defaults are not the intended target. Treat recommendation DDL as a proposal that still requires review and explicit approval.

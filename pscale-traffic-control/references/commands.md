@@ -1,44 +1,23 @@
-Create, review, diff, inspect, throttle, revert, and manage deploy requests.
+# `pscale traffic-control` command reference
 
-The affected parent and unblock help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary. Unchanged blocks remain from the checksum-verified v0.321.0 binary. Terminal padding and trailing whitespace are not material.
+The complete help surface below is exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
-## pscale deploy-request
+## `pscale traffic-control`
 
 ```text
-Create, review, diff, revert, and manage deploy requests.
+Manage Database Traffic Control™ budgets and rules for a Postgres database branch.
 
-This command is only supported for Vitess databases.
+This command is only supported for Postgres databases.
 
 Usage:
-  pscale deploy-request [command]
-
-Aliases:
-  deploy-request, dr
+  pscale traffic-control [command]
 
 Available Commands:
-  apply         Apply changes to a gated deploy request
-  cancel        Cancel a deploy request
-  close         Close a deploy request
-  create        Create a deploy request from a branch
-  deploy        Deploy a specific deploy request
-  deployment    Show the deployment for a deploy request
-  diff          Show the diff of a deploy request
-  edit          Edit a deploy request
-  force-cutover Force cutover when a migration is delayed by a table lock
-  list          List all deploy requests for a database
-  operations    List deploy operations for a deploy request
-  queue         Show the deploy queue for a database
-  revert        Revert a deployed deploy request
-  review        Review a deploy request (approve, comment, etc...)
-  reviews       List reviews for a deploy request
-  show          Show a specific deploy request
-  skip-revert   Skip and close a pending deploy request revert
-  storage-check Check storage readiness for a deploy request
-  throttler     Show or update deploy request throttler configuration
-  unblock       Unblock the deploy queue after a failed deploy or revert
+  budget      Manage traffic budgets
+  rule        Manage traffic rules
 
 Flags:
-  -h, --help         help for deploy-request
+  -h, --help         help for traffic-control
       --org string   The organization for the current user
 
 Global Flags:
@@ -51,247 +30,28 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale deploy-request [command] --help" for more information about a command.
+Use "pscale traffic-control [command] --help" for more information about a command.
 
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale deploy-request unblock
+## `pscale traffic-control budget`
 
 ```text
-Unblock the deploy queue after a failed deploy or revert.
-
-When a deployment or revert errors, PlanetScale blocks the queue as a
-precaution. This is the same action as "Unblock deploy queue" in the dashboard.
-It does not apply a gated deploy (use 'deploy-request apply' for that) and it
-does not fix a schema that failed deploy checks.
-
-The API decides whether the failure was a deploy or a revert.
+Manage traffic budgets
 
 Usage:
-  pscale deploy-request unblock <database> <number> [flags]
-
-Flags:
-  -h, --help   help for unblock
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale deploy-request deploy
-
-```text
-Deploy a specific deploy request
-
-Usage:
-  pscale deploy-request deploy <database> <number|branch> [flags]
-
-Flags:
-  -h, --help              help for deploy
-      --instant           If enabled, the schema migrations from this deploy request will be applied using MySQL’s built-in ALGORITHM=INSTANT option. Deployment will be faster, but cannot be reverted.
-      --strategy string   Deployment strategy: "serial" (default) or "parallel".
-      --wait              wait until the branch is deployed
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale deploy-request force-cutover
-
-```text
-Force cutover when a deploy request is delayed waiting for a table lock.
-
-The final step of a migration requires a brief table lock. Long-running
-transactions can block that lock and delay completion. PlanetScale keeps
-retrying for up to 1 hour, then forces cutover automatically.
-
-Use this command to skip the wait: force cutover kills long-running
-transactions that are blocking the table lock so the migration can finish.
-
-Only allowed when the deployment state is in_progress_cutover.
-
-Usage:
-  pscale deploy-request force-cutover <database> <number> [flags]
-
-Flags:
-      --force   Skip the confirmation prompt and force cutover now.
-  -h, --help    help for force-cutover
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale deploy-request queue
-
-```text
-Show the deploy queue for a database
-
-Usage:
-  pscale deploy-request queue <database> [flags]
-
-Flags:
-  -h, --help   help for queue
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale deploy-request deployment
-
-```text
-Show the deployment for a deploy request
-
-Usage:
-  pscale deploy-request deployment <database> <number> [flags]
-
-Flags:
-  -h, --help   help for deployment
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale deploy-request operations
-
-```text
-List deploy operations for a deploy request
-
-Usage:
-  pscale deploy-request operations <database> <number> [flags]
-
-Flags:
-  -h, --help   help for operations
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale deploy-request reviews
-
-```text
-List reviews for a deploy request
-
-Usage:
-  pscale deploy-request reviews <database> <number> [flags]
-
-Flags:
-  -h, --help   help for reviews
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale deploy-request storage-check
-
-```text
-Check storage readiness for a deploy request
-
-Usage:
-  pscale deploy-request storage-check <database> <number> [flags]
-
-Flags:
-  -h, --help   help for storage-check
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale deploy-request throttler
-
-```text
-Show or update deploy request throttler configuration.
-
-This is per deploy request, not the database-level throttler.
-
-Usage:
-  pscale deploy-request throttler [command]
+  pscale traffic-control budget [command]
 
 Available Commands:
-  show        Show throttler configuration for a deploy request
-  update      Update throttler configuration for a deploy request
+  create      Create a traffic budget
+  delete      Delete a traffic budget
+  list        List traffic budgets for a branch
+  show        Show a traffic budget
+  update      Update a traffic budget
 
 Flags:
-  -h, --help   help for throttler
+  -h, --help   help for budget
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -304,18 +64,47 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale deploy-request throttler [command] --help" for more information about a command.
+Use "pscale traffic-control budget [command] --help" for more information about a command.
 
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale deploy-request throttler show
+## `pscale traffic-control budget list`
 
 ```text
-Show throttler configuration for a deploy request
+List traffic budgets for a branch
 
 Usage:
-  pscale deploy-request throttler show <database> <number> [flags]
+  pscale traffic-control budget list <database> <branch> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+      --fingerprint string   Only list budgets with a rule for this query fingerprint
+  -h, --help                 help for list
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## `pscale traffic-control budget show`
+
+```text
+Show a traffic budget
+
+Usage:
+  pscale traffic-control budget show <database> <branch> <budget-id> [flags]
 
 Flags:
   -h, --help   help for show
@@ -334,22 +123,23 @@ Global Flags:
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale deploy-request throttler update
+## `pscale traffic-control budget create`
 
 ```text
-Update throttler configuration for a deploy request.
-
-Use --ratio to apply one ratio (0-95) to all eligible keyspaces.
-Use --configuration keyspace=ratio (repeatable) for per-keyspace ratios.
-Pass exactly one of these modes. 0 effectively disables throttling; 95 slows migrations the most.
+Create a traffic budget
 
 Usage:
-  pscale deploy-request throttler update <database> <number> [flags]
+  pscale traffic-control budget create <database> <branch> [flags]
 
 Flags:
-      --configuration stringArray   Per-keyspace ratio as keyspace=ratio (repeatable)
-  -h, --help                        help for update
-      --ratio int                   Throttler ratio 0-95 applied to all eligible keyspaces
+      --burst int               Maximum capacity a single query can consume (0-6000). Unlimited when not set.
+      --capacity int            Maximum capacity that can be banked (0-6000). Unlimited when not set.
+      --concurrency int         Percentage of available worker processes (0-100). Unlimited when not set.
+  -h, --help                    help for create
+      --mode string             Mode of the budget: enforce, warn, or off (default "warn")
+      --name string             Name of the traffic budget (required) (required)
+      --rate int                Rate at which capacity refills, as a percentage of server resources (0-100). Unlimited when not set.
+      --warning-threshold int   Percentage (0-100) of capacity, burst, or concurrency at which to emit warnings for enforced budgets.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -364,3 +154,161 @@ Global Flags:
 
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## `pscale traffic-control budget update`
+
+```text
+Update a traffic budget
+
+Usage:
+  pscale traffic-control budget update <database> <branch> <budget-id> [flags]
+
+Flags:
+      --burst int               Maximum capacity a single query can consume (0-6000). Unlimited when not set.
+      --capacity int            Maximum capacity that can be banked (0-6000). Unlimited when not set.
+      --concurrency int         Percentage of available worker processes (0-100). Unlimited when not set.
+  -h, --help                    help for update
+      --mode string             Mode of the budget: enforce, warn, or off
+      --name string             Name of the traffic budget
+      --rate int                Rate at which capacity refills, as a percentage of server resources (0-100). Unlimited when not set.
+      --warning-threshold int   Percentage (0-100) of capacity, burst, or concurrency at which to emit warnings for enforced budgets.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## `pscale traffic-control budget delete`
+
+```text
+Delete a traffic budget
+
+Usage:
+  pscale traffic-control budget delete <database> <branch> <budget-id> [flags]
+
+Aliases:
+  delete, rm
+
+Flags:
+      --force   Delete a budget without confirmation
+  -h, --help    help for delete
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## `pscale traffic-control rule`
+
+```text
+Manage traffic rules
+
+Usage:
+  pscale traffic-control rule [command]
+
+Available Commands:
+  create      Create a traffic rule on a budget
+  delete      Delete a traffic rule from a budget
+
+Flags:
+  -h, --help   help for rule
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale traffic-control rule [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## `pscale traffic-control rule create`
+
+```text
+Create a traffic rule on a budget
+
+Usage:
+  pscale traffic-control rule create <database> <branch> <budget-id> [flags]
+
+Flags:
+      --fingerprint string   SQL fingerprint to match
+  -h, --help                 help for create
+      --keyspace string      Keyspace to match
+      --kind string          Kind of rule (default "match")
+      --tag stringArray      Tag in the format key=<key>,value=<value>,source=<source> (repeatable)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## `pscale traffic-control rule delete`
+
+```text
+Delete a traffic rule from a budget
+
+Usage:
+  pscale traffic-control rule delete <database> <branch> <budget-id> <rule-id> [flags]
+
+Aliases:
+  delete, rm
+
+Flags:
+      --force   Delete a rule without confirmation
+  -h, --help    help for delete
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## Scope and safety
+
+- All commands are Postgres-only and require `--org` unless an organization is already configured.
+- `budget list` and `budget show` are read-only. Create/update/delete budget and create/delete rule are writes.
+- `budget show` returns the budget and its rules; use the returned IDs for later operations.
+- Start ordinary rollouts in `warn`, observe behavior, and require explicit approval before `enforce`.
+- Use `--force` only for an already-approved non-interactive deletion, then verify with `budget list` or `budget show`.

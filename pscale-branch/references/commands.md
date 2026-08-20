@@ -1,3 +1,5 @@
+The parent, update, and switchover help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
 ## pscale branch
 
 ```text
@@ -24,6 +26,8 @@ Available Commands:
   schema          Show the schema of a branch
   show            Show a specific branch of a database
   switch          Switches the current project to use the specified branch
+  switchover      Switch over the primary of a Postgres branch (Postgres only)
+  update          Update a branch's name or deletion protection
   vtgate          Manage VTGate size for a Vitess branch
 
 Flags:
@@ -42,6 +46,73 @@ Global Flags:
 
 Use "pscale branch [command] --help" for more information about a command.
 
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch update
+
+```text
+Update a branch's name or deletion protection.
+
+Only the flags you pass are sent. At least one flag is required.
+
+Usage:
+  pscale branch update <database> <branch> [flags]
+
+Examples:
+  pscale branch update mydb main --new-name trunk
+  pscale branch update mydb main --deletion-protected
+  pscale branch update mydb main --deletion-protected=false
+
+Flags:
+      --deletion-protected   Protect the branch from deletion (use --deletion-protected=false to disable)
+  -h, --help                 help for update
+      --new-name string      Rename the branch
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch switchover
+
+```text
+Switch over the primary of a Postgres branch. Postgres only.
+
+On a branch with replicas the primary steps down and a replica is promoted in
+its place; use --candidate to pick the replica, otherwise one is selected
+automatically. A branch running a single instance has nothing to promote, so
+that instance is restarted in place and the branch is unreachable while it
+comes back. Writes are briefly interrupted while the switch completes.
+
+Usage:
+  pscale branch switchover <database> <branch> [flags]
+
+Flags:
+      --candidate string   Name of the replica to promote, as returned by 'branch infra'. Omit to select automatically. Only applies to branches with replicas
+  -h, --help               help for switchover
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 Unless a command-specific help block repeats them inline, every `pscale branch`

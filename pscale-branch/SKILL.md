@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, delete, promote, diff, inspect query patterns, and manage PlanetScale database branches, Postgres parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, and Vitess workflows. Use when creating development branches for schema changes, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, vtctld, promote branch, MoveTables, global keyspace.
+description: Create, rename, protect, delete, promote, diff, switchover, inspect query patterns, and manage PlanetScale database branches, Postgres parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, and Vitess workflows. Use when creating development branches for schema changes, renaming branches, changing deletion protection, switching a Postgres primary to a replica, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, rename branch, deletion protection, branch switchover, primary switchover, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -25,8 +25,15 @@ pscale branch list <database> --page 2 --per-page 100 --format json
 # Show branch details
 pscale branch show <database> <branch-name>
 
+# Rename a branch or change deletion protection (write; inspect and approve first)
+pscale branch update <database> <branch-name> --new-name <new-name> --format json
+pscale branch update <database> <branch-name> --deletion-protected=true --format json
+
 # Inspect branch infrastructure/pods (supports Postgres and Vitess)
 pscale branch infra <database> <branch-name> --format json
+
+# Start a Postgres primary switchover (operational write; inspect and approve first)
+pscale branch switchover <database> <branch-name> --candidate <replica-name> --format json
 
 # View schema diff
 pscale branch diff <database> <branch-name>
@@ -158,6 +165,48 @@ pscale branch infra <database> <branch-name> --org <org> --format json
 ```
 
 Use this for read-only diagnostics. Do not infer that a schema/deploy operation is safe solely from infra output; combine it with branch status, schema diff, and deploy-request checks.
+
+### Rename or protect a branch
+
+`pscale branch update` supports both Vitess and Postgres branches. It sends only flags explicitly provided and requires at least one of `--new-name` or `--deletion-protected`. Renames can break connection configuration, deployment jobs, scripts, and branch references; disabling deletion protection increases removal risk.
+
+```bash
+# Inspect the current branch first
+pscale branch show <database> <branch> --org <org> --format json
+
+# After reviewing downstream references and receiving explicit approval
+pscale branch update <database> <branch> --org <org> \
+  --new-name <new-name> \
+  --deletion-protected=true \
+  --format json
+
+# Use an explicit false value to remove protection after approval
+pscale branch update <database> <branch> --org <org> \
+  --deletion-protected=false --format json
+
+# Verify using the resulting branch name
+pscale branch show <database> <resulting-branch-name> --org <org> --format json
+```
+
+Before a rename, inventory application connection settings, CI/CD jobs, deploy-request automation, and project `.pscale.yml` references. Show the complete proposed update and obtain explicit approval. If renaming and changing deletion protection together, verify both returned fields rather than assuming an all-or-nothing update.
+
+### Postgres primary switchover
+
+`pscale branch switchover` starts a Postgres-only primary switchover and returns immediately; it does not wait for completion. On a replicated branch, PlanetScale promotes the named `--candidate` from `branch infra`, or selects one when the flag is omitted. A single-instance branch has no replica to promote, so PlanetScale restarts the instance in place and the branch is unavailable while it returns. Writes are briefly interrupted in either case.
+
+```bash
+# Inspect instance names, roles, and replica availability
+pscale branch infra <database> <branch> --org <org> --format json
+
+# After confirming impact, target, and rollback/incident plan with the user
+pscale branch switchover <database> <branch> --org <org> \
+  --candidate <replica-name> --format json
+
+# Re-read infra until the primary role and instance health are clear
+pscale branch infra <database> <branch> --org <org> --format json
+```
+
+Only one switchover can run on a branch at a time. Do not pass `--candidate` for a branch without replicas. A failed switchover has an unconfirmed outcome: the primary may still have moved and the CLI does not roll it back. Re-check `branch infra` before any retry. Treat this as an availability-impacting operational write that always requires explicit approval.
 
 ### Connection inspection and safe termination
 

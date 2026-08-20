@@ -1,6 +1,6 @@
 ---
 name: pscale-deploy-request
-description: Create, review, inspect, deploy, throttle, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, managing per-deploy throttling, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, deploy operations, storage check, force cutover, deploy throttler, review deployment, revert deployment, production migration.
+description: Create, review, inspect, deploy, throttle, unblock, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, managing per-deploy throttling, unblocking a queue after a failed deploy or revert, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, unblock deploy queue, failed deploy, failed revert, deploy operations, storage check, force cutover, deploy throttler, review deployment, revert deployment, production migration.
 ---
 
 # pscale deploy-request
@@ -30,6 +30,9 @@ pscale deploy-request operations <database> <number> --format json
 
 # Inspect the database-wide deployment queue
 pscale deploy-request queue <database> --format json
+
+# Unblock only after a failed deploy/revert is diagnosed and approved
+pscale deploy-request unblock <database> <number> --format json
 
 # Deploy (apply changes)
 pscale deploy-request deploy <database> <number>
@@ -109,6 +112,26 @@ pscale deploy-request operations <database> <number> --org <org> --format json
 ```
 
 Treat `enough_storage: false`, a paused queue, a non-deployable deployment, or an unresolved required review as a stop condition. Do not deploy merely because one inspection endpoint is clear. During a migration, use operation state, `progress_percentage`, and `eta_seconds` as observations, not promises.
+
+### Unblock after a failed deploy or revert
+
+`pscale deploy-request unblock` is the CLI equivalent of the dashboard's **Unblock deploy queue** action. It is accepted only when the selected deployment state is `complete_error` or `complete_revert_error`. The CLI rejects `pending_cutover` (use `apply`), deploy-check `error` (fix the check failure), and states without a failed deploy.
+
+```bash
+# Diagnose the exact failed request and blocked queue
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+
+# After explaining the failed state and receiving explicit approval
+pscale deploy-request unblock <database> <number> --org <org> --format json
+
+# Verify the request and queue after the write
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+```
+
+Unblocking does not repair the failed migration, retry it, apply a gated cutover, or resolve failed deploy checks. It marks the failed deploy/revert complete so later queue work can proceed; the API determines whether the failed action was a deploy or revert. Treat it as a production operational write and preserve the failure evidence before running it.
 
 ### Manage per-deploy throttling
 

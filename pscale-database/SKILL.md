@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, and database-level Vitess migration throttling. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, keyspace delete, database settings, database throttler, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, keyspace delete, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -21,6 +21,9 @@ pscale database show <database> --format json
 
 # Inspect database-level defaults for future Vitess deploy requests
 pscale database throttler show <database> --org <org> --format json
+
+# Inspect database-level aggressive cutover for future Vitess deploy requests
+pscale database aggressive-cutover show <database> --org <org> --format json
 
 # Update one setting; boolean flags require an explicit value
 pscale database update <database> --require-approval-for-deploy=true
@@ -121,6 +124,25 @@ pscale database throttler show <database> --org <org> --format json
 ```
 
 Pass exactly one update mode: `--ratio` or one or more `--configuration keyspace=ratio` values. Ratios range from 0 through 95; 0 effectively disables migration throttling, while 95 slows migrations the most. Because a change affects future schema deployment behavior, show the current configuration and complete proposed values, obtain explicit approval, then verify the returned and re-read configuration. The command rejects PostgreSQL databases.
+
+### Database-level Vitess aggressive cutover
+
+Aggressive cutover is a Vitess database setting for **future** deploy requests. When enabled, those deploy requests cut over more aggressively while waiting on table locks. It is not the same action as `pscale deploy-request force-cutover`, which affects one already-running deployment.
+
+```bash
+# Read current state
+pscale database aggressive-cutover show <database> --org <org> --format json
+
+# After reviewing lock/transaction impact and obtaining explicit approval
+pscale database aggressive-cutover enable <database> --org <org> --format json
+# or
+pscale database aggressive-cutover disable <database> --org <org> --format json
+
+# Verify persisted state
+pscale database aggressive-cutover show <database> --org <org> --format json
+```
+
+The command rejects PostgreSQL databases. Enabling it can shorten cutover waits but may increase the chance that blocking application transactions are interrupted. Confirm the database, current setting, expected migration workload, application tolerance, and rollback choice before changing it. JSON output exposes the resulting `enabled` boolean; verify that field after the write.
 
 ### PostgreSQL IP restrictions
 

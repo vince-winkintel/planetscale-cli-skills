@@ -1,6 +1,6 @@
 # `pscale insights` command reference
 
-The complete affected help surface below is exact output from the official, checksum-verified PlanetScale CLI v0.315.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
+The complete affected parent, errors, and anomalies help surfaces below are exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary. Unchanged queries, tags, and recommendations blocks remain from the checksum-verified v0.315.0 binary. Terminal padding and trailing whitespace are not material.
 
 ## `pscale insights`
 
@@ -130,15 +130,60 @@ Agents: run "pscale agent-guide --format json" for machine-readable guidance, or
 ## `pscale insights errors`
 
 ```text
-List queries that are failing with errors
+List aggregated query errors for a branch.
+
+Pass a value from the fingerprint column to 'pscale insights errors show' to
+see the individual queries behind an error.
 
 Usage:
   pscale insights errors <database> <branch> [flags]
+  pscale insights errors [command]
+
+Available Commands:
+  show        Show the queries behind an error fingerprint
 
 Flags:
   -h, --help            help for errors
       --limit int       Number of errors to return (default 15)
       --period string   Time period to aggregate over (e.g. 1h, 1d)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale insights errors [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## `pscale insights errors show`
+
+```text
+Show the individual query executions that failed with an error fingerprint.
+
+Use the fingerprint column from 'pscale insights errors <database> <branch>'
+(error_fingerprint in JSON), not the truncated id.
+
+Useful for seeing which users, keyspaces, and statements produced the error.
+
+Usage:
+  pscale insights errors show <database> <branch> <fingerprint> [flags]
+
+Examples:
+  pscale insights errors show mydb main b129e8fa --org myorg
+  pscale insights errors show mydb main b129e8fa --org myorg --period 1h --limit 50
+
+Flags:
+  -h, --help            help for show
+      --limit int       Number of queries to return (default 25)
+      --period string   Time period to look back (e.g. 1h, 1d)
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -161,9 +206,44 @@ List detected resource anomalies (CPU, memory, IOPS, rows read/written)
 
 Usage:
   pscale insights anomalies <database> <branch> [flags]
+  pscale insights anomalies [command]
+
+Available Commands:
+  show        Show an anomaly and its correlated queries
 
 Flags:
   -h, --help   help for anomalies
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale insights anomalies [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## `pscale insights anomalies show`
+
+```text
+Show a single anomaly from 'pscale insights anomalies <database> <branch>',
+along with the queries whose activity correlates with it.
+
+Usage:
+  pscale insights anomalies show <database> <branch> <anomaly-id> [flags]
+
+Examples:
+  pscale insights anomalies show mydb main anomaly-id --org myorg
+
+Flags:
+  -h, --help   help for show
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

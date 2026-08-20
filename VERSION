@@ -1,7 +1,14 @@
-1.0.15
+1.0.16
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.322.0
+  - Reviewed the upstream release and compare `v0.321.0...v0.322.0` on 2026-08-20.
+  - Added branch rename/deletion-protection updates and guarded Postgres primary switchovers.
+  - Added Vitess database aggressive-cutover status/enable/disable and deploy-queue unblocking after failed deploys or reverts.
+  - Added Insights error-fingerprint and anomaly detail workflows, including full-fingerprint lookup and correlated-query interpretation.
+  - Added standalone PostgreSQL Traffic Control inventory and guarded budget/rule management, including the new budget list and fingerprint filter.
+  - Re-captured every affected parent/subcommand help surface from the checksum-verified v0.322.0 macOS arm64 release binary.
 - PlanetScale CLI v0.321.0
   - Reviewed the upstream release and compare `v0.320.0...v0.321.0` on 2026-08-19.
   - Added standalone `pscale-metrics` guidance for historical series, current values, and engine-aware grouped performance reports across JSON, CSV, and human output.
