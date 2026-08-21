@@ -92,41 +92,7 @@ Global Flags:
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale deploy-request edit
-
-```text
-Update settings on a deploy request.
-
-Use --enable-auto-apply / --disable-auto-apply to control gated cutover, and
---auto-delete-branch to control whether the source branch is deleted after a
-successful deploy (same flag as 'deploy-request create'). At least one setting
-must be passed; unset flags are not sent.
-
-Usage:
-  pscale deploy-request update <database> <number> [flags]
-
-Aliases:
-  update, edit
-
-Flags:
-      --auto-delete-branch   Delete the branch after the deploy request completes. Pass --auto-delete-branch=false to keep it.
-      --disable-auto-apply   Disable auto-apply. The deploy request will wait for your confirmation before swapping to the new schema. Use 'deploy-request apply' to apply the changes manually.
-      --enable-auto-apply    Enable auto-apply. The deploy request will automatically swap over to the new schema once ready.
-  -h, --help                 help for update
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
+`pscale deploy-request edit --help` prints the same help block; `edit` is an alias of `update`.
 
 ## pscale deploy-request unblock
 

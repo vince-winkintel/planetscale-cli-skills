@@ -150,7 +150,8 @@ pscale role default <database> <branch> --format json
 ```bash
 pscale password list <database> <branch> --format json
 pscale password show <database> <branch> <password-id> --format json
-pscale password update <database> <branch> <password-id> --cidrs 10.0.0.0/8 --format json
+# After explicit approval; --cidrs replaces the entire allowlist
+pscale password update <database> <branch> <password-id> --cidrs <cidr-allowlist> --format json
 ```
 
 ## Related Skills

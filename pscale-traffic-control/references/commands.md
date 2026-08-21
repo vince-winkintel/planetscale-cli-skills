@@ -1,6 +1,6 @@
 # `pscale traffic-control` command reference
 
-The complete help surface below is exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary after normalizing only trailing whitespace.
+The complete help surface below is exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary after normalizing only trailing whitespace, and was verified unchanged against the checksum-verified v0.323.0 binary.
 
 ## `pscale traffic-control`
 

@@ -78,7 +78,7 @@ pscale traffic-control rule delete <database> <branch> <budget-id> <rule-id> \
 
 Rule create also accepts `--keyspace` and repeatable `--tag`; `--kind` defaults to `match`. Each tag must contain non-empty `key` and `value`; `source` defaults to `sql`. Confirm the complete matching scope before creation. A broad or incorrect rule can affect unrelated traffic, especially under an enforced budget. Use `budget show` to verify the created/deleted rule and never infer a rule ID from a truncated display.
 
-## Related skills
+## Related Skills
 
 - **pscale-insights** — gather query fingerprints, tags, errors, and anomaly evidence
 - **pscale-metrics** — compare branch resource behavior before and after a rollout
@@ -86,4 +86,4 @@ Rule create also accepts `--keyspace` and repeatable `--tag`; `--kind` defaults 
 
 ## References
 
-See [references/commands.md](references/commands.md) for the checksum-verified v0.322.0 command help.
+See [references/commands.md](references/commands.md) for the checksum-verified v0.322.0 command help, verified unchanged against v0.323.0.

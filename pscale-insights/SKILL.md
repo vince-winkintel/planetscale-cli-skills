@@ -61,7 +61,7 @@ Samples expose individual executions, including start time, duration, user, rows
 
 ## Error and anomaly details
 
-The human `errors` table displays the full fingerprint in current releases. For JSON automation, copy `error_fingerprint` from the list and pass it unchanged to `errors show`; do not use a shortened display ID. The detail command returns individual failed executions, including users, keyspaces, statements, and error messages.
+The human `errors` table displays the full fingerprint. For JSON automation, copy `error_fingerprint` from the list and pass it unchanged to `errors show`; do not use a shortened display ID. The detail command returns individual failed executions, including users, keyspaces, statements, and error messages.
 
 ```bash
 pscale insights errors <database> <branch> --org <org> --period 1h --format json

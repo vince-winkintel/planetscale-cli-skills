@@ -136,7 +136,7 @@ pscale deploy-request update <database> <number> --org <org> \
 pscale deploy-request show <database> <number> --org <org> --format json
 ```
 
-Use exactly one of `--enable-auto-apply` or `--disable-auto-apply`. Use `--auto-delete-branch=false` to preserve the branch; `--auto-delete-branch` enables deletion after completion. Do not use the `edit` alias in prose or scripts except when explaining backwards compatibility.
+Never pass `--enable-auto-apply` and `--disable-auto-apply` together; `--auto-delete-branch` can be updated on its own. Use `--auto-delete-branch=false` to preserve the branch; `--auto-delete-branch` enables deletion after completion. Do not use the `edit` alias in prose or scripts except when explaining backwards compatibility.
 
 ### Unblock after a failed deploy or revert
 

@@ -1,6 +1,5 @@
 The branch parent, maintenance, extensions, and query-patterns help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.323.0 macOS arm64 release binary after normalizing only trailing whitespace. The unchanged update and switchover blocks remain from the checksum-verified v0.322.0 binary.
 
-
 ## pscale branch
 
 ```text

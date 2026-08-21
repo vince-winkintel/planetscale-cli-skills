@@ -31,7 +31,7 @@ pscale isolates its internal `sqlite3` calls from `~/.sqliterc` and forces batch
 
 If a D1 import or verification fails with unexpected SQLite output, upgrade pscale to the current release and rerun the same migration step. Treat an `unexpected output` error on a current release as a real parsing/data problem, and preserve the reported output and stderr when troubleshooting.
 
-D1 migration state now hardens generated identifiers and output paths. Keep migration IDs and output paths literal, avoid deriving filenames from untrusted input in wrapper scripts, and preserve the CLI's final wait/status output before deciding whether to resume, verify, or mark complete.
+The CLI hardens generated identifiers and output paths in D1 migration state. Keep migration IDs and output paths literal, avoid deriving filenames from untrusted input in wrapper scripts, and preserve the CLI's final wait/status output before deciding whether to resume, verify, or mark complete.
 
 ### Schema conversion behavior
 
