@@ -1,6 +1,6 @@
 ---
 name: pscale-deploy-request
-description: Create, review, inspect, deploy, throttle, unblock, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, managing per-deploy throttling, unblocking a queue after a failed deploy or revert, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, unblock deploy queue, failed deploy, failed revert, deploy operations, storage check, force cutover, deploy throttler, review deployment, revert deployment, production migration.
+description: Create, review, inspect, deploy, update, throttle, unblock, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, changing auto-apply or auto-delete-branch settings, managing per-deploy throttling, unblocking a queue after a failed deploy or revert, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, unblock deploy queue, failed deploy, failed revert, deploy operations, storage check, deploy request update, auto apply, auto delete branch, force cutover, deploy throttler, review deployment, revert deployment, production migration.
 ---
 
 # pscale deploy-request
@@ -36,6 +36,10 @@ pscale deploy-request unblock <database> <number> --format json
 
 # Deploy (apply changes)
 pscale deploy-request deploy <database> <number>
+
+# Update deploy request settings (edit is an alias)
+pscale deploy-request update <database> <number> --enable-auto-apply --format json
+pscale deploy-request update <database> <number> --auto-delete-branch=false --format json
 
 # Explicit strategy (parallel requires database support and approval)
 pscale deploy-request deploy <database> <number> --strategy parallel --wait
@@ -112,6 +116,27 @@ pscale deploy-request operations <database> <number> --org <org> --format json
 ```
 
 Treat `enough_storage: false`, a paused queue, a non-deployable deployment, or an unresolved required review as a stop condition. Do not deploy merely because one inspection endpoint is clear. During a migration, use operation state, `progress_percentage`, and `eta_seconds` as observations, not promises.
+
+### Update deploy request settings
+
+Use canonical `pscale deploy-request update`; `edit` remains an alias. This is an operational write because auto-apply changes cutover behavior and auto-delete controls whether the source branch is deleted after a successful deploy. At least one setting flag is required, and omitted flags are not sent.
+
+```bash
+# Inspect first
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+
+# After explicit approval for the exact settings
+pscale deploy-request update <database> <number> --org <org> \
+  --enable-auto-apply \
+  --auto-delete-branch=false \
+  --format json
+
+# Verify readback
+pscale deploy-request show <database> <number> --org <org> --format json
+```
+
+Use exactly one of `--enable-auto-apply` or `--disable-auto-apply`. Use `--auto-delete-branch=false` to preserve the branch; `--auto-delete-branch` enables deletion after completion. Do not use the `edit` alias in prose or scripts except when explaining backwards compatibility.
 
 ### Unblock after a failed deploy or revert
 

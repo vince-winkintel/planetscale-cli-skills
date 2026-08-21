@@ -25,11 +25,13 @@ pscale sql <database> <branch> --org <org> --format json --keyspace <keyspace> -
 pscale sql <database> <branch> --org <org> --format json --dbname app --query "SELECT 1"
 ```
 
+For PostgreSQL targets, the CLI-created temporary connection uses `sslmode=verify-full` by default. Keep that verification in place unless the user has a specific, approved diagnostic reason to alter connection behavior outside this command.
+
 ## Roles and safety
 
 - Default role is `reader`.
 - Use `--role writer`, `--role readwriter`, or `--role admin` only when the user explicitly asked for a write-capable operation.
-- Destructive SQL containing `DELETE`, `DROP`, or `TRUNCATE` is blocked unless `--force` is passed. MySQL executable comments such as `/*! DROP TABLE ... */` and version-gated `/*!80000 DELETE ... */` are live SQL and are included in this safety check; do not treat them as inert comments.
+- Destructive SQL containing `DELETE`, `DROP`, or `TRUNCATE` is blocked unless `--force` is passed. The guard also detects data-modifying CTEs and `EXPLAIN ANALYZE`/`EXPLAIN ANALYSE` wrappers around destructive statements. MySQL executable comments such as `/*! DROP TABLE ... */` and version-gated `/*!80000 DELETE ... */` are live SQL and are included in this safety check; do not treat them as inert comments.
 - Agents must ask for explicit user approval before using `--force`; show the exact query and target database/branch/org first.
 
 ```bash

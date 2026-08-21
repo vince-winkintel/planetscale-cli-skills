@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations, databases, branches, maintenance, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, keyspaces, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, Postgres IP restrictions, read-only regions, backups, audit logs, service tokens, passwords, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, deploy request, deploy queue, unblock deploy, aggressive cutover, branch switchover, traffic control, force cutover, storage readiness, keyspace routing rules, database settings, database branch, VTGate resize, pgbouncer, backup policy, database diagnostics, or pscale import d1.
+description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations and members, databases, branches, branch maintenance, extension catalogs, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, keyspaces, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, Postgres IP restrictions, read-only regions, backups, audit logs, service tokens, passwords, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, deploy request, deploy queue, unblock deploy, aggressive cutover, branch maintenance, branch extensions, branch switchover, traffic control, force cutover, storage readiness, keyspace routing rules, database settings, database branch, VTGate resize, pgbouncer, backup policy, database diagnostics, org member, or pscale import d1.
 requirements:
   binaries:
     - pscale
@@ -62,8 +62,8 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | Command | Skill | Use When |
 |---------|-------|----------|
 | **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
-| **branch** | `pscale-branch` | Create, rename, protect, delete, promote, diff, list, and switchover branches; inspect branch infra, manage Postgres size/replicas/parameters, resize Vitess VTGates, manage live keyspace routing rules and tablet throttling, download/query-stream query pattern reports, manage Vitess MoveTables workflows |
-| **deploy-request** | `pscale-deploy-request` | Create, review, inspect queues/operations, check storage, throttle, deploy, unblock failed deploy/revert queues, force cutover, and revert schema changes |
+| **branch** | `pscale-branch` | Create, rename, protect, delete, promote, diff, list, and switchover branches; inspect branch infra, manage Postgres size/replicas/parameters/maintenance/extensions, resize Vitess VTGates, manage live keyspace routing rules and tablet throttling, manage query pattern reports, manage Vitess MoveTables workflows |
+| **deploy-request** | `pscale-deploy-request` | Create, review, inspect queues/operations, check storage, throttle, deploy, update auto-apply/auto-delete settings, unblock failed deploy/revert queues, force cutover, and revert schema changes |
 | **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level Vitess throttler/aggressive-cutover defaults, keyspaces, PostgreSQL IP restrictions, and read-only regions |
 | **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise maintenance schedules, pending versions, deadlines, and historical windows |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
@@ -74,9 +74,9 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
 | **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; manage scheduled backup policies |
 | **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
-| **password** | `pscale-password` | Create, list, delete, and scope Vitess connection passwords to read-only regions |
+| **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions |
 | **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers |
-| **org** | `pscale-org` | List, show, switch organizations |
+| **org** | `pscale-org` | List, show, switch organizations, and inspect or manage members |
 | **service-token** | `pscale-service-token` | Create, manage CI/CD service tokens |
 
 ## Decision Trees

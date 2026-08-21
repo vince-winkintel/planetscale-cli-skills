@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, rename, protect, delete, promote, diff, switchover, inspect query patterns, and manage PlanetScale database branches, Postgres parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, and Vitess workflows. Use when creating development branches for schema changes, renaming branches, changing deletion protection, switching a Postgres primary to a replica, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, rename branch, deletion protection, branch switchover, primary switchover, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, vtctld, promote branch, MoveTables, global keyspace.
+description: Create, rename, protect, delete, promote, diff, switchover, inspect query patterns, and manage PlanetScale database branches, Postgres maintenance/extensions/parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, and Vitess workflows. Use when creating development branches for schema changes, renaming branches, changing deletion protection, switching a Postgres primary to a replica, running Postgres branch maintenance, listing available Postgres extensions, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, rename branch, deletion protection, branch switchover, primary switchover, branch maintenance, Postgres maintenance, extensions, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -31,6 +31,12 @@ pscale branch update <database> <branch-name> --deletion-protected=true --format
 
 # Inspect branch infrastructure/pods (supports Postgres and Vitess)
 pscale branch infra <database> <branch-name> --format json
+
+# List available extensions on a Postgres branch cluster image
+pscale branch extensions list <database> <branch-name> --format json
+
+# Start Postgres branch image maintenance (operational write; inspect and approve first)
+pscale branch maintenance run <database> <branch-name> --format json
 
 # Start a Postgres primary switchover (operational write; inspect and approve first)
 pscale branch switchover <database> <branch-name> --candidate <replica-name> --format json
@@ -72,6 +78,13 @@ pscale branch connections top <database> <branch-name>
 
 # Download a branch query patterns CSV report
 pscale branch query-patterns download <database> <branch-name> --output query-patterns.csv
+
+# List/show generated branch query pattern reports
+pscale branch query-patterns list <database> <branch-name> --format json
+pscale branch query-patterns show <database> <branch-name> <report-id> --format json
+
+# Delete a stale query pattern report only after explicit approval
+pscale branch query-patterns delete <database> <branch-name> <report-id> --format json
 
 # Stream the CSV to stdout for pipelines
 pscale branch query-patterns download <database> <branch-name> --output - > query-patterns.csv
@@ -166,6 +179,16 @@ pscale branch infra <database> <branch-name> --org <org> --format json
 
 Use this for read-only diagnostics. Do not infer that a schema/deploy operation is safe solely from infra output; combine it with branch status, schema diff, and deploy-request checks.
 
+### Postgres branch extensions
+
+`pscale branch extensions list` is read-only and returns the extensions available on the branch's current cluster image. It is not an inventory of installed `CREATE EXTENSION` state inside a database.
+
+```bash
+pscale branch extensions list <database> <branch> --org <org> --format json
+```
+
+There is no CLI command to enable an extension. Use `pscale sql` for reviewed SQL such as `CREATE EXTENSION`, and use `pscale branch resize --parameters` only for preload-library configuration when the parameter catalog shows that a parameter is available.
+
 ### Rename or protect a branch
 
 `pscale branch update` supports both Vitess and Postgres branches. It sends only flags explicitly provided and requires at least one of `--new-name` or `--deletion-protected`. Renames can break connection configuration, deployment jobs, scripts, and branch references; disabling deletion protection increases removal risk.
@@ -208,6 +231,29 @@ pscale branch infra <database> <branch> --org <org> --format json
 
 Only one switchover can run on a branch at a time. Do not pass `--candidate` for a branch without replicas. A failed switchover has an unconfirmed outcome: the primary may still have moved and the CLI does not roll it back. Re-check `branch infra` before any retry. Treat this as an availability-impacting operational write that always requires explicit approval.
 
+### Postgres branch maintenance
+
+`pscale branch maintenance run` starts asynchronous Postgres branch image maintenance. PlanetScale applies the image upgrade to replicas first, then switches over from the old primary to an upgraded replica. Expect seconds of unavailability during the switchover, and expect all direct connections to be terminated; applications must rely on retry logic. A single-instance branch has no replica to promote and is unavailable until the instance returns.
+
+```bash
+# Inspect instance topology and make sure no resize/change request is in progress
+pscale branch infra <database> <branch> --org <org> --format json
+pscale branch resize status <database> <branch> --org <org> --format json
+
+# After explicit approval for the target and impact
+pscale branch maintenance run <database> <branch> --org <org> --format json
+
+# Optionally include a PostgreSQL minor-version upgrade during maintenance
+pscale branch maintenance run <database> <branch> --org <org> \
+  --update-postgres-minor-version \
+  --format json
+
+# Track async progress through branch infrastructure
+pscale branch infra <database> <branch> --org <org> --format json
+```
+
+Maintenance cannot start while a `branch resize` change request is in progress. Treat this as an availability-impacting operational write: show the target branch, topology, expected connection termination/unavailability, minor-version choice, and incident/rollback plan before asking for approval.
+
 ### Connection inspection and safe termination
 
 `pscale branch connections` replaced the older MySQL-only process view with a shared Postgres/Vitess connection view. Prefer JSON output for agent workflows so action IDs are explicit and not truncated.
@@ -233,9 +279,19 @@ Treat `kill` and `kill-transaction` as destructive operational actions: show the
 
 ### Query pattern reports
 
-`pscale branch query-patterns download` generates a branch-level query patterns report, polls until PlanetScale finishes it, and downloads the resulting CSV. Use it for query-shape analysis before tuning indexes, schema, or application query patterns.
+`pscale branch query-patterns` manages branch-level query pattern reports for query-shape analysis before tuning indexes, schema, or application query patterns. `list` and `show` are read-only. `download` generates/polls/downloads a CSV report. `delete` removes one generated report and requires explicit approval for the exact report ID.
 
 ```bash
+# List generated reports, paging by cursor when needed
+pscale branch query-patterns list <database> <branch-name> --org <org> --format json
+pscale branch query-patterns list <database> <branch-name> --org <org> \
+  --starting-after <cursor> \
+  --limit 100 \
+  --format json
+
+# Inspect one report before downloading or deleting it
+pscale branch query-patterns show <database> <branch-name> <report-id> --org <org> --format json
+
 # Download with an explicit output path
 pscale branch query-patterns download <database> <branch-name> --org <org> --output query-patterns.csv
 
@@ -245,9 +301,12 @@ pscale branch query-patterns download <database> <branch-name> --org <org>
 
 # Use --output - to write the CSV to stdout for shell pipelines
 pscale branch query-patterns download <database> <branch-name> --org <org> --output - > query-patterns.csv
+
+# Delete only after confirming the exact report ID and target branch
+pscale branch query-patterns delete <database> <branch-name> <report-id> --org <org> --format json
 ```
 
-The command requires Query Insights to be enabled for the database. A not-found error can mean either the branch does not exist or Query Insights is disabled. Prefer an explicit `--output` path in automation so downstream analysis can find the CSV deterministically; use `--output -` when a pipeline should consume the CSV from stdout.
+The command group requires Query Insights to be enabled for the database. A not-found error can mean either the branch/report does not exist or Query Insights is disabled. Prefer an explicit `--output` path in automation so downstream analysis can find the CSV deterministically; use `--output -` when a pipeline should consume the CSV from stdout. For deletion, `--force` only skips the prompt; it is not approval. Re-run `list` or `show` after deletion and verify the report is gone.
 
 ### Change a Postgres branch
 

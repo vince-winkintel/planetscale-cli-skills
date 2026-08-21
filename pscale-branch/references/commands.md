@@ -1,4 +1,5 @@
-The parent, update, and switchover help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary after normalizing only trailing whitespace.
+The branch parent, maintenance, extensions, and query-patterns help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.323.0 macOS arm64 release binary after normalizing only trailing whitespace. The unchanged update and switchover blocks remain from the checksum-verified v0.322.0 binary.
+
 
 ## pscale branch
 
@@ -14,11 +15,13 @@ Available Commands:
   delete          Delete a branch from a database
   demote          Demote a production branch to development
   diff            Show the diff of a branch
+  extensions      List extensions available on a Postgres branch
   lint            Lints the schema for a branch
   list            List all branches of a database
+  maintenance     Run maintenance for a Postgres branch
   parameters      List the configuration parameters of a Postgres branch
   promote         Promote a new branch from a database
-  query-patterns  Download query pattern reports for a branch
+  query-patterns  List, show, delete, and download query pattern reports for a branch
   refresh-schema  Refresh the schema for a database branch
   resize          Change a Postgres branch's cluster size, replicas, or parameters
   routing-rules   Fetch or update your keyspace routing rules
@@ -100,6 +103,156 @@ Usage:
 Flags:
       --candidate string   Name of the replica to promote, as returned by 'branch infra'. Omit to select automatically. Only applies to branches with replicas
   -h, --help               help for switchover
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch maintenance
+
+```text
+Manage maintenance for a Postgres branch.
+
+PlanetScale upgrades a branch's image in emergencies, such as patching security
+issues, or when you initiate the upgrade yourself. 'maintenance run' initiates
+one.
+
+See https://planetscale.com/docs/postgres/operations-philosophy
+
+Usage:
+  pscale branch maintenance [command]
+
+Available Commands:
+  run         Run maintenance for a Postgres branch now (Postgres only)
+
+Flags:
+  -h, --help   help for maintenance
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale branch maintenance [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch maintenance run
+
+```text
+Run maintenance for a Postgres branch, updating it to the latest available
+image. Postgres only.
+
+This is how regular version bumps, bugfixes, and quality-of-life improvements
+reach a branch. PlanetScale otherwise upgrades images only in emergencies, such
+as patching security issues.
+
+The upgrade is applied to the replicas first, followed by a switchover from the
+old primary to an upgraded replica. That failover leads to a short period of
+database unavailability (seconds), and all direct connections are terminated, so
+your application should have retry logic. A branch running a single instance has
+no replica to switch over to and is unavailable until it comes back.
+
+Pass --update-postgres-minor-version to also upgrade the branch to the latest
+PostgreSQL minor version during the run.
+
+Maintenance cannot start while a change request (see 'branch resize') is still
+in progress.
+
+See https://planetscale.com/docs/postgres/operations-philosophy
+
+Usage:
+  pscale branch maintenance run <database> <branch> [flags]
+
+Flags:
+  -h, --help                            help for run
+      --update-postgres-minor-version   Upgrade the branch to the latest PostgreSQL minor version during maintenance
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch extensions
+
+```text
+List extensions available on a Postgres branch's cluster image.
+
+This is the catalog of extensions the image can load, not the result of
+CREATE EXTENSION. There is no CLI command to enable an extension; preload
+libraries are configured with 'pscale branch resize --parameters'.
+
+Usage:
+  pscale branch extensions <database> <branch> [flags]
+  pscale branch extensions [command]
+
+Available Commands:
+  list        List extensions available on a Postgres branch
+
+Flags:
+  -h, --help   help for extensions
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale branch extensions [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+`pscale branch extensions <database> <branch>` accepts the same flags and is equivalent to `extensions list`. This is a read-only cluster-image catalog, not installed extension state.
+
+## pscale branch extensions list
+
+```text
+List extensions available on a Postgres branch's cluster image.
+
+This is the catalog of extensions the image can load, not the result of
+CREATE EXTENSION. There is no CLI command to enable an extension; preload
+libraries are configured with 'pscale branch resize --parameters'.
+
+Usage:
+  pscale branch extensions list <database> <branch> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+  -h, --help   help for list
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -445,13 +598,16 @@ Global Flags:
 ## pscale branch query-patterns
 
 ```text
-Download query pattern reports for a branch
+List, show, delete, and download query pattern reports for a branch
 
 Usage:
   pscale branch query-patterns [command]
 
 Available Commands:
+  delete      Delete a query pattern report
   download    Download a CSV report of the query patterns for a branch
+  list        List query pattern reports for a branch
+  show        Show a query pattern report
 
 Flags:
   -h, --help   help for query-patterns
@@ -469,6 +625,91 @@ Global Flags:
 
 Use "pscale branch query-patterns [command] --help" for more information about a command.
 
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch query-patterns list
+
+```text
+List query pattern reports for a branch
+
+Usage:
+  pscale branch query-patterns list <database> <branch> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+  -h, --help                    help for list
+      --limit int               Number of results to return (max 100) (default 25)
+      --starting-after string   Cursor to fetch the next page of reports
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch query-patterns show
+
+```text
+Show a query pattern report
+
+Usage:
+  pscale branch query-patterns show <database> <branch> <report-id> [flags]
+
+Flags:
+  -h, --help   help for show
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch query-patterns delete
+
+```text
+Delete a query pattern report
+
+Usage:
+  pscale branch query-patterns delete <database> <branch> <report-id> [flags]
+
+Aliases:
+  delete, rm
+
+Flags:
+      --force   Delete the report without confirmation
+  -h, --help    help for delete
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 ## pscale branch query-patterns download
@@ -493,6 +734,8 @@ Global Flags:
       --org string                The organization for the current user
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 ## pscale branch routing-rules

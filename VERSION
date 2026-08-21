@@ -1,7 +1,14 @@
-1.0.16
+1.0.17
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.323.0
+  - Reviewed the upstream release and compare `v0.322.0...v0.323.0` on 2026-08-21.
+  - Added Postgres branch maintenance run and extension-catalog guidance.
+  - Added query-pattern report list/show/delete workflows alongside download.
+  - Added organization member list/show/update/remove workflows and Vitess password show/update metadata management.
+  - Updated deploy-request update/edit alias guidance, Postgres role default lookup, SQL destructive guards, and D1 import hardening notes.
+  - Re-captured every affected parent/subcommand help surface from the checksum-verified v0.323.0 macOS arm64 release binary.
 - PlanetScale CLI v0.322.0
   - Reviewed the upstream release and compare `v0.321.0...v0.322.0` on 2026-08-20.
   - Added branch rename/deletion-protection updates and guarded Postgres primary switchovers.

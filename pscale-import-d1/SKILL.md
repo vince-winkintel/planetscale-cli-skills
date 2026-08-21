@@ -31,6 +31,8 @@ pscale isolates its internal `sqlite3` calls from `~/.sqliterc` and forces batch
 
 If a D1 import or verification fails with unexpected SQLite output, upgrade pscale to the current release and rerun the same migration step. Treat an `unexpected output` error on a current release as a real parsing/data problem, and preserve the reported output and stderr when troubleshooting.
 
+D1 migration state now hardens generated identifiers and output paths. Keep migration IDs and output paths literal, avoid deriving filenames from untrusted input in wrapper scripts, and preserve the CLI's final wait/status output before deciding whether to resume, verify, or mark complete.
+
 ### Schema conversion behavior
 
 The current converter preserves and translates more SQLite schema semantics, including column- and table-level `CHECK` constraints, named constraints, generated columns, `NUMERIC`/`DECIMAL` precision, and common computed defaults such as `date('now')`, `time('now')`, `randomblob()`, UUID generators, and `CAST(unixepoch() AS TEXT)`. For columns inferred as PostgreSQL booleans, integer `0`/`1` literals in applicable `CHECK` comparisons, `IN`, and `BETWEEN` expressions are rewritten to `false`/`true`; non-boolean columns and decimal-like literals are left unchanged. SQLite `VIRTUAL` generated columns are materialized as PostgreSQL `STORED` generated columns because PostgreSQL 16 supports only stored generated columns.
@@ -96,7 +98,8 @@ If `<branch>` is omitted, pscale uses the default branch. Prefer passing the bra
 3. Do not run non-dry-run `start` or `complete` without explicit user confirmation of the target and source export.
 4. Prefer `--format json` and preserve the JSON output path/summary for auditability.
 5. Use an explicit branch argument and `--dbname` when the destination PostgreSQL database name is not `postgres`.
-6. Verify after loading; do not call the migration complete until `verify` succeeds.
+6. PostgreSQL connections created during import use verified TLS by default; do not weaken that behavior in surrounding tooling.
+7. Verify after loading; do not call the migration complete until `verify` succeeds.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 Create, review, diff, inspect, throttle, revert, and manage deploy requests.
 
-The affected parent and unblock help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary. Unchanged blocks remain from the checksum-verified v0.321.0 binary. Terminal padding and trailing whitespace are not material.
+The affected parent and update/edit help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.323.0 macOS arm64 release binary after normalizing only trailing whitespace. Previously captured unchanged blocks retain their original attribution.
 
 ## pscale deploy-request
 
@@ -23,7 +23,6 @@ Available Commands:
   deploy        Deploy a specific deploy request
   deployment    Show the deployment for a deploy request
   diff          Show the diff of a deploy request
-  edit          Edit a deploy request
   force-cutover Force cutover when a migration is delayed by a table lock
   list          List all deploy requests for a database
   operations    List deploy operations for a deploy request
@@ -36,6 +35,7 @@ Available Commands:
   storage-check Check storage readiness for a deploy request
   throttler     Show or update deploy request throttler configuration
   unblock       Unblock the deploy queue after a failed deploy or revert
+  update        Update a deploy request
 
 Flags:
   -h, --help         help for deploy-request
@@ -52,6 +52,78 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale deploy-request [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale deploy-request update
+
+```text
+Update settings on a deploy request.
+
+Use --enable-auto-apply / --disable-auto-apply to control gated cutover, and
+--auto-delete-branch to control whether the source branch is deleted after a
+successful deploy (same flag as 'deploy-request create'). At least one setting
+must be passed; unset flags are not sent.
+
+Usage:
+  pscale deploy-request update <database> <number> [flags]
+
+Aliases:
+  update, edit
+
+Flags:
+      --auto-delete-branch   Delete the branch after the deploy request completes. Pass --auto-delete-branch=false to keep it.
+      --disable-auto-apply   Disable auto-apply. The deploy request will wait for your confirmation before swapping to the new schema. Use 'deploy-request apply' to apply the changes manually.
+      --enable-auto-apply    Enable auto-apply. The deploy request will automatically swap over to the new schema once ready.
+  -h, --help                 help for update
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale deploy-request edit
+
+```text
+Update settings on a deploy request.
+
+Use --enable-auto-apply / --disable-auto-apply to control gated cutover, and
+--auto-delete-branch to control whether the source branch is deleted after a
+successful deploy (same flag as 'deploy-request create'). At least one setting
+must be passed; unset flags are not sent.
+
+Usage:
+  pscale deploy-request update <database> <number> [flags]
+
+Aliases:
+  update, edit
+
+Flags:
+      --auto-delete-branch   Delete the branch after the deploy request completes. Pass --auto-delete-branch=false to keep it.
+      --disable-auto-apply   Disable auto-apply. The deploy request will wait for your confirmation before swapping to the new schema. Use 'deploy-request apply' to apply the changes manually.
+      --enable-auto-apply    Enable auto-apply. The deploy request will automatically swap over to the new schema once ready.
+  -h, --help                 help for update
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
