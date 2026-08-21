@@ -1,6 +1,6 @@
 ---
 name: pscale-insights
-description: Query PlanetScale server-side performance insights, execution samples, query tags, errors, anomalies, and schema recommendations. Use when ranking slow or expensive queries, drilling into individual executions, attributing load by sqlcommenter or system tags, investigating production query failures or resource anomalies, reviewing or dismissing index/schema recommendations, or when a user asks for pscale insights. Triggers on pscale insights, query insights, query samples, query tags, sqlcommenter, slow queries, query errors, anomalies, schema recommendations, missing indexes, unused indexes, database bloat.
+description: Query PlanetScale server-side performance insights, execution samples, query tags, error details, anomaly correlations, and schema recommendations. Use when ranking slow or expensive queries, drilling into individual executions, attributing load by sqlcommenter or system tags, investigating the queries behind a full error fingerprint, correlating queries with a resource anomaly, reviewing or dismissing index/schema recommendations, or when a user asks for pscale insights. Triggers on pscale insights, query insights, query samples, query tags, sqlcommenter, slow queries, query errors, error fingerprint, anomalies, correlated queries, schema recommendations, missing indexes, unused indexes, database bloat.
 ---
 
 # pscale insights
@@ -32,7 +32,9 @@ pscale insights tags summaries <database> <branch> --org <org> \
 
 # Inspect aggregated query failures and detected resource anomalies
 pscale insights errors <database> <branch> --org <org> --period 1d --format json
+pscale insights errors show <database> <branch> <full-error-fingerprint> --org <org> --period 1d --format json
 pscale insights anomalies <database> <branch> --org <org> --format json
+pscale insights anomalies show <database> <branch> <anomaly-id> --org <org> --format json
 
 # Review database-level schema recommendations and their proposed DDL
 pscale insights recommendations <database> --org <org> --format json
@@ -57,6 +59,26 @@ Each JSON record from `pscale insights queries` includes a `fingerprint` and `ke
 
 Samples expose individual executions, including start time, duration, user, rows read/returned, normalized SQL, errors, and attached tags. Use them to validate whether an aggregate represents one outlier or a recurring pattern. Query samples can contain sensitive SQL context, usernames, addresses, or tag values, so do not paste raw output into public issues or logs without review.
 
+## Error and anomaly details
+
+The human `errors` table displays the full fingerprint. For JSON automation, copy `error_fingerprint` from the list and pass it unchanged to `errors show`; do not use a shortened display ID. The detail command returns individual failed executions, including users, keyspaces, statements, and error messages.
+
+```bash
+pscale insights errors <database> <branch> --org <org> --period 1h --format json
+pscale insights errors show <database> <branch> <error_fingerprint> \
+  --org <org> --period 1h --limit 25 --format json
+```
+
+`anomalies show` returns one anomaly plus queries whose activity correlates with it. Correlation is evidence for investigation, not proof that a query caused the resource event.
+
+```bash
+pscale insights anomalies <database> <branch> --org <org> --format json
+pscale insights anomalies show <database> <branch> <anomaly-id> \
+  --org <org> --format json
+```
+
+Treat detailed executions and normalized SQL as potentially sensitive. Compare the anomaly interval with query timing, metrics, and application changes before proposing a fix.
+
 ## Query tags
 
 Use `pscale insights tags` to list observed sqlcommenter and system tag keys. The command returns friendly names matching the PlanetScale Insights UI, such as `app`, `controller`, and `username`.
@@ -78,7 +100,7 @@ List tags before using `show` or `summaries`. Pass friendly names, not internal 
 2. Rank queries by the metric related to the symptom (`totalTime`, `p99Latency`, `rowsReadPerReturned`, or `errorCount`).
 3. Use the returned fingerprint and keyspace to inspect recent `queries samples` when execution-level evidence is needed.
 4. List and summarize query tags to attribute the workload to applications, controllers, users, or other observed dimensions.
-5. Inspect `errors` and `anomalies` for the same branch and time window.
+5. Inspect `errors` and `anomalies` for the same branch and time window, then drill into the relevant full error fingerprint or anomaly ID.
 6. Run `pscale inspect all <database> <branch> --org <org> --format json` for live connection-level evidence.
 7. Review database-level `recommendations` for index, bloat, and sequence-risk findings.
 8. Summarize evidence separately from proposed changes.

@@ -1,6 +1,6 @@
 ---
 name: pscale-deploy-request
-description: Create, review, inspect, deploy, throttle, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, managing per-deploy throttling, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, deploy operations, storage check, force cutover, deploy throttler, review deployment, revert deployment, production migration.
+description: Create, review, inspect, deploy, update, throttle, unblock, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, changing auto-apply or auto-delete-branch settings, managing per-deploy throttling, unblocking a queue after a failed deploy or revert, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, unblock deploy queue, failed deploy, failed revert, deploy operations, storage check, deploy request update, auto apply, auto delete branch, force cutover, deploy throttler, review deployment, revert deployment, production migration.
 ---
 
 # pscale deploy-request
@@ -31,8 +31,15 @@ pscale deploy-request operations <database> <number> --format json
 # Inspect the database-wide deployment queue
 pscale deploy-request queue <database> --format json
 
+# Unblock only after a failed deploy/revert is diagnosed and approved
+pscale deploy-request unblock <database> <number> --format json
+
 # Deploy (apply changes)
 pscale deploy-request deploy <database> <number>
+
+# Update deploy request settings (edit is an alias)
+pscale deploy-request update <database> <number> --enable-auto-apply --format json
+pscale deploy-request update <database> <number> --auto-delete-branch=false --format json
 
 # Explicit strategy (parallel requires database support and approval)
 pscale deploy-request deploy <database> <number> --strategy parallel --wait
@@ -109,6 +116,47 @@ pscale deploy-request operations <database> <number> --org <org> --format json
 ```
 
 Treat `enough_storage: false`, a paused queue, a non-deployable deployment, or an unresolved required review as a stop condition. Do not deploy merely because one inspection endpoint is clear. During a migration, use operation state, `progress_percentage`, and `eta_seconds` as observations, not promises.
+
+### Update deploy request settings
+
+Use canonical `pscale deploy-request update`; `edit` remains an alias. This is an operational write because auto-apply changes cutover behavior and auto-delete controls whether the source branch is deleted after a successful deploy. At least one setting flag is required, and omitted flags are not sent.
+
+```bash
+# Inspect first
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+
+# After explicit approval for the exact settings
+pscale deploy-request update <database> <number> --org <org> \
+  --enable-auto-apply \
+  --auto-delete-branch=false \
+  --format json
+
+# Verify readback
+pscale deploy-request show <database> <number> --org <org> --format json
+```
+
+Never pass `--enable-auto-apply` and `--disable-auto-apply` together; `--auto-delete-branch` can be updated on its own. Use `--auto-delete-branch=false` to preserve the branch; `--auto-delete-branch` enables deletion after completion. Do not use the `edit` alias in prose or scripts except when explaining backwards compatibility.
+
+### Unblock after a failed deploy or revert
+
+`pscale deploy-request unblock` is the CLI equivalent of the dashboard's **Unblock deploy queue** action. It is accepted only when the selected deployment state is `complete_error` or `complete_revert_error`. The CLI rejects `pending_cutover` (use `apply`), deploy-check `error` (fix the check failure), and states without a failed deploy.
+
+```bash
+# Diagnose the exact failed request and blocked queue
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+
+# After explaining the failed state and receiving explicit approval
+pscale deploy-request unblock <database> <number> --org <org> --format json
+
+# Verify the request and queue after the write
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+```
+
+Unblocking does not repair the failed migration, retry it, apply a gated cutover, or resolve failed deploy checks. It marks the failed deploy/revert complete so later queue work can proceed; the API determines whether the failed action was a deploy or revert. Treat it as a production operational write and preserve the failure evidence before running it.
 
 ### Manage per-deploy throttling
 

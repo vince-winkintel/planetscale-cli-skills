@@ -1,27 +1,23 @@
-Create, list, show, update, renew, and delete branch passwords.
+# `pscale traffic-control` command reference
 
-The password parent/show/update blocks and related command surfaces below are exact output from the official, checksum-verified PlanetScale CLI v0.323.0 macOS arm64 release binary after normalizing only trailing whitespace. The role default block is included because Postgres branches use roles instead of Vitess passwords.
+The complete help surface below is exact output from the official, checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary after normalizing only trailing whitespace, and was verified unchanged against the checksum-verified v0.323.0 binary.
 
-## pscale password
+## `pscale traffic-control`
 
 ```text
-Create, list, update, and delete branch passwords.
+Manage Database Traffic Control™ budgets and rules for a Postgres database branch.
 
-This command is only supported for Vitess databases.
+This command is only supported for Postgres databases.
 
 Usage:
-  pscale password [command]
+  pscale traffic-control [command]
 
 Available Commands:
-  create      Create password to access a branch's data
-  delete      Delete a branch password
-  list        List all passwords of a database
-  renew       Renew a branch password
-  show        Show a branch password
-  update      Update a branch password's name or IP restrictions
+  budget      Manage traffic budgets
+  rule        Manage traffic rules
 
 Flags:
-  -h, --help         help for password
+  -h, --help         help for traffic-control
       --org string   The organization for the current user
 
 Global Flags:
@@ -34,28 +30,28 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale password [command] --help" for more information about a command.
+Use "pscale traffic-control [command] --help" for more information about a command.
 
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password create
+## `pscale traffic-control budget`
 
 ```text
-Create password to access a branch's data
+Manage traffic budgets
 
 Usage:
-  pscale password create <database> <branch> <name> [flags]
+  pscale traffic-control budget [command]
 
-Aliases:
-  create, p
+Available Commands:
+  create      Create a traffic budget
+  delete      Delete a traffic budget
+  list        List traffic budgets for a branch
+  show        Show a traffic budget
+  update      Update a traffic budget
 
 Flags:
-  -h, --help                      help for create
-      --read-only-region string   Create a password scoped to a Vitess read-only region (region slug, display name, or id). List regions with: pscale keyspace read-only-regions <database> <branch> <keyspace>.
-      --replica                   When enabled, the password will route all reads to the branch's primary replicas and all read-only regions.
-      --role string               Role defines the access level, allowed values are: reader, writer, readwriter, admin. Defaults to 'reader' for replica and read-only region passwords, otherwise defaults to 'admin'.
-      --ttl duration              TTL defines the time to live for the password. Durations such as "30m", "24h", or bare integers such as "3600" (seconds) are accepted. The default TTL is 0s, which means the password will never expire. (default 0s)
+  -h, --help   help for budget
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -68,29 +64,25 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
+Use "pscale traffic-control budget [command] --help" for more information about a command.
+
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-`--read-only-region` and `--replica` are mutually exclusive. A region-scoped password defaults to `reader`, requires the selected region to be ready, and is labeled as a read-only-region credential in create output.
-
-## pscale password list
+## `pscale traffic-control budget list`
 
 ```text
-List all passwords of a database
+List traffic budgets for a branch
 
 Usage:
-  pscale password list <database> [branch] [flags]
+  pscale traffic-control budget list <database> <branch> [flags]
 
 Aliases:
   list, ls
 
 Flags:
-  -h, --help            help for list
-      --name string     Filter passwords by name using a substring match
-      --page int        Page number to fetch
-      --per-page int    Number of results per page (default 100)
-      --status string   Filter passwords by status (active, renewable, or expired)
-  -w, --web             List passwords in your web browser.
+      --fingerprint string   Only list budgets with a rule for this query fingerprint
+  -h, --help                 help for list
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -106,20 +98,16 @@ Global Flags:
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password show
+## `pscale traffic-control budget show`
 
 ```text
-Show a branch password.
-
-Only metadata is returned. The password itself is shown once, when it is
-created or renewed, and cannot be retrieved afterwards.
+Show a traffic budget
 
 Usage:
-  pscale password show <database> <branch> [<password-id>] [flags]
+  pscale traffic-control budget show <database> <branch> <budget-id> [flags]
 
 Flags:
-  -h, --help          help for show
-      --name string   Show password by name instead of ID
+  -h, --help   help for show
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -135,27 +123,23 @@ Global Flags:
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password update
+## `pscale traffic-control budget create`
 
 ```text
-Update a branch password's name or IP restrictions.
-
-This does not change the password itself. To rotate a password, create a new
-one and delete the old one.
+Create a traffic budget
 
 Usage:
-  pscale password update <database> <branch> [<password-id>] [flags]
-
-Examples:
-  pscale password update mydb main pscale_pw_xxx --new-name reporting
-  pscale password update mydb main --name reporting --cidrs 10.0.0.0/8,192.168.1.1/32
-  pscale password update mydb main --name reporting --cidrs ""
+  pscale traffic-control budget create <database> <branch> [flags]
 
 Flags:
-      --cidrs strings     Replace the IP addresses and CIDR ranges allowed to use this password. Pass an empty value to remove all restrictions
-  -h, --help              help for update
-      --name string       Update password by name instead of ID
-      --new-name string   New name for the password
+      --burst int               Maximum capacity a single query can consume (0-6000). Unlimited when not set.
+      --capacity int            Maximum capacity that can be banked (0-6000). Unlimited when not set.
+      --concurrency int         Percentage of available worker processes (0-100). Unlimited when not set.
+  -h, --help                    help for create
+      --mode string             Mode of the budget: enforce, warn, or off (default "warn")
+      --name string             Name of the traffic budget (required) (required)
+      --rate int                Rate at which capacity refills, as a percentage of server resources (0-100). Unlimited when not set.
+      --warning-threshold int   Percentage (0-100) of capacity, burst, or concurrency at which to emit warnings for enforced budgets.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -171,16 +155,23 @@ Global Flags:
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password renew
+## `pscale traffic-control budget update`
 
 ```text
-Renew a branch password
+Update a traffic budget
 
 Usage:
-  pscale password renew <database> <branch> <password-id> [flags]
+  pscale traffic-control budget update <database> <branch> <budget-id> [flags]
 
 Flags:
-  -h, --help   help for renew
+      --burst int               Maximum capacity a single query can consume (0-6000). Unlimited when not set.
+      --capacity int            Maximum capacity that can be banked (0-6000). Unlimited when not set.
+      --concurrency int         Percentage of available worker processes (0-100). Unlimited when not set.
+  -h, --help                    help for update
+      --mode string             Mode of the budget: enforce, warn, or off
+      --name string             Name of the traffic budget
+      --rate int                Rate at which capacity refills, as a percentage of server resources (0-100). Unlimited when not set.
+      --warning-threshold int   Percentage (0-100) of capacity, burst, or concurrency at which to emit warnings for enforced budgets.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -196,21 +187,20 @@ Global Flags:
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password delete
+## `pscale traffic-control budget delete`
 
 ```text
-Delete a branch password
+Delete a traffic budget
 
 Usage:
-  pscale password delete <database> <branch> [<password-id>] [flags]
+  pscale traffic-control budget delete <database> <branch> <budget-id> [flags]
 
 Aliases:
   delete, rm
 
 Flags:
-      --force         Delete a password without confirmation
-  -h, --help          help for delete
-      --name string   Delete password by name instead of ID
+      --force   Delete a budget without confirmation
+  -h, --help    help for delete
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -226,31 +216,20 @@ Global Flags:
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale role
+## `pscale traffic-control rule`
 
 ```text
-Manage database roles for a Postgres database branch.
-
-This command is only supported for Postgres databases.
+Manage traffic rules
 
 Usage:
-  pscale role [command]
+  pscale traffic-control rule [command]
 
 Available Commands:
-  create        Create a new role for a Postgres database branch
-  default       Show the default postgres role
-  delete        Delete a role
-  get           Retrieve information about a specific role
-  list          List all roles for a Postgres database branch
-  reassign      Reassign objects owned by a role to another role
-  renew         Renew a role's expiration
-  reset         Reset a role's password
-  reset-default Reset the credentials for the default `postgres` role
-  update        Update a role's name
+  create      Create a traffic rule on a budget
+  delete      Delete a traffic rule from a budget
 
 Flags:
-  -h, --help         help for role
-      --org string   The organization for the current user
+  -h, --help   help for rule
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -259,27 +238,29 @@ Global Flags:
       --debug                     Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
       --no-color                  Disable color output
+      --org string                The organization for the current user
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale role [command] --help" for more information about a command.
+Use "pscale traffic-control rule [command] --help" for more information about a command.
 
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale role default
+## `pscale traffic-control rule create`
 
 ```text
-Show the default postgres role for a branch.
-
-This does not rotate credentials. Use 'pscale role reset-default' to issue a
-new password for the default role.
+Create a traffic rule on a budget
 
 Usage:
-  pscale role default <database> <branch> [flags]
+  pscale traffic-control rule create <database> <branch> <budget-id> [flags]
 
 Flags:
-  -h, --help   help for default
+      --fingerprint string   SQL fingerprint to match
+  -h, --help                 help for create
+      --keyspace string      Keyspace to match
+      --kind string          Kind of rule (default "match")
+      --tag stringArray      Tag in the format key=<key>,value=<value>,source=<source> (repeatable)
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -295,50 +276,20 @@ Global Flags:
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale role reset-default
+## `pscale traffic-control rule delete`
 
 ```text
-This command resets the credentials for the default `postgres` role in the database, allowing you to reconfigure access. Any connections using the `postgres` role will need to be updated with the new credentials.
+Delete a traffic rule from a budget
 
 Usage:
-  pscale role reset-default <database> <branch> [flags]
-
-Flags:
-      --force   Force reset without confirmation
-  -h, --help    help for reset-default
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale role list (Postgres equivalent)
-
-```text
-List all roles for a Postgres database branch
-
-Usage:
-  pscale role list <database> <branch> [flags]
+  pscale traffic-control rule delete <database> <branch> <budget-id> <rule-id> [flags]
 
 Aliases:
-  list, ls
+  delete, rm
 
 Flags:
-  -h, --help            help for list
-      --name string     Filter roles by name using a substring match
-      --page int        Page number to fetch
-      --per-page int    Number of results per page (default 100)
-      --status string   Filter roles by status (active, renewable, disabled, or expired)
-  -w, --web             List roles in your web browser.
+      --force   Delete a rule without confirmation
+  -h, --help    help for delete
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -353,3 +304,11 @@ Global Flags:
 
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## Scope and safety
+
+- All commands are Postgres-only and require `--org` unless an organization is already configured.
+- `budget list` and `budget show` are read-only. Create/update/delete budget and create/delete rule are writes.
+- `budget show` returns the budget and its rules; use the returned IDs for later operations.
+- Start ordinary rollouts in `warn`, observe behavior, and require explicit approval before `enforce`.
+- Use `--force` only for an already-approved non-interactive deletion, then verify with `budget list` or `budget show`.

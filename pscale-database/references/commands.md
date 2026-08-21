@@ -1,4 +1,4 @@
-> The parent database and database-throttler help blocks below were captured from the checksum-verified PlanetScale CLI v0.321.0 macOS arm64 release binary and match after normalizing only trailing whitespace.
+> The affected parent database and aggressive-cutover help blocks below were captured from the checksum-verified PlanetScale CLI v0.322.0 macOS arm64 release binary and match after normalizing only trailing whitespace. Unchanged database-throttler blocks remain from the checksum-verified v0.321.0 binary.
 
 ```text
 Create, read, update, delete, and dump/restore databases
@@ -10,15 +10,16 @@ Aliases:
   database, db
 
 Available Commands:
-  create         Create a database instance
-  delete         Delete a database instance
-  dump           Backup and dump your database (Vitess databases only)
-  ip-restriction Manage Postgres IP restrictions
-  list           List databases
-  restore-dump   Restore your database from a local dump directory (Vitess databases only)
-  show           Retrieve information about a database, including settings
-  throttler      Show or update database throttler configuration
-  update         Update a database's settings
+  aggressive-cutover Show or change aggressive cutover for a database
+  create             Create a database instance
+  delete             Delete a database instance
+  dump               Backup and dump your database (Vitess databases only)
+  ip-restriction     Manage Postgres IP restrictions
+  list               List databases
+  restore-dump       Restore your database from a local dump directory (Vitess databases only)
+  show               Retrieve information about a database, including settings
+  throttler          Show or update database throttler configuration
+  update             Update a database's settings
 
 Flags:
   -h, --help         help for database
@@ -35,6 +36,120 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale database [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale database aggressive-cutover
+
+```text
+Show, enable, or disable aggressive cutover for a Vitess database.
+
+When enabled, future deploy requests on this database cut over more
+aggressively when waiting on table locks. This is a database-level setting,
+not the same as forcing cutover on a single deploy request
+(pscale deploy-request force-cutover).
+
+See https://planetscale.com/docs/vitess/schema-changes/aggressive-cutover
+
+Usage:
+  pscale database aggressive-cutover [command]
+
+Available Commands:
+  disable     Disable aggressive cutover for a database
+  enable      Enable aggressive cutover for a database
+  show        Show whether aggressive cutover is enabled
+
+Flags:
+  -h, --help   help for aggressive-cutover
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale database aggressive-cutover [command] --help" for more information about a command.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale database aggressive-cutover show
+
+```text
+Show whether aggressive cutover is enabled
+
+Usage:
+  pscale database aggressive-cutover show <database> [flags]
+
+Flags:
+  -h, --help   help for show
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale database aggressive-cutover enable
+
+```text
+Enable aggressive cutover for a database
+
+Usage:
+  pscale database aggressive-cutover enable <database> [flags]
+
+Flags:
+  -h, --help   help for enable
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale database aggressive-cutover disable
+
+```text
+Disable aggressive cutover for a database
+
+Usage:
+  pscale database aggressive-cutover disable <database> [flags]
+
+Flags:
+  -h, --help   help for disable
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 
 Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
