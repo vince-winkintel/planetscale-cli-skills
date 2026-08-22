@@ -86,4 +86,4 @@ Rule create also accepts `--keyspace` and repeatable `--tag`; `--kind` defaults 
 
 ## References
 
-See [references/commands.md](references/commands.md) for the checksum-verified v0.322.0 command help, verified unchanged against v0.323.0.
+See [references/commands.md](references/commands.md) for the checksum-verified command help.

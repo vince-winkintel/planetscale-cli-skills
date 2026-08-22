@@ -132,6 +132,8 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
+The doubled `(required)` in the `--target` description is verbatim upstream output.
+
 ## pscale pgbouncer resize
 
 ```text

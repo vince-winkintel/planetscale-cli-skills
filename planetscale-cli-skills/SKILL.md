@@ -59,8 +59,9 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 
 ## Binary-native agent bootstrap
 
-- `pscale --skill` prints the current binary's installable `pscale-cli` skill file to stdout. `pscale agent-guide --skill` is equivalent.
+- `pscale --skill` prints the current binary's installable `pscale-cli` skill file to stdout when no positional arguments follow it. `pscale agent-guide --skill` is equivalent.
 - Both forms still emit the raw Markdown skill when `--format json` is present; redirect the output to an approved skills directory when a standalone binary-native guide is wanted.
+- Validate automated bootstrap output starts with `---\nname: pscale-cli`; `pscale --skill <extra-arg>` prints root help and exits zero instead of emitting the skill.
 - The binary-native guide is useful for first-party command discovery, but it does not replace this repository's specialized safety workflows, focused references, and helper scripts.
 - When a command name is assembled dynamically, validate the expected JSON/resource shape as well as the exit code. A bare unrecognized root token currently prints root help and exits zero, so zero alone does not prove that a resource operation ran.
 

@@ -415,24 +415,20 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 Create requires `--cidrs` with repeatable or comma-separated IPv4 CIDRs; optional `--schema`, `--role`, and `--description` scope the entry. Update replaces only supplied fields. Delete accepts `--force` but should be treated as destructive because entries apply across all database branches.
 
-## pscale keyspace read-only-regions writes
+## pscale keyspace read-only-regions add
 
 ```text
-List read-only regions configured for a Vitess keyspace.
+Add a read-only region to a Vitess keyspace.
 
-This command is only supported for Vitess databases.
+<region> is a PlanetScale region slug. List available slugs with: pscale region list.
 
 Usage:
-  pscale keyspace read-only-regions <database> <branch> <keyspace> [flags]
-  pscale keyspace read-only-regions [command]
-
-Available Commands:
-  add         Add a read-only region to a keyspace
-  remove      Remove a read-only region from a keyspace
-  update      Update a keyspace's read-only region
+  pscale keyspace read-only-regions add <database> <branch> <keyspace> <region> [flags]
 
 Flags:
-  -h, --help   help for read-only-regions
+      --cluster-size pscale size cluster list   cluster size for the keyspace in this read-only region. Use pscale size cluster list to get a list of valid sizes.
+  -h, --help                                    help for add
+      --replicas int                            number of replicas per shard in this read-only region
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -445,7 +441,61 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale keyspace read-only-regions [command] --help" for more information about a command.
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace read-only-regions update
+
+```text
+Update cluster size or replicas for a keyspace's read-only region.
+
+<region> is a PlanetScale region slug already configured on the keyspace. List configured regions with: pscale keyspace read-only-regions <database> <branch> <keyspace>.
+
+Usage:
+  pscale keyspace read-only-regions update <database> <branch> <keyspace> <region> [flags]
+
+Flags:
+      --cluster-size pscale size cluster list   cluster size for the keyspace in this read-only region. Use pscale size cluster list to get a list of valid sizes.
+  -h, --help                                    help for update
+      --replicas int                            number of replicas per shard in this read-only region
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace read-only-regions remove
+
+```text
+Remove a read-only region from a Vitess keyspace.
+
+<region> is a PlanetScale region slug already configured on the keyspace. List configured regions with: pscale keyspace read-only-regions <database> <branch> <keyspace>.
+
+Usage:
+  pscale keyspace read-only-regions remove <database> <branch> <keyspace> <region> [flags]
+
+Flags:
+  -h, --help   help for remove
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
