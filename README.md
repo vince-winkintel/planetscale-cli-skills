@@ -113,7 +113,7 @@ pscale branch create my-database feature-branch --from main
 | **pscale-import-d1** | Import Cloudflare D1 exports into PlanetScale Postgres | `pscale import d1 lint/start/verify` |
 | **pscale-backup** | Create/restore backups and manage scheduled policies | `pscale backup create/list/policy` |
 | **pscale-audit-log** | List audit events and export authentication attempts | `pscale audit-log list/auth-attempts` |
-| **pscale-password** | Connection passwords, including Vitess read-only-region credentials and metadata/IP restriction updates | `pscale password create/list/show/update` |
+| **pscale-password** | Connection passwords and Postgres roles, including Vitess read-only-region credentials, Postgres connection targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role list/get/default` |
 | **pscale-pgbouncer** | Dedicated PostgreSQL PgBouncer lifecycle and asynchronous resizing | `pscale pgbouncer list/show/create/resize/delete` |
 | **pscale-org** | Switch organizations and inspect or manage members | `pscale org list/switch/member` |
 | **pscale-service-token** | CI/CD authentication | `pscale service-token create` |

@@ -1,6 +1,6 @@
 ---
 name: pscale-password
-description: Create, list, show, update, renew, and delete branch connection passwords, including Vitess credentials scoped to a separate read-only region. Use when creating connection strings for applications, managing database credentials, generating passwords for local development, routing reads to a read-only region, rotating credentials, updating password names or CIDR restrictions, or finding credentials by name or status. Triggers on password, connection string, database credentials, create password, show password, update password, CIDR, read-only region password, password status, Postgres role, default Postgres role.
+description: Create, list, show, update, renew, and delete branch connection passwords, and inspect Postgres roles and their connection targets. Use when creating connection strings for applications, managing database credentials, generating passwords for local development, routing reads to a Vitess read-only region, retrieving Postgres role details for a branch replica, regional read-only replica, or PgBouncer, rotating credentials, updating password names or CIDR restrictions, or finding credentials by name, status, or expiration. Triggers on password, connection string, database credentials, create password, show password, update password, CIDR, read-only region password, password status, Postgres role, role get, role status, role expiration, default Postgres role, read-only replica, PgBouncer connection.
 ---
 
 # pscale password
@@ -127,7 +127,7 @@ Use `--read-only-region` when reads must stay in one separate region. Use `--rep
 
 ### Postgres role lookup and filtering
 
-Postgres databases use roles instead of Vitess branch passwords. `pscale role default` is a read-only lookup for the default `postgres` role and does not rotate credentials. Use `pscale role reset-default` only when the user explicitly asks to reset default-role credentials and approves the connection impact. Role listing supports the same pagination and name filtering, with statuses `active`, `renewable`, `disabled`, and `expired`.
+Postgres databases use roles instead of Vitess branch passwords. `pscale role default` is a read-only lookup for the default `postgres` role and does not rotate credentials. Use `pscale role reset-default` only when the user explicitly asks to reset default-role credentials and approves the connection impact. Role list/get/default output includes `status` and `expires_at`; listing supports pagination and name filtering plus status filters for `active`, `renewable`, `disabled`, and `expired`.
 
 This workflow intentionally lives here because no dedicated `pscale-role` skill exists, and both command groups manage branch credentials.
 
@@ -139,7 +139,14 @@ pscale role list <database> <branch> \
   --per-page 100 \
   --format json
 pscale role default <database> <branch> --format json
+
+# Retrieve the same role for exactly one alternate connection target
+pscale role get <database> <branch> <role-id> --org <org> --format json --replica
+pscale role get <database> <branch> <role-id> --org <org> --format json --read-only-replica <region-slug>
+pscale role get <database> <branch> <role-id> --org <org> --format json --bouncer <bouncer-name>
 ```
+
+`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. A targeted response keeps the normal role shape but can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`. A target-specific `NOT_FOUND` can mean either the role or the requested replica/PgBouncer was not found, so verify both identifiers before retrying. Treat any returned password or connection URL as a secret: capture it directly into an approved secret manager and never print it in logs or commit it.
 
 ## Troubleshooting
 

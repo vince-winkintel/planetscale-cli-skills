@@ -1,6 +1,6 @@
 # `pscale inspect` command reference
 
-Verified from the official PlanetScale CLI v0.308.0 macOS arm64 release binary.
+Behavior was re-verified against the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary. The compact fences below are curated usage excerpts, not byte-for-byte help captures.
 
 ## Command group
 

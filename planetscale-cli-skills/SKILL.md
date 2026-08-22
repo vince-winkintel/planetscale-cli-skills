@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations and members, databases, branches, branch maintenance, extension catalogs, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, keyspaces, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, Postgres IP restrictions, read-only regions, backups, audit logs, service tokens, passwords, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, deploy request, deploy queue, unblock deploy, aggressive cutover, branch maintenance, branch extensions, branch switchover, traffic control, force cutover, storage readiness, keyspace routing rules, database settings, database branch, VTGate resize, pgbouncer, backup policy, database diagnostics, org member, or pscale import d1.
+description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations and members, databases, branches, branch maintenance, extension catalogs, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, keyspaces, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, Postgres role connection targets, Postgres IP restrictions, read-only regions, backups, audit logs, service tokens, passwords, binary-native agent guidance, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, pscale role get, deploy request, deploy queue, unblock deploy, aggressive cutover, branch maintenance, branch extensions, branch switchover, traffic control, force cutover, storage readiness, keyspace routing rules, database settings, database branch, VTGate resize, pgbouncer, backup policy, database diagnostics, org member, or pscale import d1.
 requirements:
   binaries:
     - pscale
@@ -56,6 +56,14 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Keep API URLs and credentials in the user config, environment/secret manager, or explicit approved flags. Never commit them to a repository-local config.
 - `pscale api` follows cross-host redirects without forwarding authentication or caller-supplied headers. Even with this protection, pass secret-bearing headers only to an explicitly verified API host and do not expose them in logs.
 - When `--format json` is active, API error codes are preserved in the top-level `code` field instead of being collapsed to `COMMAND_FAILED`. Branch automation should branch on exact codes when present; for `schema_mutation_blocked`, wait for the active vtctld mutation or deploy to finish before retrying.
+
+## Binary-native agent bootstrap
+
+- `pscale --skill` prints the current binary's installable `pscale-cli` skill file to stdout when no positional arguments follow it. `pscale agent-guide --skill` is equivalent.
+- Both forms still emit the raw Markdown skill when `--format json` is present; redirect the output to an approved skills directory when a standalone binary-native guide is wanted.
+- Validate automated bootstrap output starts with `---\nname: pscale-cli`; `pscale --skill <extra-arg>` prints root help and exits zero instead of emitting the skill.
+- The binary-native guide is useful for first-party command discovery, but it does not replace this repository's specialized safety workflows, focused references, and helper scripts.
+- When a command name is assembled dynamically, validate the expected JSON/resource shape as well as the exit code. A bare unrecognized root token currently prints root help and exits zero, so zero alone does not prove that a resource operation ran.
 
 ## Sub-Skills
 
