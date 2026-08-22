@@ -29,9 +29,15 @@ Use "pscale backup [command] --help" for more information about a command.
 
 ## pscale backup policy
 
-The `create`, `update`, and `delete` help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.315.0 macOS arm64 release binary. Terminal padding and trailing whitespace are not material.
+All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ```text
+Manage scheduled backup policies for a database.
+
+Backup policies define automatic backup frequency, schedule, and retention for
+production or development branches. This is separate from one-off branch
+backups created with 'pscale backup create'.
+
 Usage:
   pscale backup policy [command]
 
@@ -41,6 +47,24 @@ Available Commands:
   list        List backup policies for a database
   show        Show a backup policy
   update      Update a backup policy
+
+Flags:
+  -h, --help   help for policy
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale backup policy [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 ### pscale backup policy create
@@ -76,7 +100,7 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 ### pscale backup policy update
@@ -113,7 +137,7 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 ### pscale backup policy delete
@@ -142,7 +166,7 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Agents: run "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
 Create usage is `pscale backup policy create <database>` and requires target, frequency value/unit, schedule time, and retention value/unit. Update usage is `pscale backup policy update <database> <policy-id>` and sends only supplied flags. Delete usage is `pscale backup policy delete <database> <policy-id>`; `--force` skips confirmation, and required default system policies cannot be deleted.

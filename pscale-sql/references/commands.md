@@ -1,5 +1,7 @@
 ## pscale sql
 
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
 ```text
 Execute a single SQL query against a database branch using ephemeral credentials.
 
@@ -13,7 +15,9 @@ Destructive SQL containing DELETE, DROP, or TRUNCATE is blocked unless --force i
 Agents must ask the user for approval before using --force.
 
 MySQL (Vitess) databases use the primary keyspace by default (same as pscale shell -D @primary).
-Pass --keyspace when targeting a specific keyspace in a multi-keyspace database.
+Pass --keyspace when targeting a specific keyspace in a multi-keyspace database. A keyspace may
+include a shard and tablet type (mykeyspace/-80, mykeyspace/-80@replica) to pin the connection to
+one shard; enumerate shards with SHOW VITESS_SHARDS.
 
 PostgreSQL databases use --dbname (default postgres).
 
@@ -38,7 +42,7 @@ Flags:
       --dbname string     PostgreSQL database name (default "postgres")
       --force             Allow destructive SQL (DELETE, DROP, TRUNCATE). Only use after the user explicitly approves.
   -h, --help              help for sql
-      --keyspace string   Vitess keyspace (optional; defaults to @primary, same as pscale shell)
+      --keyspace string   Vitess keyspace, optionally with a shard and tablet type (e.g. mykeyspace, mykeyspace/-80, mykeyspace/-80@replica). List shards with --query "SHOW VITESS_SHARDS". Defaults to @primary, same as pscale shell.
       --org string        The organization for the current user
       --query string      SQL query to execute (required)
       --replica           When enabled, the password will route all reads to the branch's primary replicas and all read-only regions.
@@ -53,4 +57,6 @@ Global Flags:
       --no-color                  Disable color output
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
