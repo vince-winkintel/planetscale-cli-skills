@@ -168,6 +168,8 @@ See `scripts/create-branch-for-mr.sh` for automation.
 
 `pscale branch create --restore-point` creates a new PostgreSQL branch from a point-in-time recovery timestamp. This is a write that can allocate billable resources. Confirm the organization, database, source branch, timestamp, target branch name, cluster size, and retention/recovery objective with the user before running it.
 
+If `--cluster-size` is omitted, a restore-point branch defaults to `PS-10`, a billable non-development size, rather than `PS_DEV`; always pass an explicit size. `--from` is optional and, when omitted, PlanetScale uses the database's default branch as the recovery source; prefer passing the source branch explicitly in automation.
+
 ```bash
 # Inspect the intended source branch and its current state first
 pscale branch show <database> <source-branch> --org <org> --format json
