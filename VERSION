@@ -1,7 +1,11 @@
-1.0.18
+1.0.19
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.325.0
+  - Reviewed the upstream release and compare `v0.324.0...v0.325.0` on 2026-08-25.
+  - Added guarded PostgreSQL point-in-time recovery guidance for `pscale branch create --restore-point`, including source-branch inspection, RFC 3339 timestamps, explicit approval, readiness waiting, and post-create verification.
+  - Added the complete `pscale branch create` help surface and re-verified the unchanged parent help from the checksum-verified v0.325.0 macOS arm64 release binary.
 - PlanetScale CLI v0.324.0
   - Reviewed the upstream release and compare `v0.323.0...v0.324.0` on 2026-08-22.
   - Added binary-native agent bootstrap guidance for `pscale --skill` and `pscale agent-guide --skill`, including JSON-mode output behavior.

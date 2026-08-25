@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, rename, protect, delete, promote, diff, switchover, inspect query patterns, and manage PlanetScale database branches, Postgres maintenance/extensions/parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, and Vitess workflows. Use when creating development branches for schema changes, renaming branches, changing deletion protection, switching a Postgres primary to a replica, running Postgres branch maintenance, listing available Postgres extensions, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, rename branch, deletion protection, branch switchover, primary switchover, branch maintenance, Postgres maintenance, extensions, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, vtctld, promote branch, MoveTables, global keyspace.
+description: Create, rename, protect, delete, promote, diff, switchover, restore, inspect query patterns, and manage PlanetScale database branches, Postgres maintenance/extensions/parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, and Vitess workflows. Use when creating development branches for schema changes, restoring a PostgreSQL branch to a point in time, renaming branches, changing deletion protection, switching a Postgres primary to a replica, running Postgres branch maintenance, listing available Postgres extensions, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, restore point, point-in-time recovery, PITR, rename branch, deletion protection, branch switchover, primary switchover, branch maintenance, Postgres maintenance, extensions, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -15,6 +15,14 @@ pscale branch create <database> <branch-name>
 
 # Create branch from specific source
 pscale branch create <database> <branch-name> --from <source-branch>
+
+# Restore a new Postgres branch to a point in time (write; inspect and approve first)
+pscale branch create <database> <branch-name> \
+  --from <source-branch> \
+  --restore-point <RFC3339-timestamp> \
+  --cluster-size <postgres-cluster-size> \
+  --wait \
+  --format json
 
 # List the default page (up to 100 branches)
 pscale branch list <database>
@@ -155,6 +163,28 @@ pscale branch create my-database $BRANCH_NAME --from main
 ```
 
 See `scripts/create-branch-for-mr.sh` for automation.
+
+### Restore a Postgres branch to a point in time
+
+`pscale branch create --restore-point` creates a new PostgreSQL branch from a point-in-time recovery timestamp. This is a write that can allocate billable resources. Confirm the organization, database, source branch, timestamp, target branch name, cluster size, and retention/recovery objective with the user before running it.
+
+```bash
+# Inspect the intended source branch and its current state first
+pscale branch show <database> <source-branch> --org <org> --format json
+
+# After explicit approval, create and wait for the recovered branch
+pscale branch create <database> <new-branch> --org <org> \
+  --from <source-branch> \
+  --restore-point <RFC3339-timestamp> \
+  --cluster-size <postgres-cluster-size> \
+  --wait \
+  --format json
+
+# Verify the resulting branch rather than relying only on the create exit code
+pscale branch show <database> <new-branch> --org <org> --format json
+```
+
+Use an absolute RFC 3339 timestamp such as `2026-08-25T13:30:00Z`; do not infer a timezone or silently round the requested recovery point. The flag is PostgreSQL-only. The CLI rejects combining `--restore-point` with `--restore` or `--seed-data`; use the backup-restore workflow instead when the user identifies a backup ID. If creation fails or times out, treat the outcome as unconfirmed and inspect the target branch before retrying.
 
 ### Schema Comparison
 
