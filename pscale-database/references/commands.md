@@ -623,3 +623,115 @@ Global Flags:
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## pscale database parent with region discovery
+
+All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+```text
+Create, read, update, delete, and dump/restore databases
+
+Usage:
+  pscale database [command]
+
+Aliases:
+  database, db
+
+Available Commands:
+  aggressive-cutover Show or change aggressive cutover for a database
+  create             Create a database instance
+  delete             Delete a database instance
+  dump               Backup and dump your database (Vitess databases only)
+  ip-restriction     Manage Postgres IP restrictions
+  list               List databases
+  read-only-regions  List read-only regions for a database
+  regions            List regions available to a database
+  restore-dump       Restore your database from a local dump directory (Vitess databases only)
+  show               Retrieve information about a database, including settings
+  throttler          Show or update database throttler configuration
+  update             Update a database's settings
+
+Flags:
+  -h, --help         help for database
+      --org string   The organization for the current user
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale database [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale database regions
+
+All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+```text
+List regions available to a database
+
+Usage:
+  pscale database regions [command]
+
+Available Commands:
+  list        List regions available to a database
+
+Flags:
+  -h, --help   help for regions
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale database regions [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale database read-only-regions
+
+All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+```text
+List read-only regions for a database's default branch.
+
+This command is only supported for Vitess databases.
+
+Usage:
+  pscale database read-only-regions [command]
+
+Available Commands:
+  list        List read-only regions for a database
+
+Flags:
+  -h, --help   help for read-only-regions
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale database read-only-regions [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```

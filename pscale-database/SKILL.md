@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, keyspace delete, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -30,6 +30,10 @@ pscale database update <database> --require-approval-for-deploy=true
 
 # Inspect PostgreSQL IP restrictions
 pscale database ip-restriction list <database> --format json
+
+# Discover valid branch/read-only region targets for a database
+pscale database regions list <database> --org <org> --format json
+pscale database read-only-regions list <database> --org <org> --format json
 
 # Delete database
 pscale database delete <database>
@@ -186,9 +190,11 @@ Current dump behavior propagates cursor-close and worker errors as a non-zero ex
 
 ### Manage Vitess read-only regions
 
-Use `pscale region list` to discover available region slugs, and `pscale size cluster list` to discover valid cluster sizes. Add/update require at least one sizing flag supported by the API. Removing a region can disrupt region-scoped readers, dumps, and passwords: inventory those dependencies, confirm the exact keyspace and region, obtain approval, run the removal, and verify the remaining list.
+Use `pscale database regions list <database>` to discover regions currently available to a database, `pscale database read-only-regions list <database>` to discover configured read-only regions, and `pscale size cluster list` to discover valid cluster sizes. The database-scoped read-only-region command is Vitess-only; for PostgreSQL databases the CLI fetches the database to determine its engine and rejects it before calling the read-only-regions endpoint. Add/update require at least one sizing flag supported by the API. Removing a region can disrupt region-scoped readers, dumps, and passwords: inventory those dependencies, confirm the exact keyspace and region, obtain approval, run the removal, and verify the remaining list.
 
 ```bash
+pscale database regions list <database> --org <org> --format json
+pscale database read-only-regions list <database> --org <org> --format json
 pscale keyspace read-only-regions add <database> <branch> <keyspace> <region> \
   --org <org> --cluster-size <size> --replicas <count> --format json
 pscale keyspace read-only-regions update <database> <branch> <keyspace> <region> \

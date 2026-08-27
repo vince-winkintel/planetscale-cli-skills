@@ -1,6 +1,6 @@
 ---
 name: pscale-backup
-description: Create, list, show, restore, and delete branch backups, and manage scheduled backup policies. Use when creating database backups, restoring from backups, managing backup lifecycle, configuring production/development backup schedules, retention, or policy targets. Triggers on backup, restore, database backup, backup branch, backup policy, retention schedule.
+description: Create, list, show, restore, update protected status, and delete branch backups, and manage scheduled backup policies. Use when creating database backups, restoring from backups, protecting or unprotecting backups, managing backup lifecycle, configuring production/development backup schedules, retention, or policy targets. Triggers on backup, restore, database backup, backup branch, protected backup, backup update, backup policy, retention schedule.
 ---
 
 # pscale backup
@@ -18,6 +18,10 @@ pscale backup list <database> <branch>
 
 # Show backup details
 pscale backup show <database> <branch> <backup-id>
+
+# Protect or unprotect a backup only after explicit approval
+pscale backup update <database> <branch> <backup-id> --protected=true --format json
+pscale backup update <database> <branch> <backup-id> --protected=false --format json
 
 # Delete backup
 pscale backup delete <database> <branch> <backup-id>
@@ -60,6 +64,25 @@ pscale backup policy update <database> <policy-id> --org <org> \
 ```
 
 Frequency units are `hour`, `day`, `week`, or `month`; retention also supports `year`. Weekly/monthly schedules can use `--schedule-day` (`0` Sunday through `6` Saturday), and monthly schedules can use `--schedule-week` (`0` first through `3` fourth). Updates send only supplied flags. Before deleting, show the exact policy, obtain approval, avoid `--force` unless explicitly authorized, and list policies afterward; required system policies cannot be deleted.
+
+### Protect or unprotect a backup
+
+`pscale backup update` toggles whether a backup is protected from deletion. The `--protected` flag is required; use an explicit `=true` or `=false` value so the requested state is clear.
+
+```bash
+# Inspect current state first
+pscale backup show <database> <branch> <backup-id> --org <org> --format json
+
+# After explicit approval for the exact backup and target state
+pscale backup update <database> <branch> <backup-id> --org <org> \
+  --protected=true \
+  --format json
+
+# Verify persisted protected state
+pscale backup show <database> <branch> <backup-id> --org <org> --format json
+```
+
+Unprotecting a backup can make later deletion possible. Read back the organization, database, branch, backup ID, current state, requested state, and retention/recovery reason before changing it.
 
 ## Related Skills
 

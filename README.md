@@ -7,7 +7,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 🎯 What This Skill Provides
 
-- **17 sub-skills** covering all major `pscale` commands
+- **18 sub-skills** covering all major `pscale` commands
 - **3 automation scripts** for common workflows (create branch, deploy schema, sync)
 - **Decision trees** for common questions (branch vs deploy request, tokens vs passwords)
 - **Troubleshooting sections** for self-service problem solving
@@ -18,7 +18,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ### Agent Skills (`npx skills`)
 
-This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 17 standalone `pscale-*` skills.
+This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 18 standalone `pscale-*` skills.
 Each skill lives in its own directory with its own `SKILL.md`; there is intentionally no root `SKILL.md` so Agent Skills can discover every sibling instead of stopping at the repository root.
 
 ```bash
@@ -112,11 +112,12 @@ pscale branch create my-database feature-branch --from main
 | **pscale-inspect** | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostics | `pscale inspect all/locks/seq-scans/bloat` |
 | **pscale-import-d1** | Import Cloudflare D1 exports into PlanetScale Postgres | `pscale import d1 lint/start/verify` |
 | **pscale-backup** | Create/restore backups and manage scheduled policies | `pscale backup create/list/policy` |
+| **pscale-billing** | Inspect invoices and manage organization payment methods | `pscale billing payment-method show/update/delete`, `pscale billing invoice list/show/line-items` |
 | **pscale-audit-log** | List audit events and export authentication attempts | `pscale audit-log list/auth-attempts` |
 | **pscale-password** | Connection passwords and Postgres roles, including Vitess read-only-region credentials, Postgres connection targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role list/get/default` |
 | **pscale-pgbouncer** | Dedicated PostgreSQL PgBouncer lifecycle and asynchronous resizing | `pscale pgbouncer list/show/create/resize/delete` |
-| **pscale-org** | Switch organizations and inspect or manage members | `pscale org list/switch/member` |
-| **pscale-service-token** | CI/CD authentication | `pscale service-token create` |
+| **pscale-org** | Switch organizations, update settings, and inspect or manage members/teams | `pscale org list/switch/update/member/team` |
+| **pscale-service-token** | CI/CD authentication | `pscale service-token create/show` |
 
 ## 🛠️ Automation Scripts
 
@@ -228,9 +229,18 @@ pscale insights errors my-db main --org my-org --period 1h --format json
 pscale insights errors show my-db main <full-error-fingerprint> --org my-org --period 1h --format json
 pscale insights anomalies show my-db main <anomaly-id> --org my-org --format json
 pscale insights recommendations my-db --org my-org --format json
+pscale insights recommendations show my-db <number> --org my-org --format json
+pscale insights queries show my-db main <query-id> --org my-org --format json
+pscale insights queries summary my-db main <fingerprint> --org my-org --keyspace <keyspace> --format json
+pscale insights queries traffic-budgets my-db main <fingerprint> --org my-org --keyspace <keyspace> --format json
 
 # Inventory Postgres Traffic Control budgets and their rules
 pscale traffic-control budget list my-db main --org my-org --format json
+
+# Drill into specialized metrics for queries, tables, or tablets
+pscale metrics queries my-db main --org my-org --metric latency_p99 --query-id <fingerprint-keyspace> --period 1h --format json
+pscale metrics tables my-db main --org my-org --format json
+pscale metrics tablets my-db main --org my-org --metric vreplication_lag --workflow <workflow> --period 1h --format json
 ```
 
 `pscale metrics` provides historical/current branch telemetry, `pscale insights` provides query-fingerprint analysis, and `pscale inspect` provides live target-specific checks. For inspection, choose `--dbname` for PostgreSQL or `--keyspace <keyspace>/<shard>` for Vitess when defaults are not the intended target. Treat recommendation DDL as a proposal that still requires review and explicit approval.

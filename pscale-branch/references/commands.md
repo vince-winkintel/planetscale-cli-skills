@@ -1409,3 +1409,143 @@ Global Flags:
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## pscale branch create (v0.327.0)
+
+All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+```text
+Create a new branch from a database
+
+Usage:
+  pscale branch create <source-database> <branch> [options] [flags]
+
+Aliases:
+  create, b
+
+Flags:
+      --cluster-size string    Cluster size for the branch. Defaults to PS_DEV for regular branches, or PS-10 for branches created from a backup or with seed-data. Use 'pscale size cluster list' to see the valid sizes.
+      --from string            Parent branch to create the new branch from. Cannot be used with --restore unless --restore-point is set.
+  -h, --help                   help for create
+      --major-version string   For PostgreSQL databases, the PostgreSQL major version to use for the branch. Defaults to the major version of the parent branch if it exists or the database's default branch major version. Ignored for branches restored from backups.
+      --max-storage int        Maximum storage size in bytes for autoscaling
+      --min-storage int        Minimum storage size in bytes
+      --region string          Region for the branch to be created in.
+      --restore string         ID of Backup to restore into branch.
+      --restore-point string   For PostgreSQL databases, restore from a point-in-time recovery timestamp (e.g. 2023-01-01T00:00:00Z). Requires --restore or --from.
+      --seed-data              Add seed data using the Data Branching™ feature. This branch will be created with the same resources as the base branch.
+      --wait                   Wait until the branch is ready
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch switchover (v0.327.0)
+
+All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+```text
+Switch over the primary of a Postgres branch. Postgres only.
+
+On a branch with replicas the primary steps down and a replica is promoted in
+its place; use --candidate to pick the replica, otherwise one is selected
+automatically. A branch running a single instance has nothing to promote, so
+that instance is restarted in place and the branch is unreachable while it
+comes back. Writes are briefly interrupted while the switch completes.
+
+Usage:
+  pscale branch switchover <database> <branch> [flags]
+  pscale branch switchover [command]
+
+Available Commands:
+  list        List switchovers for a Postgres branch
+  show        Show a switchover for a Postgres branch
+
+Flags:
+      --candidate string   Name of the replica to promote, as returned by 'branch infra'. Omit to select automatically. Only applies to branches with replicas
+  -h, --help               help for switchover
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale branch switchover [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch switchover list
+
+All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+```text
+List switchovers for a Postgres branch
+
+Usage:
+  pscale branch switchover list <database> <branch> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+  -h, --help           help for list
+      --page int       Page number to fetch
+      --per-page int   Number of results per page (default 100)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch switchover show
+
+All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+```text
+Show a switchover for a Postgres branch
+
+Usage:
+  pscale branch switchover show <database> <branch> <id> [flags]
+
+Flags:
+  -h, --help   help for show
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```

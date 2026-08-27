@@ -1,6 +1,6 @@
 ---
 name: pscale-service-token
-description: Create, list, and manage service tokens for CI/CD authentication. Use when setting up automated deployments, configuring CI/CD pipelines (GitHub Actions, GitLab CI, CircleCI, etc.), creating non-interactive authentication, or rotating CI/CD credentials. Preferred over passwords for production automation. Triggers on service token, CI/CD auth, automation token, pipeline authentication.
+description: Create, show, list, and manage service tokens for CI/CD authentication. Use when setting up automated deployments, configuring CI/CD pipelines (GitHub Actions, GitLab CI, CircleCI, etc.), creating non-interactive authentication, inspecting service token metadata, or rotating CI/CD credentials. Preferred over passwords for production automation. Triggers on service token, service-token show, CI/CD auth, automation token, pipeline authentication.
 ---
 
 # pscale service-token
@@ -15,6 +15,9 @@ pscale service-token create --org <org>
 
 # List service tokens
 pscale service-token list --org <org>
+
+# Show safe metadata for one service token
+pscale service-token show <token-id> --org <org> --format json
 
 # Delete service token
 pscale service-token delete <token-id> --org <org>
@@ -75,6 +78,17 @@ pscale service-token create --org my-org
 # 4. Delete old token
 pscale service-token delete <old-token-id> --org my-org
 ```
+
+### Inspect a service token
+
+`pscale service-token show` returns safe service-token metadata such as ID, name, creation time, and last-used time. It does not print the token secret and does not include access grants; use `show-access` when grants are needed.
+
+```bash
+pscale service-token show <token-id> --org <org> --format json
+pscale service-token show-access <token-id> --org <org> --format json
+```
+
+Treat token IDs and grant details as sensitive operational metadata. Never ask the user to paste a service token secret into chat; use environment variables or a secrets manager.
 
 ## Troubleshooting
 
