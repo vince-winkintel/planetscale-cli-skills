@@ -190,7 +190,7 @@ Current dump behavior propagates cursor-close and worker errors as a non-zero ex
 
 ### Manage Vitess read-only regions
 
-Use `pscale database regions list <database>` to discover regions currently available to a database, `pscale database read-only-regions list <database>` to discover configured read-only regions, and `pscale size cluster list` to discover valid cluster sizes. The database-scoped read-only-region command is Vitess-only; for PostgreSQL databases the CLI rejects it before calling the API. Add/update require at least one sizing flag supported by the API. Removing a region can disrupt region-scoped readers, dumps, and passwords: inventory those dependencies, confirm the exact keyspace and region, obtain approval, run the removal, and verify the remaining list.
+Use `pscale database regions list <database>` to discover regions currently available to a database, `pscale database read-only-regions list <database>` to discover configured read-only regions, and `pscale size cluster list` to discover valid cluster sizes. The database-scoped read-only-region command is Vitess-only; for PostgreSQL databases the CLI fetches the database to determine its engine and rejects it before calling the read-only-regions endpoint. Add/update require at least one sizing flag supported by the API. Removing a region can disrupt region-scoped readers, dumps, and passwords: inventory those dependencies, confirm the exact keyspace and region, obtain approval, run the removal, and verify the remaining list.
 
 ```bash
 pscale database regions list <database> --org <org> --format json

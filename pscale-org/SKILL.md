@@ -92,9 +92,10 @@ Treat updates and removals as external access-control writes. `--force` on remov
 
 ### Update organization settings
 
-`pscale org update` sends only flags explicitly supplied. It can change billing email, IDP-managed-role behavior, and billing spend alerts. These are organization-wide settings; inspect the current organization first, read back the proposed diff, and obtain explicit approval before running the update.
+`pscale org update` sends only flags explicitly supplied. It can change billing email, IDP-managed-role behavior, and billing spend alerts. These are organization-wide settings; confirm the exact target organization and proposed diff, and obtain explicit approval before running the update.
 
 ```bash
+# Optional: confirms only the locally active organization name; it does not inspect settings
 pscale org show --format json
 
 # After approval for the exact org and values
@@ -104,8 +105,8 @@ pscale org update --org <org> \
   --spend-alert-amount 2500 \
   --format json
 
-# Verify returned state
-pscale org show --format json
+# Verification: the update's JSON response above returns the resulting settings;
+# `pscale org show` only prints the locally active org name and ignores --org
 ```
 
 `--spend-alert-amount` must be a valid monthly amount. Do not claim that disabling spend alerts clears the stored amount; the CLI validates contradictory combinations rather than silently dropping them.

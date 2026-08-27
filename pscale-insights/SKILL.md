@@ -75,7 +75,7 @@ pscale insights queries traffic-budgets <database> <branch> <fingerprint> \
   --org <org> --keyspace <keyspace> --page 1 --per-page 25 --format json
 ```
 
-Use the exact query ID, fingerprint, and keyspace returned by Insights. The CLI rejects short or malformed query identifiers that the API would otherwise ignore; if a command returns no data, verify the selector before concluding the query had no activity or budgets.
+Use the exact query ID, fingerprint, and keyspace returned by Insights. These Insights commands forward identifiers to the API as-is, and metrics query selectors are also forwarded opaquely; if a command returns no data or not-found, verify the selector before concluding the query had no activity or budgets.
 
 ## Error and anomaly details
 

@@ -237,9 +237,9 @@ pscale insights queries traffic-budgets my-db main <fingerprint> --org my-org --
 # Inventory Postgres Traffic Control budgets and their rules
 pscale traffic-control budget list my-db main --org my-org --format json
 
-# Drill into specialized metrics for queries, tables, tablets, or tags
+# Drill into specialized metrics for queries, tables, or tablets
 pscale metrics queries my-db main --org my-org --metric latency_p99 --query-id <fingerprint-keyspace> --period 1h --format json
-pscale metrics tables my-db main --org my-org --metric data_size --table users --period 1d --format json
+pscale metrics tables my-db main --org my-org --format json
 pscale metrics tablets my-db main --org my-org --metric vreplication_lag --workflow <workflow> --period 1h --format json
 ```
 

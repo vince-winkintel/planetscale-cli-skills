@@ -70,12 +70,8 @@ pscale metrics queries <database> <branch> --org <org> \
   --period 1h \
   --format json
 
-# Table storage metrics
-pscale metrics tables <database> <branch> --org <org> \
-  --metric data_size \
-  --table users \
-  --period 1d \
-  --format json
+# Table storage metrics (no filter flags; JSON preserves the untyped storage-metrics API response)
+pscale metrics tables <database> <branch> --org <org> --format json
 
 # Tablet metrics, including workflow-scoped VReplication lag
 pscale metrics tablets <database> <branch> --org <org> \
@@ -92,7 +88,7 @@ pscale metrics tags <database> <branch> --org <org> \
   --format json
 ```
 
-At least one `--metric` is required. `metrics queries` requires a query selector such as `--query-id`; do not pass the short Insights display ID when the API expects the full fingerprint/keyspace selector. `metrics tags` requires at least one `--tag-set`. Traffic Control filters such as `--budget-id` and `--rule-id` should come from the current branch. Workflow filtering is intended for VReplication lag and should use the workflow name visible on the branch.
+For `queries`, `tablets`, and `tags`, at least one `--metric` is required; `tables` and `keyspace-tables` accept no local filter flags and preserve the untyped storage-metrics API response. `metrics queries` requires a query selector such as `--query-id`, or `--fingerprint` with `--keyspace`; query selectors are forwarded opaquely, so use exact IDs from current command output rather than short display IDs. `metrics tags` requires at least one `--tag-set`. Traffic Control filters such as `--budget-id` and `--rule-id` should come from the current branch. Workflow filtering is intended for VReplication lag and should use the workflow name visible on the branch.
 
 ## Query current values
 

@@ -170,7 +170,7 @@ See `scripts/create-branch-for-mr.sh` for automation.
 
 `pscale branch create --restore-point` creates a new PostgreSQL branch from a point-in-time recovery timestamp. This is a write that can allocate billable resources. Confirm the organization, database, source branch, timestamp, target branch name, cluster size, and retention/recovery objective with the user before running it.
 
-If `--cluster-size` is omitted, a restore-point branch defaults to `PS-10`, a billable non-development size, rather than `PS_DEV`; always pass an explicit size. `--from` is optional and, when omitted, PlanetScale resolves the database's default branch as the recovery source; prefer passing the source branch explicitly in automation unless the user intentionally wants the default branch.
+If `--cluster-size` is omitted, a restore-point branch defaults to `PS-10`, a billable non-development size, rather than `PS_DEV`; always pass an explicit size. `--from` may be omitted only when `--restore <backup-id>` is supplied; with `--restore-point` and no `--restore`, the CLI requires `--from` and resolves the covering backup from that parent branch and timestamp. Prefer passing the source branch explicitly in automation.
 
 ```bash
 # Inspect the intended source branch and its current state first
@@ -188,7 +188,7 @@ pscale branch create <database> <new-branch> --org <org> \
 pscale branch show <database> <new-branch> --org <org> --format json
 ```
 
-Use an absolute RFC 3339 timestamp such as `2026-08-25T13:30:00Z`; do not infer a timezone or silently round the requested recovery point. The flag is PostgreSQL-only. The CLI now permits `--restore <backup-id>` with `--restore-point` even when `--from` is omitted. With `--restore-point`, it resolves the backup needed by the API from the parent branch and timestamp; if the user supplied a specific backup ID, read back both the backup and timestamp before creating the branch. The CLI still rejects combining `--restore-point` with `--seed-data`. If creation fails or times out, treat the outcome as unconfirmed and inspect the target branch before retrying.
+Use an absolute RFC 3339 timestamp such as `2026-08-25T13:30:00Z`; do not infer a timezone or silently round the requested recovery point. The flag is PostgreSQL-only. The CLI permits `--restore <backup-id>` with `--restore-point` even when `--from` is omitted; in that mode, the recovery source is the supplied backup. Without `--restore`, the CLI resolves the backup needed by the API from the required parent branch and timestamp. If the user supplied a specific backup ID, read back both the backup and timestamp before creating the branch. The CLI still rejects combining `--restore-point` with `--seed-data`. If creation fails or times out, treat the outcome as unconfirmed and inspect the target branch before retrying.
 
 ### Schema Comparison
 
