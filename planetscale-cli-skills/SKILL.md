@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations and members, databases, branches, PostgreSQL point-in-time recovery, branch maintenance, extension catalogs, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, keyspaces, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, Postgres role connection targets, Postgres IP restrictions, read-only regions, backups, audit logs, service tokens, passwords, binary-native agent guidance, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, restore point, point-in-time recovery, PITR, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, pscale role get, deploy request, deploy queue, unblock deploy, aggressive cutover, branch maintenance, branch extensions, branch switchover, traffic control, force cutover, storage readiness, keyspace routing rules, database settings, database branch, VTGate resize, pgbouncer, backup policy, database diagnostics, org member, or pscale import d1.
+description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations, teams, members, billing, invoices, payment methods, databases, branches, PostgreSQL point-in-time recovery, branch maintenance, extension catalogs, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, keyspaces, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, Postgres role connection targets, Postgres IP restrictions, read-only regions, backups, audit logs, service tokens, passwords, binary-native agent guidance, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, restore point, point-in-time recovery, PITR, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, pscale role get, deploy request, deploy queue, unblock deploy, aggressive cutover, branch maintenance, branch extensions, branch switchover, traffic control, force cutover, storage readiness, keyspace routing rules, database settings, database branch, VTGate resize, pgbouncer, billing, invoice, payment method, backup policy, database diagnostics, org member, org team, or pscale import d1.
 requirements:
   binaries:
     - pscale
@@ -15,11 +15,11 @@ metadata:
   openclaw:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
-      Scope is limited to: database and branch management, maintenance schedule inspection, dedicated PostgreSQL PgBouncers, Postgres Traffic Control, VTGate sizing, Vitess read-only-region access, deploy requests,
+      Scope is limited to: database and branch management, maintenance schedule inspection, dedicated PostgreSQL PgBouncers, Postgres Traffic Control, VTGate sizing, Vitess read-only-region access, billing inspection/payment-method management, deploy requests,
       non-interactive SQL queries, historical/current performance metrics, query insights, read-only diagnostics, Cloudflare D1 imports, backups, audit-log exports, passwords,
       authentication-attempt exports, service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, maintenance inspection, dedicated PgBouncers, Postgres Traffic Control, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
+      - Run pscale CLI commands to manage PlanetScale databases, branches, maintenance inspection, dedicated PgBouncers, Postgres Traffic Control, billing, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -81,11 +81,12 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostic checks |
 | **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
 | **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; manage scheduled backup policies |
+| **billing** | `pscale-billing` | Inspect invoices and manage organization payment methods with sensitive billing-data safeguards |
 | **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
 | **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions |
 | **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers |
-| **org** | `pscale-org` | List, show, switch organizations, and inspect or manage members |
-| **service-token** | `pscale-service-token` | Create, manage CI/CD service tokens |
+| **org** | `pscale-org` | List, show, switch, update organizations, and inspect or manage members and teams |
+| **service-token** | `pscale-service-token` | Create, show, and manage CI/CD service tokens |
 
 ## Decision Trees
 
@@ -253,9 +254,16 @@ pscale insights tags summaries <database> <branch> --org <org> --tags app --sort
 pscale insights errors show <database> <branch> <full-error-fingerprint> --org <org> --format json
 pscale insights anomalies show <database> <branch> <anomaly-id> --org <org> --format json
 pscale insights recommendations <database> --org <org> --format json
+pscale insights recommendations show <database> <number> --org <org> --format json
+pscale insights queries show <database> <branch> <query-id> --org <org> --format json
+pscale insights queries summary <database> <branch> <fingerprint> --org <org> --keyspace <keyspace> --format json
 
 # Postgres Traffic Control inventory
 pscale traffic-control budget list <database> <branch> --org <org> --format json
+
+# Organization billing inspection
+pscale billing invoice list --org <org> --page 1 --per-page 25 --format json
+pscale billing payment-method show --org <org> --format json
 
 # Cloudflare D1 import dry-run
 pscale import d1 start <database> <branch> --input ./d1-export.sql --dry-run --format json

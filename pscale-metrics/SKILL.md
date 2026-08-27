@@ -1,6 +1,6 @@
 ---
 name: pscale-metrics
-description: Query PlanetScale historical and current branch metrics or produce engine-aware performance reports with pscale. Use when investigating workload, latency, errors, traffic control, query efficiency, network, storage, CPU, memory, IOPS, replication, WAL, PgBouncer, pod health, or backup activity over time. Triggers on pscale metrics, PlanetScale metrics, performance report, historical metrics, current metrics, latency trend, storage utilization, CPU utilization, replication lag, WAL metrics, PgBouncer metrics.
+description: Query PlanetScale historical and current branch metrics or produce engine-aware performance reports with pscale. Use when investigating workload, latency, errors, traffic control, query efficiency, query/table/tablet/tag time series, network, storage, CPU, memory, IOPS, replication, WAL, PgBouncer, pod health, or backup activity over time. Triggers on pscale metrics, PlanetScale metrics, performance report, historical metrics, current metrics, specialized metrics, query metrics, table metrics, tablet metrics, tag metrics, latency trend, storage utilization, CPU utilization, replication lag, WAL metrics, PgBouncer metrics.
 ---
 
 # pscale metrics
@@ -57,6 +57,42 @@ pscale metrics show <database> <branch> \
 At least one `--metric` is required; repeat it or pass comma-separated names. When `--period` is omitted, `show` defaults to `12h`. Human output summarizes each series with latest/minimum/average/maximum values and a compact trend. JSON preserves the complete API response. CSV preserves each timestamped sample and its series labels.
 
 Use optional filters only when the target is known: `--tablet-type`, `--keyspace`, `--shard`, `--role`, `--container`, `--pod`/`--pods`, `--query-id`, `--fingerprint`, `--budget-id`, `--rule-id`, or `--search`. Narrowing filters can legitimately produce an empty result; verify scope before interpreting emptiness as healthy behavior.
+
+## Specialized metrics
+
+Use the specialized commands when the investigation starts from an Insights query, table, tablet, or tag scope. They forward opaque selectors to the API, so use IDs exactly as returned by `pscale insights`, `pscale metrics`, or branch/tablet discovery commands.
+
+```bash
+# Query-pattern metrics; query IDs are fingerprint-keyspace selectors
+pscale metrics queries <database> <branch> --org <org> \
+  --metric latency_p99 \
+  --query-id <fingerprint-keyspace> \
+  --period 1h \
+  --format json
+
+# Table storage metrics
+pscale metrics tables <database> <branch> --org <org> \
+  --metric data_size \
+  --table users \
+  --period 1d \
+  --format json
+
+# Tablet metrics, including workflow-scoped VReplication lag
+pscale metrics tablets <database> <branch> --org <org> \
+  --metric vreplication_lag \
+  --workflow <workflow-name> \
+  --period 1h \
+  --format json
+
+# Query-tag metrics; repeat --tag-set for independent series
+pscale metrics tags <database> <branch> --org <org> \
+  --metric latency_p99 \
+  --tag-set Busername=alice,Senv=production \
+  --period 1h \
+  --format json
+```
+
+At least one `--metric` is required. `metrics queries` requires a query selector such as `--query-id`; do not pass the short Insights display ID when the API expects the full fingerprint/keyspace selector. `metrics tags` requires at least one `--tag-set`. Traffic Control filters such as `--budget-id` and `--rule-id` should come from the current branch. Workflow filtering is intended for VReplication lag and should use the workflow name visible on the branch.
 
 ## Query current values
 

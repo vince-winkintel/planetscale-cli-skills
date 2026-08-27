@@ -1,7 +1,16 @@
-1.0.19
+1.0.20
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.327.0
+  - Reviewed the upstream release and compare `v0.325.0...v0.327.0` on 2026-08-26.
+  - Added standalone billing guidance for payment-method and invoice commands, with sensitive-data handling, pagination, and destructive payment-method deletion gates.
+  - Added guidance for Insights query detail/summary/traffic-budgets and recommendation show, specialized metrics query/table/tablet/tag commands, backup protected-status updates, database region discovery, organization update/team management, service-token show, switchover history, and SQL table/vertical output.
+  - Re-captured affected help surfaces from the checksum-verified v0.327.0 macOS arm64 release binary; archive SHA-256 verified as `955886f8e533cfe9b57979d5b9463b49620c41001c2654c2dc56da6495dd341d`.
+- PlanetScale CLI v0.326.0
+  - Reviewed the upstream release and compare as part of `v0.325.0...v0.327.0` on 2026-08-26.
+  - Updated PostgreSQL PITR branch-creation guidance for restore-point backup resolution and the optional `--from` behavior when `--restore` is combined with `--restore-point`.
+  - Added the billing payment-method command family coverage that first appeared in v0.326.0.
 - PlanetScale CLI v0.325.0
   - Reviewed the upstream release and compare `v0.324.0...v0.325.0` on 2026-08-25.
   - Added guarded PostgreSQL point-in-time recovery guidance for `pscale branch create --restore-point`, including source-branch inspection, RFC 3339 timestamps, explicit approval, readiness waiting, and post-create verification.
