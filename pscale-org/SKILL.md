@@ -144,7 +144,7 @@ pscale org update --org <org> --idp-sso-managed-roles=true --format json
 pscale org update --org <org> --idp-managed-roles=true --format json
 ```
 
-`configure`, `directory enable`, and `domain verify` return `portal_url`, `browser_opened`, and `next_steps`. If `browser_opened` is false, open `portal_url` through the approved browser flow; do not treat URL creation as proof that the portal work completed. `enable --format json` does not open the verification portal and instead includes `domain_verification_url` when one is available. After each portal step, re-run `sso show`; after domain verification, also re-run `domain list` and `domain show <domain-id>`.
+`configure`, `directory enable`, and `domain verify` return `portal_url`, `browser_opened`, and `next_steps`. If `browser_opened` is false, open `portal_url` through the approved browser flow; do not treat URL creation as proof that the portal work completed. With `domain verify --wait --format json`, capture the portal payload from stderr; stdout is reserved for the final domain object, while the non-waiting JSON flow prints the portal payload to stdout. `enable --format json` does not open the verification portal and instead includes `domain_verification_url` when one is available. After each portal step, re-run `sso show`; after domain verification, also re-run `domain list` and `domain show <domain-id>`.
 
 Without `--wait`, `domain verify` cannot identify the new domain because the portal call returns only a URL. With `--wait`, the CLI snapshots the existing domains, waits for a new domain ID to appear, and then polls it until `verified` or `failed`; a timeout or interrupted command is an unconfirmed outcome, so inspect `domain list` before retrying.
 

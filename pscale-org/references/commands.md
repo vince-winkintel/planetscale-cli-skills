@@ -1,4 +1,4 @@
-List, show, switch, and update organizations; manage organization SSO, members, and teams.
+List, show, switch, and update organizations; manage organization SSO, members, and teams. The complete SSO command family is documented in [`sso-commands.md`](sso-commands.md).
 
 Unless a section says otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
