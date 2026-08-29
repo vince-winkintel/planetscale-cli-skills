@@ -1,27 +1,25 @@
-Create, list, show, update, renew, and delete branch passwords.
+# Organization SSO command reference
 
-Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. Role surfaces are included because Postgres branches use roles instead of Vitess passwords.
+All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
-## pscale password
+## pscale org sso
 
 ```text
-Create, list, update, and delete branch passwords.
-
-This command is only supported for Vitess databases.
+Manage organization SSO
 
 Usage:
-  pscale password [command]
+  pscale org sso [command]
 
 Available Commands:
-  create      Create password to access a branch's data
-  delete      Delete a branch password
-  list        List all passwords of a database
-  renew       Renew a branch password
-  show        Show a branch password
-  update      Update a branch password's name or IP restrictions
+  configure   Open the identity provider setup portal
+  directory   Enable or disable directory sync
+  disable     Disable organization SSO
+  domain      List, show, verify, and delete SSO email domains
+  enable      Enable organization SSO
+  show        Show organization SSO status
 
 Flags:
-  -h, --help         help for password
+  -h, --help         help for sso
       --org string   The organization for the current user
 
 Global Flags:
@@ -34,28 +32,21 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale password [command] --help" for more information about a command.
+Use "pscale org sso [command] --help" for more information about a command.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password create
+## pscale org sso show
 
 ```text
-Create password to access a branch's data
+Show organization SSO status
 
 Usage:
-  pscale password create <database> <branch> <name> [flags]
-
-Aliases:
-  create, p
+  pscale org sso show [flags]
 
 Flags:
-  -h, --help                      help for create
-      --read-only-region string   Create a password scoped to a Vitess read-only region (region slug, display name, or id). List regions with: pscale keyspace read-only-regions <database> <branch> <keyspace>.
-      --replica                   When enabled, the password will route all reads to the branch's primary replicas and all read-only regions.
-      --role string               Role defines the access level, allowed values are: reader, writer, readwriter, admin. Defaults to 'reader' for replica and read-only region passwords, otherwise defaults to 'admin'.
-      --ttl duration              TTL defines the time to live for the password. Durations such as "30m", "24h", or bare integers such as "3600" (seconds) are accepted. The default TTL is 0s, which means the password will never expire. (default 0s)
+  -h, --help   help for show
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -71,26 +62,210 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-`--read-only-region` and `--replica` are mutually exclusive. A region-scoped password defaults to `reader`, requires the selected region to be ready, and is labeled as a read-only-region credential in create output.
-
-## pscale password list
+## pscale org sso enable
 
 ```text
-List all passwords of a database
+Enable organization SSO
 
 Usage:
-  pscale password list <database> [branch] [flags]
+  pscale org sso enable [flags]
+
+Flags:
+  -h, --help   help for enable
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale org sso configure
+
+```text
+Return a URL for configuring the identity provider. Requires SSO to be enabled and at least one verified domain.
+
+Usage:
+  pscale org sso configure [flags]
+
+Flags:
+  -h, --help   help for configure
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale org sso disable
+
+```text
+Disable organization SSO
+
+Usage:
+  pscale org sso disable [flags]
+
+Flags:
+      --force   Disable SSO without confirmation
+  -h, --help    help for disable
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale org sso directory
+
+```text
+Enable or disable directory sync
+
+Usage:
+  pscale org sso directory [command]
+
+Available Commands:
+  disable     Disable directory sync
+  enable      Open the directory sync setup portal
+
+Flags:
+  -h, --help   help for directory
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale org sso directory [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale org sso directory enable
+
+```text
+Open the directory sync setup portal
+
+Usage:
+  pscale org sso directory enable [flags]
+
+Flags:
+  -h, --help   help for enable
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale org sso directory disable
+
+```text
+Disable directory sync for the organization. Non-admin directory members are removed.
+
+Usage:
+  pscale org sso directory disable [flags]
+
+Flags:
+      --force   Disable directory sync without confirmation
+  -h, --help    help for disable
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale org sso domain
+
+```text
+List, show, verify, and delete SSO email domains
+
+Usage:
+  pscale org sso domain [command]
+
+Available Commands:
+  delete      Delete an SSO email domain
+  list        List SSO email domains
+  show        Show an SSO email domain
+  verify      Open the domain verification portal
+
+Flags:
+  -h, --help   help for domain
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale org sso domain [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale org sso domain list
+
+```text
+List SSO email domains
+
+Usage:
+  pscale org sso domain list [flags]
 
 Aliases:
   list, ls
 
 Flags:
-  -h, --help            help for list
-      --name string     Filter passwords by name using a substring match
-      --page int        Page number to fetch
-      --per-page int    Number of results per page (default 100)
-      --status string   Filter passwords by status (active, renewable, or expired)
-  -w, --web             List passwords in your web browser.
+  -h, --help   help for list
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -106,20 +281,16 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password show
+## pscale org sso domain show
 
 ```text
-Show a branch password.
-
-Only metadata is returned. The password itself is shown once, when it is
-created or renewed, and cannot be retrieved afterwards.
+Show an SSO email domain
 
 Usage:
-  pscale password show <database> <branch> [<password-id>] [flags]
+  pscale org sso domain show <domain-id> [flags]
 
 Flags:
-  -h, --help          help for show
-      --name string   Show password by name instead of ID
+  -h, --help   help for show
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -135,27 +306,18 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password update
+## pscale org sso domain verify
 
 ```text
-Update a branch password's name or IP restrictions.
-
-This does not change the password itself. To rotate a password, create a new
-one and delete the old one.
+Open the domain verification portal
 
 Usage:
-  pscale password update <database> <branch> [<password-id>] [flags]
-
-Examples:
-  pscale password update mydb main pscale_pw_xxx --new-name reporting
-  pscale password update mydb main --name reporting --cidrs 10.0.0.0/8,192.168.1.1/32
-  pscale password update mydb main --name reporting --cidrs ""
+  pscale org sso domain verify [flags]
 
 Flags:
-      --cidrs strings     Replace the IP addresses and CIDR ranges allowed to use this password. Pass an empty value to remove all restrictions
-  -h, --help              help for update
-      --name string       Update password by name instead of ID
-      --new-name string   New name for the password
+  -h, --help                    help for verify
+      --wait                    After opening the portal, wait until a domain is verified
+      --wait-timeout duration   Maximum time to wait with --wait (default 10m0s)
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -171,204 +333,20 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale password renew
+## pscale org sso domain delete
 
 ```text
-Renew a branch password
+Delete an SSO email domain
 
 Usage:
-  pscale password renew <database> <branch> <password-id> [flags]
-
-Flags:
-  -h, --help   help for renew
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale password delete
-
-```text
-Delete a branch password
-
-Usage:
-  pscale password delete <database> <branch> [<password-id>] [flags]
+  pscale org sso domain delete <domain-id> [flags]
 
 Aliases:
   delete, rm
 
 Flags:
-      --force         Delete a password without confirmation
-  -h, --help          help for delete
-      --name string   Delete password by name instead of ID
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale role
-
-```text
-Manage database roles for a Postgres database branch.
-
-This command is only supported for Postgres databases.
-
-Usage:
-  pscale role [command]
-
-Available Commands:
-  create        Create a new role for a Postgres database branch
-  default       Show the default postgres role
-  delete        Delete a role
-  get           Retrieve information about a specific role
-  list          List all roles for a Postgres database branch
-  reassign      Reassign objects owned by a role to another role
-  renew         Renew a role's expiration
-  reset         Reset a role's password
-  reset-default Reset the credentials for the default `postgres` role
-  update        Update a role's name
-
-Flags:
-  -h, --help         help for role
-      --org string   The organization for the current user
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Use "pscale role [command] --help" for more information about a command.
-
-Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale role default
-
-```text
-Show the default postgres role for a branch.
-
-This does not rotate credentials. Use 'pscale role reset-default' to issue a
-new password for the default role.
-
-Usage:
-  pscale role default <database> <branch> [flags]
-
-Flags:
-  -h, --help   help for default
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale role reset-default
-
-```text
-This command resets the credentials for the default `postgres` role in the database, allowing you to reconfigure access. Any connections using the `postgres` role will need to be updated with the new credentials.
-
-Usage:
-  pscale role reset-default <database> <branch> [flags]
-
-Flags:
-      --force   Force reset without confirmation
-  -h, --help    help for reset-default
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale role get
-
-This help fence is exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.
-
-```text
-Retrieve information about a specific role
-
-Usage:
-  pscale role get <database> <branch> <role-id> [flags]
-
-Flags:
-      --bouncer string             Return connection details for a PgBouncer (name).
-  -h, --help                       help for get
-      --read-only-replica string   Return connection details for a read-only replica (name).
-      --replica                    Return connection details for a branch replica.
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --org string                The organization for the current user
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
-## pscale role list (Postgres equivalent)
-
-```text
-List all roles for a Postgres database branch
-
-Usage:
-  pscale role list <database> <branch> [flags]
-
-Aliases:
-  list, ls
-
-Flags:
-  -h, --help            help for list
-      --name string     Filter roles by name using a substring match
-      --page int        Page number to fetch
-      --per-page int    Number of results per page (default 100)
-      --status string   Filter roles by status (active, renewable, disabled, or expired)
-  -w, --web             List roles in your web browser.
+      --force   Delete the domain without confirmation
+  -h, --help    help for delete
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

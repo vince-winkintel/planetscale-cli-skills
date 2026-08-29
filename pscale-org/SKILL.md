@@ -1,6 +1,6 @@
 ---
 name: pscale-org
-description: List, show, switch, update PlanetScale organizations, and inspect or manage organization members and teams. Use when managing multiple organizations, switching between accounts, viewing organization details, changing billing email/spend alerts/IDP-managed roles, listing members, showing a member by email or user ID, updating member roles, removing members, creating/updating/deleting teams, adding/removing team members, or troubleshooting organization access. Triggers on org, organization, switch org, list orgs, org update, spend alert, billing email, IDP roles, org member, organization member, member role, remove member, org team, team member.
+description: List, show, switch, update PlanetScale organizations, manage organization SSO and directory sync, and inspect or manage organization members and teams. Use when managing multiple organizations, switching between accounts, viewing organization details, enabling/configuring/disabling SSO, verifying SSO email domains, enabling/disabling directory sync, changing billing email/spend alerts/IdP-managed roles, listing members, showing a member by email or user ID, updating member roles, removing members, creating/updating/deleting teams, adding/removing team members, or troubleshooting organization access. Triggers on org, organization, switch org, list orgs, org update, organization SSO, SSO domain, domain verify, directory sync, spend alert, billing email, IdP roles, idp-sso-managed-roles, org member, organization member, member role, remove member, org team, team member.
 ---
 
 # pscale org
@@ -30,6 +30,10 @@ pscale org member remove <email-or-user-id> --org <org> --format json
 # Update organization settings only after explicit approval
 pscale org update --org <org> --billing-email billing@example.com --format json
 pscale org update --org <org> --spend-alert --spend-alert-amount 2500 --format json
+
+# Inspect SSO state and follow the returned next_steps deliberately
+pscale org sso show --org <org> --format json
+pscale org sso domain list --org <org> --format json
 
 # Manage teams only after explicit approval for writes
 pscale org team list --org <org> --format json
@@ -92,7 +96,7 @@ Treat updates and removals as external access-control writes. `--force` on remov
 
 ### Update organization settings
 
-`pscale org update` sends only flags explicitly supplied. It can change billing email, IDP-managed-role behavior, and billing spend alerts. These are organization-wide settings; confirm the exact target organization and proposed diff, and obtain explicit approval before running the update.
+`pscale org update` sends only flags explicitly supplied. It can change billing email, identity-provider-managed-role behavior, and billing spend alerts. These are organization-wide settings; confirm the exact target organization and proposed diff, and obtain explicit approval before running the update.
 
 ```bash
 # Optional: confirms only the locally active organization name; it does not inspect settings
@@ -109,7 +113,61 @@ pscale org update --org <org> \
 # `pscale org show` only prints the locally active org name and ignores --org
 ```
 
-`--spend-alert-amount` must be a valid monthly amount. Do not claim that disabling spend alerts clears the stored amount; the CLI validates contradictory combinations rather than silently dropping them.
+`--idp-sso-managed-roles` controls roles from the SSO profile; `--idp-managed-roles` controls roles from directory sync. They are mutually exclusive when enabled: enabling either one explicitly turns the other off, and enabling both in one command is rejected. Passing one as `false` leaves the other setting unchanged. `--spend-alert-amount` must be a valid monthly amount. Do not claim that disabling spend alerts clears the stored amount; the CLI validates contradictory combinations rather than silently dropping them.
+
+### Manage organization SSO
+
+Always pass an explicit `--org` for SSO commands instead of relying on the locally active organization. Start with the read-only status command and prefer JSON so resource IDs, `domain_verification_url`, and generated `next_steps` remain available. Treat `next_steps` as state-aware guidance to review, not as commands to execute without the same approval gates as direct requests.
+
+```bash
+# Read-only inventory
+pscale org sso show --org <org> --format json
+pscale org sso domain list --org <org> --format json
+pscale org sso domain show <domain-id> --org <org> --format json
+
+# After explicit approval, enable SSO
+pscale org sso enable --org <org> --format json
+
+# If enable returns domain_verification_url, open it in an approved browser flow.
+# Prefer --wait: it waits for a new domain ID, then polls that domain to a terminal state.
+pscale org sso domain verify --org <org> --format json \
+  --wait --wait-timeout 10m
+
+# Configure the identity provider only after a domain is verified
+pscale org sso configure --org <org> --format json
+
+# Enable directory sync only after the SSO profile is configured
+pscale org sso directory enable --org <org> --format json
+
+# Choose exactly one approved source for organization role management
+pscale org update --org <org> --idp-sso-managed-roles=true --format json
+pscale org update --org <org> --idp-managed-roles=true --format json
+```
+
+`configure`, `directory enable`, and `domain verify` return `portal_url`, `browser_opened`, and `next_steps`. If `browser_opened` is false, open `portal_url` through the approved browser flow; do not treat URL creation as proof that the portal work completed. With `domain verify --wait --format json`, capture the portal payload from stderr; stdout is reserved for the final domain object, while the non-waiting JSON flow prints the portal payload to stdout. `enable --format json` does not open the verification portal and instead includes `domain_verification_url` when one is available. After each portal step, re-run `sso show`; after domain verification, also re-run `domain list` and `domain show <domain-id>`.
+
+Without `--wait`, `domain verify` cannot identify the new domain because the portal call returns only a URL. With `--wait`, the CLI snapshots the existing domains, waits for a new domain ID to appear, and then polls it until `verified` or `failed`; a timeout or interrupted command is an unconfirmed outcome, so inspect `domain list` before retrying.
+
+### Disable or remove SSO resources
+
+Disabling SSO, disabling directory sync, and deleting a domain are access-control writes. Confirm the exact organization/domain, expected user impact, recovery plan, and resulting role-management source before approval. JSON/non-interactive execution requires `--force`; that flag only skips the prompt and is not approval.
+
+```bash
+# Inspect first
+pscale org sso show --org <org> --format json
+pscale org sso domain show <domain-id> --org <org> --format json
+
+# Run exactly the approved destructive action
+pscale org sso directory disable --org <org> --format json --force
+pscale org sso domain delete <domain-id> --org <org> --format json --force
+pscale org sso disable --org <org> --format json --force
+
+# Verify the exact target afterward
+pscale org sso show --org <org> --format json
+pscale org sso domain list --org <org> --format json
+```
+
+Directory-sync disable removes non-admin directory members. Domain deletion can invalidate the SSO setup path, and SSO disable changes organization-wide authentication behavior. Never chain these operations from returned `next_steps`; apply one approved write at a time and read back the resulting state.
 
 ### Manage organization teams
 
@@ -148,4 +206,4 @@ pscale org switch <correct-org>
 
 ## References
 
-See `references/commands.md` for complete command reference.
+See `references/commands.md` for organization, member, update, and team commands. See `references/sso-commands.md` for the complete organization SSO command family.

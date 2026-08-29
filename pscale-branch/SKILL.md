@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, rename, protect, delete, promote, diff, switchover, restore, inspect query patterns, and manage PlanetScale database branches, Postgres maintenance/extensions/parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, and Vitess workflows. Use when creating development branches for schema changes, restoring a PostgreSQL branch to a point in time, renaming branches, changing deletion protection, switching a Postgres primary to a replica, running Postgres branch maintenance, listing available Postgres extensions, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, restore point, point-in-time recovery, PITR, rename branch, deletion protection, branch switchover, primary switchover, branch maintenance, Postgres maintenance, extensions, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, vtctld, promote branch, MoveTables, global keyspace.
+description: Create, rename, protect, delete, promote, diff, switchover, restore, inspect query patterns, and manage PlanetScale database branches, Postgres maintenance/extensions/parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, Lookup Vindexes, and Vitess workflows. Use when creating development branches for schema changes, restoring a PostgreSQL branch to a point in time, renaming branches, changing deletion protection, switching a Postgres primary to a replica, running Postgres branch maintenance, listing available Postgres extensions, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, creating or completing an owned Lookup Vindex backfill, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, restore point, point-in-time recovery, PITR, rename branch, deletion protection, branch switchover, primary switchover, branch maintenance, Postgres maintenance, extensions, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, lookup vindex, owned vindex, continue after copy with owner, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -105,6 +105,12 @@ pscale branch vtctld get-routing-rules <database> <branch-name>
 pscale branch vtctld get-keyspace-routing-rules <database> <branch-name> --format json
 pscale branch vtctld get-shard <database> <branch-name> --keyspace <keyspace> --shard <shard>
 pscale branch vtctld list-tablets <database> <branch-name> --format json
+
+# Inspect one Lookup Vindex workflow; table-keyspace is where the lookup table/workflow lives
+pscale branch vtctld lookup-vindex show <database> <branch-name> \
+  --table-keyspace <lookup-table-keyspace> \
+  --name <vindex-name> \
+  --format json
 
 # Inspect one tablet's throttler state before proposing a change
 pscale branch vtctld throttler status <database> <branch-name> \
@@ -484,6 +490,58 @@ Rules:
 - `--threshold` changes the replication-lag threshold (in seconds) for the keyspace's default check; treat it as a keyspace-wide mutation that needs the same explicit approval as an app rule change.
 - After a write, re-run `throttler status` on the relevant tablets and verify the returned policy. Do not assume one tablet proves cluster-wide propagation when the branch has multiple tablets.
 
+### Vitess Lookup Vindex lifecycle
+
+`pscale branch vtctld lookup-vindex` creates and manages a Vitess Lookup Vindex backfill workflow. Every lifecycle action changes live workflow or VSchema state except `show`. Confirm the organization, database, branch, owner table, owner columns, lookup table, both keyspaces, vindex type, and recovery plan before creating or advancing one.
+
+The keyspace flags have distinct meanings:
+
+- `--keyspace` is the owner table's keyspace, where the lookup vindex is defined in the VSchema.
+- `--table-keyspace` is where the lookup table and its backfill workflow are created and managed.
+
+Do not swap them. `--table-keyspace` and `--name` identify the workflow for every follow-up command; commands that alter owner-side VSchema state also accept `--keyspace`.
+
+```bash
+# Inspect branch schema/routing and any existing workflow first
+pscale branch schema <database> <branch> --org <org>
+pscale branch vtctld lookup-vindex show <database> <branch> --org <org> \
+  --table-keyspace <lookup-table-keyspace> \
+  --name <vindex-name> \
+  --format json
+
+# After explicit approval, create the lookup table and backfill workflow
+pscale branch vtctld lookup-vindex create <database> <branch> --org <org> \
+  --keyspace <owner-table-keyspace> \
+  --table-keyspace <lookup-table-keyspace> \
+  --name <vindex-name> \
+  --type <lookup-vindex-type> \
+  --table-owner <owner-table> \
+  --table-owner-columns <owner-column> \
+  --table-name <lookup-table> \
+  --format json
+
+# Verify progress before any lifecycle transition
+pscale branch vtctld lookup-vindex show <database> <branch> --org <org> \
+  --table-keyspace <lookup-table-keyspace> --name <vindex-name> --format json
+
+# Run only the specifically approved transition
+pscale branch vtctld lookup-vindex externalize <database> <branch> --org <org> \
+  --keyspace <owner-table-keyspace> --table-keyspace <lookup-table-keyspace> \
+  --name <vindex-name> --format json
+pscale branch vtctld lookup-vindex internalize <database> <branch> --org <org> \
+  --keyspace <owner-table-keyspace> --table-keyspace <lookup-table-keyspace> \
+  --name <vindex-name> --format json
+pscale branch vtctld lookup-vindex complete <database> <branch> --org <org> \
+  --keyspace <owner-table-keyspace> --table-keyspace <lookup-table-keyspace> \
+  --name <vindex-name> --format json
+pscale branch vtctld lookup-vindex cancel <database> <branch> --org <org> \
+  --table-keyspace <lookup-table-keyspace> --name <vindex-name> --format json
+```
+
+For an owned Lookup Vindex, `--continue-after-copy-with-owner` defaults to `true` and is always sent to the API. This keeps the backfill workflow running after the copy phase so writes that bypass VTGate, including rows applied by VReplication during an import, continue reaching the lookup table. Pass `--continue-after-copy-with-owner=false` only when the user explicitly wants the workflow stopped after copy and understands the write-propagation gap.
+
+Do not externalize until the copy/backfill state and lookup-table consistency are verified. `externalize --delete` also removes the workflow, so omit `--delete` unless that irreversible cleanup was separately approved. Treat `internalize`, `complete`, and `cancel` as distinct actions, never interchangeable recovery guesses. After each action, re-run `show` and inspect schema/routing state; a not-found result after cleanup is only expected when the approved action removed the workflow.
+
 ### Vitess MoveTables and global sequences
 
 `pscale branch vtctld move-tables create` supports `--global-keyspace`. Use it with `--sharded-auto-increment-handling REPLACE` when backing sequence tables for sharded auto-increment columns must be created in a specific unsharded keyspace.
@@ -601,7 +659,7 @@ pscale branch list <database> | grep main
 
 ## References
 
-See `references/commands.md` for complete `pscale branch` command reference.
+See `references/commands.md` for the general `pscale branch` command reference. See `references/lookup-vindex-commands.md` for the complete Lookup Vindex parent and lifecycle help surfaces.
 
 ## Branch Lifecycle
 
