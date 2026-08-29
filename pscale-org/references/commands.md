@@ -1,11 +1,13 @@
-List, show, switch organizations, and manage organization members.
+List, show, switch, and update organizations; manage organization SSO, members, and teams.
 
 Unless a section says otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ## pscale org
 
+This help fence is exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
 ```text
-List, show, and switch organizations
+Manage organizations
 
 Usage:
   pscale org [command]
@@ -14,7 +16,10 @@ Available Commands:
   list        List the currently active organizations
   member      List, show, update, and remove organization members
   show        Display the currently active organization
+  sso         Manage organization SSO
   switch      Switch the currently active organization
+  team        Manage organization teams
+  update      Update an organization's settings
 
 Flags:
   -h, --help   help for org
@@ -276,45 +281,9 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale org parent with update and team
-
-All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
-
-```text
-Manage organizations
-
-Usage:
-  pscale org [command]
-
-Available Commands:
-  list        List the currently active organizations
-  member      List, show, update, and remove organization members
-  show        Display the currently active organization
-  switch      Switch the currently active organization
-  team        Manage organization teams
-  update      Update an organization's settings
-
-Flags:
-  -h, --help   help for org
-
-Global Flags:
-      --api-token string          The API token to use for authenticating against the PlanetScale API.
-      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
-      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
-  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
-      --service-token string      Service Token for authenticating.
-      --service-token-id string   The Service Token ID for authenticating.
-
-Use "pscale org [command] --help" for more information about a command.
-
-Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
-```
-
 ## pscale org update
 
-All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+This help fence is exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ```text
 Update an organization's settings
@@ -325,7 +294,8 @@ Usage:
 Flags:
       --billing-email string     The billing email for the organization
   -h, --help                     help for update
-      --idp-managed-roles        Whether the identity provider manages organization roles
+      --idp-managed-roles        Whether the identity provider manages organization roles through directory sync
+      --idp-sso-managed-roles    Whether the identity provider manages organization roles through SSO
       --org string               The organization for the current user (required)
       --spend-alert              Enable or disable billing spend alerts
       --spend-alert-amount int   Monthly spend amount that triggers spend alerts

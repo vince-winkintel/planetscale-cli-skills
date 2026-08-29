@@ -1,7 +1,13 @@
-1.0.20
+1.0.21
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.328.0
+  - Reviewed the upstream release and compare `v0.327.0...v0.328.0` on 2026-08-29.
+  - Added organization SSO status, enable/configure/disable, directory-sync, and email-domain verification workflows, including JSON `next_steps`, portal handling, wait behavior, destructive gates, and mutually exclusive IdP role controls.
+  - Corrected Postgres role connection targeting to use a read-only replica name rather than a region slug.
+  - Added guarded Lookup Vindex lifecycle guidance and documented the corrected owner/lookup keyspace meanings plus the new default that keeps owned-vindex backfill running after copy.
+  - Re-captured every affected parent/subcommand help surface from the checksum-verified v0.328.0 macOS arm64 release binary; archive SHA-256 verified as `12bba36e569c2b91bba43d3dafa5d273c2f6dc95725d7dad0cbb3f2726c01b3f`.
 - PlanetScale CLI v0.327.0
   - Reviewed the upstream release and compare `v0.325.0...v0.327.0` on 2026-08-26.
   - Added standalone billing guidance for payment-method and invoice commands, with sensitive-data handling, pagination, and destructive payment-method deletion gates.

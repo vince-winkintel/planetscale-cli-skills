@@ -1,6 +1,6 @@
 ---
 name: pscale-password
-description: Create, list, show, update, renew, and delete branch connection passwords, and inspect Postgres roles and their connection targets. Use when creating connection strings for applications, managing database credentials, generating passwords for local development, routing reads to a Vitess read-only region, retrieving Postgres role details for a branch replica, regional read-only replica, or PgBouncer, rotating credentials, updating password names or CIDR restrictions, or finding credentials by name, status, or expiration. Triggers on password, connection string, database credentials, create password, show password, update password, CIDR, read-only region password, password status, Postgres role, role get, role status, role expiration, default Postgres role, read-only replica, PgBouncer connection.
+description: Create, list, show, update, renew, and delete branch connection passwords, and inspect Postgres roles and their connection targets. Use when creating connection strings for applications, managing database credentials, generating passwords for local development, routing reads to a Vitess read-only region, retrieving Postgres role details for a branch replica, named read-only replica, or PgBouncer, rotating credentials, updating password names or CIDR restrictions, or finding credentials by name, status, or expiration. Triggers on password, connection string, database credentials, create password, show password, update password, CIDR, read-only region password, password status, Postgres role, role get, role status, role expiration, default Postgres role, read-only replica, replica name, PgBouncer connection.
 ---
 
 # pscale password
@@ -142,11 +142,11 @@ pscale role default <database> <branch> --format json
 
 # Retrieve the same role for exactly one alternate connection target
 pscale role get <database> <branch> <role-id> --org <org> --format json --replica
-pscale role get <database> <branch> <role-id> --org <org> --format json --read-only-replica <region-slug>
+pscale role get <database> <branch> <role-id> --org <org> --format json --read-only-replica <replica-name>
 pscale role get <database> <branch> <role-id> --org <org> --format json --bouncer <bouncer-name>
 ```
 
-`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. A targeted response keeps the normal role shape but can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`. A target-specific `NOT_FOUND` can mean either the role or the requested replica/PgBouncer was not found, so verify both identifiers before retrying. Treat any returned password or connection URL as a secret: capture it directly into an approved secret manager and never print it in logs or commit it.
+`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. `--read-only-replica` takes the replica name returned by branch infrastructure or replica inventory, not a region slug. A targeted response keeps the normal role shape but can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`. A target-specific `NOT_FOUND` can mean either the role or the requested replica/PgBouncer was not found, so verify both identifiers before retrying. Treat any returned password or connection URL as a secret: capture it directly into an approved secret manager and never print it in logs or commit it.
 
 ## Troubleshooting
 

@@ -101,7 +101,7 @@ pscale branch create my-database feature-branch --from main
 | Skill | Use When | Common Commands |
 |-------|----------|----------------|
 | **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
-| **pscale-branch** | Create, restore to a PostgreSQL recovery point, rename, protect, diff, promote, and switchover branches; manage Postgres size/replicas/parameters/maintenance/extensions, resize Vitess VTGates, inspect branch infra, manage live routing rules and tablet throttling, manage query pattern reports, manage Vitess MoveTables workflows | `pscale branch create/update/switchover/diff/parameters/maintenance/extensions/resize/vtgate/infra/query-patterns/vtctld` |
+| **pscale-branch** | Create, restore to a PostgreSQL recovery point, rename, protect, diff, promote, and switchover branches; manage Postgres size/replicas/parameters/maintenance/extensions, resize Vitess VTGates, inspect branch infra, manage live routing rules, Lookup Vindexes, tablet throttling, query pattern reports, and Vitess MoveTables workflows | `pscale branch create/update/switchover/diff/parameters/maintenance/extensions/resize/vtgate/infra/query-patterns/vtctld lookup-vindex` |
 | **pscale-deploy-request** | Deploy schema changes safely; inspect queues, operations, reviews, storage, and throttling; update auto-apply/auto-delete settings; unblock failed deploy/revert queues | `pscale deploy-request create/deploy/update/unblock/queue/operations/storage-check/throttler` |
 | **pscale-database** | Manage settings, database-level Vitess throttler and aggressive-cutover defaults, PostgreSQL IP restrictions, shells, keyspaces, and read-only regions/dumps | `pscale database show/update/throttler/aggressive-cutover/ip-restriction`, `pscale keyspace delete/read-only-regions`, `pscale shell` |
 | **pscale-maintenance** | Inspect Vitess Enterprise maintenance schedules and windows | `pscale maintenance list/show/windows` |
@@ -114,9 +114,9 @@ pscale branch create my-database feature-branch --from main
 | **pscale-backup** | Create/restore backups and manage scheduled policies | `pscale backup create/list/policy` |
 | **pscale-billing** | Inspect invoices and manage organization payment methods | `pscale billing payment-method show/update/delete`, `pscale billing invoice list/show/line-items` |
 | **pscale-audit-log** | List audit events and export authentication attempts | `pscale audit-log list/auth-attempts` |
-| **pscale-password** | Connection passwords and Postgres roles, including Vitess read-only-region credentials, Postgres connection targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role list/get/default` |
+| **pscale-password** | Connection passwords and Postgres roles, including Vitess read-only-region credentials, named Postgres replica connection targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role list/get/default` |
 | **pscale-pgbouncer** | Dedicated PostgreSQL PgBouncer lifecycle and asynchronous resizing | `pscale pgbouncer list/show/create/resize/delete` |
-| **pscale-org** | Switch organizations, update settings, and inspect or manage members/teams | `pscale org list/switch/update/member/team` |
+| **pscale-org** | Switch organizations, update settings, manage SSO/directory sync/domains, and inspect or manage members/teams | `pscale org list/switch/update/sso/member/team` |
 | **pscale-service-token** | CI/CD authentication | `pscale service-token create/show` |
 
 ## 🛠️ Automation Scripts
