@@ -16,11 +16,25 @@ pscale read-only-replica list <database> <branch> --org <org> --format json
 pscale read-only-replica show <database> <branch> <name> --org <org> --format json
 ```
 
-Confirm the database is PostgreSQL and the target branch is ready. Use `pscale region list --org <org> --format json` to discover region slugs and `pscale size cluster list --org <org> --format json` to discover supported cluster sizes.
+Confirm the database is PostgreSQL and the target branch is ready. Use `pscale region list --org <org> --format json` to discover region slugs. Inspect the primary branch before choosing capacity; omitting `--cluster-size` inherits its size, which is usually the safest and least wasteful starting point. When an explicit override is intentional, use `pscale size cluster list --org <org> --engine postgresql --format json` and choose a fully qualified SKU matching the branch's provider and architecture.
+
+List/show JSON serializes the underlying API model rather than the normalized human/CSV fields. Expect API-native nested objects and names, probe a representative response before automating, and use defensive access such as `.region.slug // .region.name // empty` and `.cluster_display_name // .cluster_name // empty` rather than assuming a fixed flattened schema.
+
+To validate branch-level replica routing after provisioning, run a read-only query with the actual replica flag:
+
+```bash
+pscale sql <database> <branch> --org <org> --format json \
+  --replica --query "SELECT 1"
+```
+
+`pscale sql --replica` and `pscale shell --replica` route reads across the branch's primary replicas and all read-only regions; they cannot pin a query to one named read-only replica. Validate a specific named/region target through the same application connection path or region-aware endpoint that production will use.
 
 ## Create
 
 ```bash
+# Inspect primary sizing before deciding whether to override it
+pscale branch show <database> <branch> --org <org> --format json
+
 # The API defaults to one instance and the primary cluster size
 pscale read-only-replica create <database> <branch> <name> \
   --region <region> --org <org> --format json
@@ -60,6 +74,10 @@ Deletion removes dedicated read capacity and can break clients routed to the nam
 
 ```bash
 pscale read-only-replica show <database> <branch> <name> --org <org> --format json
+
+# Before deletion, send representative production reads through the exact
+# application connection path/region that will remain and verify success,
+# latency, and capacity there; --replica alone cannot prove a named target.
 pscale read-only-replica delete <database> <branch> <name> --org <org> --format json --force
 pscale read-only-replica list <database> <branch> --org <org> --format json
 ```

@@ -38,11 +38,15 @@ pscale backup policy list <database> --format json
 
 ### Restore to a new branch
 
-Inspect the source backup and target database first. `--cluster-size` is required for both engines. For PostgreSQL restores, optional `--replicas` sets the number of **additional** replicas: `0` creates a single-node branch, while omitting the flag uses the selected cluster size's default. The CLI rejects `--replicas` for Vitess/MySQL restores.
+Inspect the source backup and target database first. `--cluster-size` is required for both engines, but valid SKUs are engine-specific: read the database `kind`, then list sizes with `--engine postgresql` for PostgreSQL or `--engine mysql` for Vitess/MySQL. Do not choose from the unfiltered mixed-engine list. For PostgreSQL restores, optional `--replicas` sets the number of **additional** replicas: `0` creates a single-node branch, while omitting the flag uses the selected cluster size's default. The CLI rejects `--replicas` for Vitess/MySQL restores.
 
 ```bash
 pscale backup show <database> <source-branch> <backup-id> --org <org> --format json
-pscale size cluster list --org <org> --format json
+pscale database show <database> --org <org> --format json
+
+# Choose the filter that matches the returned database kind
+pscale size cluster list --org <org> --engine postgresql --format json
+# pscale size cluster list --org <org> --engine mysql --format json
 
 # Restore and then verify the new branch
 pscale backup restore <database> <new-branch> <backup-id> --org <org> \

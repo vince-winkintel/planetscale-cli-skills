@@ -85,14 +85,11 @@ pscale shell my-database main --db-name app_db
 # Equivalent positional form
 pscale shell my-database main app_db
 
-# Execute SQL directly
-pscale shell my-database main --execute "SHOW TABLES"
-
-# Run SQL from file
-pscale shell my-database main < schema.sql
+# Agent-friendly, non-interactive query path
+pscale sql my-database main --org my-org --format json --query "SELECT 1"
 ```
 
-`--db-name` and the third positional argument are mutually exclusive and only supported for PostgreSQL; omitting both connects to `postgres`. Vitess/MySQL shells reject either form. `pscale shell` is interactive and creates short-lived credentials, so use `pscale sql --query` for agent-friendly, non-interactive statements.
+`--db-name` and the third positional argument are mutually exclusive and only supported for PostgreSQL; omitting both connects to `postgres`. Vitess/MySQL shells reject either form. PostgreSQL shell access requires an interactive terminal and a locally installed `psql` client. `pscale shell` creates short-lived credentials and starts that client, so use `pscale sql <database> <branch> --org <org> --format json --query '<sql>'` for agent-friendly, non-interactive statements.
 
 ### Database settings
 

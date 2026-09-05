@@ -26,7 +26,35 @@ pscale webhook create <database> \
   --org <org> --format json
 ```
 
-`--url` is required. Confirm the destination host, TLS endpoint, subscribed events, enabled state, and receiver ownership before creation. The create response may contain a webhook signing secret; route it directly to an approved secret store and redact command output.
+`--url` is required. Confirm the destination host, TLS endpoint, subscribed events, enabled state, and receiver ownership before creation. Successful `create` output includes the generated webhook signing `secret` in both human and JSON formats. Capture it from that response directly into an approved secret manager; do not print it into logs, paste it into tickets, or commit it. Treat the create response as the one reliable capture point.
+
+`--events` accepts a comma-separated list. Published event names are:
+
+```text
+branch.anomaly
+branch.out_of_memory
+branch.primary_promoted
+branch.ready
+branch.schema_recommendation
+branch.sleeping
+branch.start_maintenance
+backup.failed
+backup.succeeded
+cluster.storage
+database.access_request
+deploy_request.closed
+deploy_request.errored
+deploy_request.in_progress
+deploy_request.opened
+deploy_request.pending_cutover
+deploy_request.queued
+deploy_request.reverted
+deploy_request.schema_applied
+keyspace.storage
+webhook.test
+```
+
+The CLI forwards event strings to the PlanetScale API without client-side validation. Use the [webhook events reference](https://planetscale.com/docs/api/webhook-events) as the source of truth; an unknown or unsupported name is not normalized by the CLI and can fail at the API.
 
 ### Authorization header
 
@@ -64,6 +92,8 @@ pscale webhook update <database> <webhook-id> \
 pscale webhook show <database> <webhook-id> --org <org> --format json
 ```
 
+Before updating, save the non-secret configuration from `webhook show` (`url`, `events`, and `enabled`) and ensure the current Authorization value is available separately if rollback may need to restore it—the API does not return that header value. To roll back, re-run `webhook update` with the previous `--url`, `--events`, and explicit `--enabled=<true|false>` values, plus either the prior `--authorization-header` value or `--clear-authorization-header`, then verify with `webhook show` and `webhook test`.
+
 `--authorization-header` and `--clear-authorization-header` are mutually exclusive. An empty `--authorization-header` value is rejected; use the clear flag. Changing or clearing authentication can interrupt deliveries, so coordinate the receiver update and verify `authorization_header_configured` afterward.
 
 ## Test and delete
@@ -82,6 +112,8 @@ pscale webhook show <database> <webhook-id> --org <org> --format json
 pscale webhook delete <database> <webhook-id> --org <org> --format json
 pscale webhook list <database> --org <org> --format json
 ```
+
+When scripting against `--format json`, probe one representative response first and handle optional fields defensively. The CLI serializes the underlying API webhook model for JSON, while human and CSV output use a smaller normalized view, so fields can differ and the JSON model can gain fields as the API evolves. Do not build strict decoders from the command-reference snippets or assume table and JSON output have identical fields.
 
 ## Reference
 
