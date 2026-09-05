@@ -43,6 +43,7 @@ pscale keyspace delete <database> <branch> <keyspace>
 
 # Open database shell
 pscale shell <database> <branch>
+pscale shell <database> <branch> --db-name <postgres-database>
 
 # List configured Vitess read-only regions for a keyspace
 pscale keyspace read-only-regions <database> <branch> <keyspace> --format json
@@ -79,12 +80,19 @@ pscale branch create my-new-db development
 # Open shell to specific branch
 pscale shell my-database main
 
+# PostgreSQL only: select the logical database explicitly
+pscale shell my-database main --db-name app_db
+# Equivalent positional form
+pscale shell my-database main app_db
+
 # Execute SQL directly
 pscale shell my-database main --execute "SHOW TABLES"
 
 # Run SQL from file
 pscale shell my-database main < schema.sql
 ```
+
+`--db-name` and the third positional argument are mutually exclusive and only supported for PostgreSQL; omitting both connects to `postgres`. Vitess/MySQL shells reject either form. `pscale shell` is interactive and creates short-lived credentials, so use `pscale sql --query` for agent-friendly, non-interactive statements.
 
 ### Database settings
 

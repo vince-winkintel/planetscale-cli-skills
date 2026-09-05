@@ -242,3 +242,32 @@ Use "pscale backup [command] --help" for more information about a command.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## pscale backup restore
+
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.329.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `2cc70050c1f7397ed1a5c272a5d1bbe1217803966717991466057ffc806c2f7b`.
+
+```text
+Restore a backup to a new branch
+
+Usage:
+  pscale backup restore <database> <branch> <backup> [flags]
+
+Flags:
+      --cluster-size pscale size cluster list   Cluster size for restored backup branch. Use pscale size cluster list to see the valid sizes. (required) (default "PS-10")
+  -h, --help                                    help for restore
+      --replicas int                            Number of additional replicas for a PostgreSQL restore. 0 creates a single-node branch; omit to use the target cluster size default.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```

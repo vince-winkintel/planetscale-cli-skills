@@ -1,7 +1,13 @@
-1.0.21
+1.0.22
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.329.0
+  - Reviewed the upstream release and compare `v0.328.0...v0.329.0` on 2026-09-05.
+  - Added standalone PostgreSQL read-only replica lifecycle guidance for list/show/create/update/delete, including sizing, regions, parameter floors, asynchronous readiness, and destructive-delete gates.
+  - Added webhook authorization-header configuration and complete webhook lifecycle guidance with secret-safe invocation, explicit clearing, test-event impact, and read-back verification.
+  - Added PostgreSQL logical-database targeting for `pscale shell` and replica-count selection for PostgreSQL backup restores.
+  - Re-captured every affected parent/subcommand help surface from the checksum-verified v0.329.0 macOS arm64 release binary; archive SHA-256 verified as `2cc70050c1f7397ed1a5c272a5d1bbe1217803966717991466057ffc806c2f7b`.
 - PlanetScale CLI v0.328.0
   - Reviewed the upstream release and compare `v0.327.0...v0.328.0` on 2026-08-29.
   - Added organization SSO status, enable/configure/disable, directory-sync, and email-domain verification workflows, including JSON `next_steps`, portal handling, wait behavior, destructive gates, and mutually exclusive IdP role controls.

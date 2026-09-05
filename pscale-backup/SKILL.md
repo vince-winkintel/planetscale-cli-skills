@@ -19,6 +19,10 @@ pscale backup list <database> <branch>
 # Show backup details
 pscale backup show <database> <branch> <backup-id>
 
+# Restore to a new branch; --replicas is PostgreSQL-only
+pscale backup restore <database> <new-branch> <backup-id> --cluster-size <size>
+pscale backup restore <database> <new-branch> <backup-id> --cluster-size <size> --replicas 2
+
 # Protect or unprotect a backup only after explicit approval
 pscale backup update <database> <branch> <backup-id> --protected=true --format json
 pscale backup update <database> <branch> <backup-id> --protected=false --format json
@@ -31,6 +35,22 @@ pscale backup policy list <database> --format json
 ```
 
 ## Workflows
+
+### Restore to a new branch
+
+Inspect the source backup and target database first. `--cluster-size` is required for both engines. For PostgreSQL restores, optional `--replicas` sets the number of **additional** replicas: `0` creates a single-node branch, while omitting the flag uses the selected cluster size's default. The CLI rejects `--replicas` for Vitess/MySQL restores.
+
+```bash
+pscale backup show <database> <source-branch> <backup-id> --org <org> --format json
+pscale size cluster list --org <org> --format json
+
+# Restore and then verify the new branch
+pscale backup restore <database> <new-branch> <backup-id> --org <org> \
+  --cluster-size <size> --replicas 2 --format json
+pscale branch show <database> <new-branch> --org <org> --format json
+```
+
+Restoring creates a new branch and can incur capacity cost. Confirm the database, backup ID, new branch name, cluster size, and replica count before execution. Treat the returned branch as provisioning until its readiness fields confirm it can accept connections.
 
 ### Backup Before Migration
 

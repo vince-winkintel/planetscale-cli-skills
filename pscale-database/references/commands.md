@@ -735,3 +735,58 @@ Use "pscale database read-only-regions [command] --help" for more information ab
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## pscale shell
+
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.329.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `2cc70050c1f7397ed1a5c272a5d1bbe1217803966717991466057ffc806c2f7b`.
+
+```text
+Open a shell instance to a database and branch
+
+Usage:
+  pscale shell [database] [branch] [db-name] [flags]
+
+Examples:
+The shell subcommand opens a secure shell instance to your database.
+
+For MySQL databases, it uses the MySQL command-line client ("mysql").
+For Postgres databases, it uses the Postgres command-line client ("psql").
+
+By default, if no branch names are given and there is only one branch, it
+automatically opens a shell to that branch:
+
+  pscale shell mydatabase
+
+If there are multiple branches for the given database, you'll be prompted to
+choose one. To open a shell instance to a specific branch, pass the branch as a
+second argument:
+
+  pscale shell mydatabase mybranch
+
+For Postgres databases, you can optionally specify the logical database
+to connect to using --db-name (or as a third argument):
+
+  pscale shell production main --db-name my_db
+  pscale shell production main my_db
+
+Flags:
+      --db-name string              Postgres logical database name to connect to (default: postgres). Only supported for Postgres databases.
+  -h, --help                        help for shell
+      --local-addr string           Local address to bind and listen for connections. By default the proxy binds to 127.0.0.1 with a random port.
+      --org string                  The organization for the current user
+      --remote-addr hostname:port   PlanetScale Database remote network address. By default the remote address is populated automatically from the PlanetScale API. (format: hostname:port)
+      --replica                     When enabled, the password will route all reads to the branch's primary replicas and all read-only regions.
+      --role string                 Role defines the access level, allowed values are: reader, writer, readwriter, admin. Defaults to 'reader' for replica passwords, otherwise defaults to 'admin'.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
