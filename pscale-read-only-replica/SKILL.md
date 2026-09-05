@@ -10,13 +10,14 @@ Manage dedicated read-only capacity for a PlanetScale PostgreSQL branch. These n
 ## Read before writing
 
 ```bash
-pscale database show <database> --org <org> --format json
-pscale branch show <database> <branch> --org <org> --format json
+# Inventory the branch when the replica name is unknown
 pscale read-only-replica list <database> <branch> --org <org> --format json
+
+# Or inspect one exact target when its name is already known; do not run both
 pscale read-only-replica show <database> <branch> <name> --org <org> --format json
 ```
 
-Confirm the database is PostgreSQL and the target branch is ready. Use `pscale region list --org <org> --format json` to discover region slugs. Inspect the primary branch before choosing capacity; omitting `--cluster-size` inherits its size, which is usually the safest and least wasteful starting point. When an explicit override is intentional, use `pscale size cluster list --org <org> --engine postgresql --format json` and choose a fully qualified SKU matching the branch's provider and architecture.
+The command group checks the database kind itself and rejects Vitess databases, so a separate `database show` preflight is unnecessary. Use `pscale region list --org <org> --format json` to discover region slugs. Inspect the primary branch before choosing capacity; omitting `--cluster-size` inherits its size, which is usually the safest and least wasteful starting point. When an explicit override is intentional, use `pscale size cluster list --org <org> --engine postgresql --format json` and choose a fully qualified SKU matching the branch's provider and architecture.
 
 List/show JSON serializes the underlying API model rather than the normalized human/CSV fields. Expect API-native nested objects and names, probe a representative response before automating, and use defensive access such as `.region.slug // .region.name // empty` and `.cluster_display_name // .cluster_name // empty` rather than assuming a fixed flattened schema.
 
@@ -78,11 +79,16 @@ pscale read-only-replica show <database> <branch> <name> --org <org> --format js
 # Before deletion, send representative production reads through the exact
 # application connection path/region that will remain and verify success,
 # latency, and capacity there; --replica alone cannot prove a named target.
+
+# Interactive confirmation (preferred when a TTY is available)
+pscale read-only-replica delete <database> <branch> <name> --org <org>
+
+# OR: non-interactive/JSON only after explicit approval
 pscale read-only-replica delete <database> <branch> <name> --org <org> --format json --force
 pscale read-only-replica list <database> <branch> --org <org> --format json
 ```
 
-Never add `--force` merely to bypass an interactive prompt. Verify absence from the final list and confirm remaining read capacity.
+Never add `--force` merely to bypass an interactive prompt. JSON/CSV and other non-human execution cannot present the confirmation and fails without `--force`, which is why the headless example includes it. Run exactly one deletion form, then verify absence from the final list and confirm remaining read capacity.
 
 ## Related skills
 

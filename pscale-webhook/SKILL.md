@@ -10,11 +10,12 @@ Manage database webhooks and their event subscriptions.
 ## Inspect first
 
 ```bash
-pscale webhook list <database> --org <org> --format json
-pscale webhook show <database> <webhook-id> --org <org> --format json
+set -o pipefail
+pscale webhook list <database> --org <org> --format json |
+  jq 'map(del(.secret))'
 ```
 
-Use JSON for identifiers and persisted state. Current output exposes `authorization_header_configured` as a boolean; it does not reveal the configured header value. Treat any signing secret returned at creation as sensitive and do not print, store in logs, or commit it.
+Use the redacted list for routine identifiers and persisted state. `pscale webhook show` deliberately returns the signing `secret`: human output has a `secret` column, and JSON serializes the raw webhook model with a non-optional `secret` field. Do not run `show` into agent context or logs; when an exact show is unavoidable, pipe JSON directly through `jq 'del(.secret)'` before capturing output. `authorization_header_configured` reveals only whether the separate Authorization header is configured, never its value.
 
 ## Create
 
@@ -71,28 +72,29 @@ Do not run this form until the environment variable is populated outside the age
 
 ## Update
 
-Pass at least one of `--url`, `--authorization-header`, `--clear-authorization-header`, `--events`, or `--enabled`. Only supplied fields change.
+Pass at least one of `--url`, `--authorization-header`, `--clear-authorization-header`, `--events`, or `--enabled`. Only supplied fields change, but `--events` replaces the entire subscription list rather than appending to it. Read the current list and include every event that should remain subscribed.
 
 ```bash
-# Review current state
-pscale webhook show <database> <webhook-id> --org <org> --format json
+# Save redacted pre-change state for rollback
+set -o pipefail
+pscale webhook list <database> --org <org> --format json |
+  jq --arg id '<webhook-id>' '.[] | select(.id == $id) | del(.secret)'
 
 # Disable or change subscriptions
 pscale webhook update <database> <webhook-id> \
   --enabled=false \
   --events branch.ready \
-  --org <org> --format json
+  --org <org> --format json | jq 'del(.secret)'
 
 # Remove the configured header explicitly
 pscale webhook update <database> <webhook-id> \
   --clear-authorization-header \
-  --org <org> --format json
+  --org <org> --format json | jq 'del(.secret)'
 
-# Verify persisted non-secret state
-pscale webhook show <database> <webhook-id> --org <org> --format json
+# Each synchronous update response is the read-back for that change
 ```
 
-Before updating, save the non-secret configuration from `webhook show` (`url`, `events`, and `enabled`) and ensure the current Authorization value is available separately if rollback may need to restore it—the API does not return that header value. To roll back, re-run `webhook update` with the previous `--url`, `--events`, and explicit `--enabled=<true|false>` values, plus either the prior `--authorization-header` value or `--clear-authorization-header`, then verify with `webhook show` and `webhook test`.
+Before updating, save the redacted non-secret configuration (`url`, `events`, and `enabled`) and ensure the current Authorization value is available separately if rollback may need to restore it—the API does not return that header value. To roll back, re-run `webhook update` with the previous `--url`, complete `--events` list, and explicit `--enabled=<true|false>` values, plus either the prior `--authorization-header` value or `--clear-authorization-header`. The synchronous update response verifies persisted non-secret state; use `webhook test` to verify receiver behavior.
 
 `--authorization-header` and `--clear-authorization-header` are mutually exclusive. An empty `--authorization-header` value is rejected; use the clear flag. Changing or clearing authentication can interrupt deliveries, so coordinate the receiver update and verify `authorization_header_configured` afterward.
 
@@ -101,16 +103,21 @@ Before updating, save the non-secret configuration from `webhook show` (`url`, `
 `webhook test` sends a real event to the external receiver. Confirm the destination and downstream side effects before running it. A successful CLI response proves dispatch was accepted, not that the receiver processed it; verify receiver-side evidence when available.
 
 ```bash
-pscale webhook show <database> <webhook-id> --org <org> --format json
+set -o pipefail
+pscale webhook list <database> --org <org> --format json |
+  jq 'map(del(.secret))'
 pscale webhook test <database> <webhook-id> --org <org> --format json
 ```
 
 Deletion has no CLI confirmation flag. Treat it as destructive: inspect the exact webhook, inventory dependencies, obtain explicit approval, delete, and read back the list.
 
 ```bash
-pscale webhook show <database> <webhook-id> --org <org> --format json
+set -o pipefail
+pscale webhook list <database> --org <org> --format json |
+  jq 'map(del(.secret))'
 pscale webhook delete <database> <webhook-id> --org <org> --format json
-pscale webhook list <database> --org <org> --format json
+pscale webhook list <database> --org <org> --format json |
+  jq 'map(del(.secret))'
 ```
 
 When scripting against `--format json`, probe one representative response first and handle optional fields defensively. The CLI serializes the underlying API webhook model for JSON, while human and CSV output use a smaller normalized view, so fields can differ and the JSON model can gain fields as the API evolves. Do not build strict decoders from the command-reference snippets or assume table and JSON output have identical fields.
