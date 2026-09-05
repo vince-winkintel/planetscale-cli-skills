@@ -55,7 +55,7 @@ keyspace.storage
 webhook.test
 ```
 
-The CLI forwards event strings to the PlanetScale API without client-side validation. Use the [webhook events reference](https://planetscale.com/docs/api/webhook-events) as the source of truth; an unknown or unsupported name is not normalized by the CLI and can fail at the API.
+The CLI forwards event strings to the PlanetScale API without client-side validation. Use the [`events` enum in the webhook API reference](https://planetscale.com/docs/api/reference/create_webhook) for accepted names and the [webhook events reference](https://planetscale.com/docs/api/webhook-events) for trigger and payload details; the general events page can lag the API enum. An unknown or unsupported name is not normalized by the CLI and can fail at the API.
 
 ### Authorization header
 
