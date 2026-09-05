@@ -7,7 +7,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 🎯 What This Skill Provides
 
-- **18 sub-skills** covering all major `pscale` commands
+- **20 sub-skills** covering all major `pscale` commands
 - **3 automation scripts** for common workflows (create branch, deploy schema, sync)
 - **Decision trees** for common questions (branch vs deploy request, tokens vs passwords)
 - **Troubleshooting sections** for self-service problem solving
@@ -18,7 +18,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ### Agent Skills (`npx skills`)
 
-This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 18 standalone `pscale-*` skills.
+This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 20 standalone `pscale-*` skills.
 Each skill lives in its own directory with its own `SKILL.md`; there is intentionally no root `SKILL.md` so Agent Skills can discover every sibling instead of stopping at the repository root.
 
 ```bash
@@ -116,6 +116,8 @@ pscale branch create my-database feature-branch --from main
 | **pscale-audit-log** | List audit events and export authentication attempts | `pscale audit-log list/auth-attempts` |
 | **pscale-password** | Connection passwords and Postgres roles, including Vitess read-only-region credentials, named Postgres replica connection targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role list/get/default` |
 | **pscale-pgbouncer** | Dedicated PostgreSQL PgBouncer lifecycle and asynchronous resizing | `pscale pgbouncer list/show/create/resize/delete` |
+| **pscale-read-only-replica** | Dedicated PostgreSQL read-only replica lifecycle, sizing, regions, and parameters | `pscale read-only-replica list/show/create/update/delete` |
+| **pscale-webhook** | Database webhook lifecycle, authorization headers, and test events | `pscale webhook list/show/create/update/test/delete` |
 | **pscale-org** | Switch organizations, update settings, manage SSO/directory sync/domains, and inspect or manage members/teams | `pscale org list/switch/update/sso/member/team` |
 | **pscale-service-token** | CI/CD authentication | `pscale service-token create/show` |
 

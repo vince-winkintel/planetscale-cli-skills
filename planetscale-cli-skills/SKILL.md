@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations, SSO, directory sync, teams, members, billing, invoices, payment methods, databases, branches, PostgreSQL point-in-time recovery, branch maintenance, extension catalogs, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, keyspaces, Lookup Vindexes, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, Postgres role connection targets, Postgres IP restrictions, read-only regions, backups, audit logs, service tokens, passwords, binary-native agent guidance, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, restore point, point-in-time recovery, PITR, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, pscale role get, deploy request, deploy queue, unblock deploy, aggressive cutover, branch maintenance, branch extensions, branch switchover, lookup vindex, traffic control, force cutover, storage readiness, keyspace routing rules, database settings, database branch, VTGate resize, pgbouncer, billing, invoice, payment method, backup policy, database diagnostics, organization SSO, directory sync, org member, org team, or pscale import d1.
+description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations, SSO, directory sync, teams, members, billing, invoices, payment methods, databases, branches, PostgreSQL point-in-time recovery, branch maintenance, extension catalogs, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, keyspaces, Lookup Vindexes, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, PostgreSQL read-only replicas, Postgres role connection targets, Postgres IP restrictions, Vitess read-only regions, backups, webhooks, audit logs, service tokens, passwords, binary-native agent guidance, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, restore point, point-in-time recovery, PITR, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, pscale role get, deploy request, deploy queue, unblock deploy, aggressive cutover, branch maintenance, branch extensions, branch switchover, lookup vindex, traffic control, force cutover, storage readiness, keyspace routing rules, database settings, database branch, VTGate resize, pgbouncer, read-only replica, pscale webhook, database webhook, webhook authorization header, billing, invoice, payment method, backup policy, database diagnostics, organization SSO, directory sync, org member, org team, or pscale import d1.
 requirements:
   binaries:
     - pscale
@@ -15,11 +15,11 @@ metadata:
   openclaw:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
-      Scope is limited to: database and branch management, maintenance schedule inspection, dedicated PostgreSQL PgBouncers, Postgres Traffic Control, VTGate sizing, Vitess read-only-region access, billing inspection/payment-method management, deploy requests,
+      Scope is limited to: database and branch management, maintenance schedule inspection, dedicated PostgreSQL PgBouncers and read-only replicas, Postgres Traffic Control, VTGate sizing, Vitess read-only-region access, webhook management, billing inspection/payment-method management, deploy requests,
       non-interactive SQL queries, historical/current performance metrics, query insights, read-only diagnostics, Cloudflare D1 imports, backups, audit-log exports, passwords,
       authentication-attempt exports, service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, maintenance inspection, dedicated PgBouncers, Postgres Traffic Control, billing, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
+      - Run pscale CLI commands to manage PlanetScale databases, branches, maintenance inspection, dedicated PgBouncers, PostgreSQL read-only replicas, webhooks, Postgres Traffic Control, billing, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -85,6 +85,8 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
 | **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions; inspect Postgres role connection targets by replica name |
 | **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers |
+| **read-only-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, and delete dedicated PostgreSQL read-only replicas |
+| **webhook** | `pscale-webhook` | List, inspect, create, update, test, and delete database webhooks, including authorization headers |
 | **org** | `pscale-org` | List, show, switch, and update organizations; manage SSO, directory sync, email domains, members, and teams |
 | **service-token** | `pscale-service-token` | Create, show, and manage CI/CD service tokens |
 
@@ -224,6 +226,10 @@ pscale deploy-request deploy <database> <number>
 pscale pgbouncer list <database> <branch> --format json
 pscale pgbouncer show <database> <branch> <name> --format json
 
+# Dedicated PostgreSQL read-only replicas
+pscale read-only-replica list <database> <branch> --org <org> --format json
+pscale read-only-replica show <database> <branch> <name> --org <org> --format json
+
 # Database operations
 pscale database create <database> --org <org>
 pscale database list
@@ -232,6 +238,13 @@ pscale database ip-restriction list <database> --format json
 pscale database throttler show <database> --org <org> --format json
 pscale database aggressive-cutover show <database> --org <org> --format json
 pscale shell <database> <branch>
+
+# Database webhooks
+# Webhook resource JSON may include the signing secret; redact before capture.
+set -o pipefail
+pscale webhook list <database> --org <org> --format json |
+  jq 'map(del(.secret))'
+# Use `show` only when intentionally retrieving the secret; otherwise use the redacted sub-skill workflow.
 
 # Maintenance schedules and windows (Vitess Enterprise)
 pscale maintenance list <database> --org <org> --format json
