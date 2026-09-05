@@ -240,10 +240,11 @@ pscale database aggressive-cutover show <database> --org <org> --format json
 pscale shell <database> <branch>
 
 # Database webhooks
+# Webhook resource JSON may include the signing secret; redact before capture.
 set -o pipefail
 pscale webhook list <database> --org <org> --format json |
   jq 'map(del(.secret))'
-# `show` includes the signing secret; use the pscale-webhook skill's redacted workflow.
+# Use `show` only when intentionally retrieving the secret; otherwise use the redacted sub-skill workflow.
 
 # Maintenance schedules and windows (Vitess Enterprise)
 pscale maintenance list <database> --org <org> --format json

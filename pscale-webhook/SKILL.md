@@ -15,7 +15,7 @@ pscale webhook list <database> --org <org> --format json |
   jq 'map(del(.secret))'
 ```
 
-Use the redacted list for routine identifiers and persisted state. `pscale webhook show` deliberately returns the signing `secret`: human output has a `secret` column, and JSON serializes the raw webhook model with a non-optional `secret` field. Do not run `show` into agent context or logs; when an exact show is unavoidable, pipe JSON directly through `jq 'del(.secret)'` before capturing output. `authorization_header_configured` reveals only whether the separate Authorization header is configured, never its value.
+Use the redacted list for routine identifiers and persisted state. Webhook resource JSON from create, show, list, or update can contain the signing `secret` because the CLI serializes the raw API model. Do not capture it unredacted in logs, chat, or agent context; only an intentional create/show flow that writes directly to an approved secret store should retain it. `pscale webhook show` deliberately returns the secret, and human output has a `secret` column. When an exact show is unavoidable for non-secret inspection, pipe JSON directly through `jq 'del(.secret)'` before capturing output. `authorization_header_configured` reveals only whether the separate Authorization header is configured, never its value.
 
 ## Create
 
