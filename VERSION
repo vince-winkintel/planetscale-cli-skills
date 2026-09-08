@@ -1,7 +1,11 @@
-1.0.22
+1.0.23
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.330.0
+  - Reviewed the upstream release and compare `v0.329.0...v0.330.0` on 2026-09-08.
+  - Updated Cloudflare D1 import guidance for SQLite-only function/operator rewrites in `CHECK` and generated expressions, plus `SQLITE_FUNCTION` lint failures for unsupported forms.
+  - Re-captured and compared the complete `import`, `import d1`, and all seven D1 subcommand help surfaces from the checksum-verified v0.330.0 macOS arm64 release binary; every stored fence remained line-for-line unchanged after normalizing only trailing whitespace. Archive SHA-256: `33acbc6e88d214f4e19b1df78c69e698357df081e868047267564b45470c6ced`.
 - PlanetScale CLI v0.329.0
   - Reviewed the upstream release and compare `v0.328.0...v0.329.0` on 2026-09-05.
   - Added standalone PostgreSQL read-only replica lifecycle guidance for list/show/create/update/delete, including sizing, regions, parameter floors, asynchronous readiness, and destructive-delete gates.
