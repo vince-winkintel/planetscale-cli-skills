@@ -37,7 +37,9 @@ The CLI hardens generated identifiers and output paths in D1 migration state. Ke
 
 The current converter preserves and translates more SQLite schema semantics, including column- and table-level `CHECK` constraints, named constraints, generated columns, `NUMERIC`/`DECIMAL` precision, and common computed defaults such as `date('now')`, `time('now')`, `randomblob()`, UUID generators, and `CAST(unixepoch() AS TEXT)`. For columns inferred as PostgreSQL booleans, integer `0`/`1` literals in applicable `CHECK` comparisons, `IN`, and `BETWEEN` expressions are rewritten to `false`/`true`; non-boolean columns and decimal-like literals are left unchanged. SQLite `VIRTUAL` generated columns are materialized as PostgreSQL `STORED` generated columns because PostgreSQL 16 supports only stored generated columns.
 
-Inside `CHECK` and generated expressions, the converter rewrites common SQLite-only forms to reviewed PostgreSQL equivalents: `json_valid()` to `IS JSON`, `ifnull()` to `coalesce()`, `iif()` to `CASE`, `instr()` to `strpos()`, supported JSON extraction/array helpers, blob/character helpers, `typeof()`, current-time functions, `==`, and literal-pattern `GLOB`/`REGEXP` operators. Rewrites are arity- and form-sensitive: for example, non-current-time `datetime(column)`, dynamic JSON paths, two-argument `unhex()`, non-literal patterns, and unsupported SQLite functions are not guessed. `lint` reports remaining incompatible calls as `SQLITE_FUNCTION` errors; rewrite or remove those expressions in the source schema before importing, then inspect the converted predicates for semantic equivalence.
+Inside `CHECK` and generated expressions, the converter rewrites selected SQLite-only forms when it recognizes a supported shape that produces valid PostgreSQL syntax—for example, `ifnull()` to `coalesce()`, `iif()` to `CASE`, `instr()` to `strpos()`, `json_valid()` to `IS JSON`, `==` to `=`, and literal `GLOB`/`REGEXP` operators to `~`. Supported date/time rewrites are limited to current-time forms; JSON paths and pattern operands generally need string literals. Function forms `glob()` and `regexp()` are not rewritten, and both are reported as `SQLITE_FUNCTION`. Bare non-literal `GLOB`/`REGEXP` operators receive the same code; issue messages display all four cases as `GLOB()`/`REGEXP()`.
+
+These rewrites guarantee neither source semantic equivalence nor complete lint coverage. `json_valid(value, flags)` currently drops the flags argument; `unixepoch()` in `CHECK` and generated expressions maps to `now()` without consulting the destination column type, so an integer-epoch comparison can convert silently and fail at DDL apply; `strftime('%s', 'now')` remains unconverted and is reported as `SQLITE_FUNCTION`; and a double-quoted `GLOB`/`REGEXP` right operand that matches a column name can be misread as a literal. Other unsupported calls—including scalar `max()`/`min()`, function-form `like()`, `format()`, and `date(column)`/`time(column)`—can pass `lint` and then fail or behave differently when PostgreSQL loads or evaluates the DDL. Any lint error blocks `start`, including `--dry-run`.
 
 Supported `strftime()` current-time defaults are mapped according to the inferred destination type: common ISO/date formats on timestamp-like columns, `%s` epoch seconds on numeric columns, and safe day/hour/minute/second or `start of day|month|year` modifiers. `utc` and `localtime` modifiers are treated as no-ops in this UTC-oriented mapping. Unsupported formats, time values, or modifiers such as `weekday N` and calendar-month arithmetic are not guessed; on an inferred non-text destination the converter can omit that default, so inspect the generated DDL and restore an equivalent PostgreSQL expression deliberately when needed.
 
@@ -49,33 +51,41 @@ Still review `convert-schema` output before loading. Expression or partial index
 
 ## Recommended migration workflow
 
+Treat these as sequential gates. Inspect step 1's JSON and do not run `start --dry-run` until `error_count` is `0`; warnings may be reviewed and accepted, but errors cannot.
+
 ```bash
 # 1. Lint the D1 export before touching PlanetScale
 pscale import d1 lint --input ./d1-export.sql --format json
 
-# 2. Preview the import plan and save a migration ID without loading data
+# 2. Convert and review the PostgreSQL DDL; lint does not recognize every incompatibility
+pscale import d1 convert-schema \
+  --input ./d1-export.sql \
+  --output ./d1-schema.sql \
+  --format json
+
+# 3. Preview the import plan and save a migration ID without loading data
 pscale import d1 start <database> <branch> \
   --input ./d1-export.sql \
   --dry-run \
   --format json
 
-# 3. Review lint output and generated migration ID from the dry-run
+# 4. Review warnings, converted DDL, and the migration ID from the dry-run
 MIGRATION_ID=<migration-id-from-json>
 
-# 4. Run the import after the user confirms the target database/branch
+# 5. Run the import after the user confirms the target database/branch
 pscale import d1 start <database> <branch> \
   --input ./d1-export.sql \
   --migration-id "$MIGRATION_ID" \
   --method pgloader \
   --format json
 
-# 5. Verify source/target counts, sequences, coercions, and content checks
+# 6. Verify source/target counts, sequences, coercions, and content checks
 pscale import d1 verify <database> <branch> \
   --migration-id "$MIGRATION_ID" \
   --input ./d1-export.sql \
   --format json
 
-# 6. Mark local migration state complete when verification passes
+# 7. Mark local migration state complete when verification passes
 pscale import d1 complete <database> <branch> --migration-id "$MIGRATION_ID" --format json
 ```
 
@@ -96,7 +106,7 @@ If `<branch>` is omitted, pscale uses the default branch. Prefer passing the bra
 ## Safety rules for agents
 
 1. Treat D1 import as a data migration: identify org, database, branch, export path, and method before running non-dry-run commands.
-2. Always run `lint` and `start --dry-run` first; summarize warnings/errors and migration ID.
+2. Run `lint` first. Fix every error and re-lint; only then run `start --dry-run` and summarize warnings plus the migration ID.
 3. Do not run non-dry-run `start` or `complete` without explicit user confirmation of the target and source export.
 4. Prefer `--format json` and preserve the JSON output path/summary for auditability.
 5. Use an explicit branch argument and `--dbname` when the destination PostgreSQL database name is not `postgres`.
@@ -115,9 +125,11 @@ pscale import d1 doctor
 
 Install `pgloader`, then rerun `doctor`. Do not bypass this by starting a real import.
 
-### Lint errors block import
+### Lint errors block all starts
 
-Review the lint JSON. Common blockers include unsupported SQLite constructs, non-simple indexes, views, triggers, or type coercions that need manual review. Fix or consciously accept the migration plan before running `start`.
+Inspect `error_count`, `warning_count`, and each entry in `issues`. Any `severity: "error"` issue makes `can_proceed` false, and `start` returns a `LINT_BLOCKED` error before both a real import and `--dry-run`. `--force` cannot override this gate; it only skips the human confirmation prompt after lint passes.
+
+Follow each issue's `remediation`, fix the source export, and rerun `lint` until `error_count` is `0`. `SQLITE_FUNCTION` identifies recognized unsupported SQLite-only calls and non-literal `GLOB`/`REGEXP` operators, but not every PostgreSQL-incompatible call, so also review `convert-schema` output. Warnings do not block `start` and may be consciously accepted after review; errors cannot.
 
 ### Resume an interrupted migration
 
