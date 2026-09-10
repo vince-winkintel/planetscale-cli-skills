@@ -504,7 +504,7 @@ These commands are Vitess-only. `add` uses a slug from `pscale region list`; upd
 
 ## pscale keyspace
 
-The keyspace parent, list, show, and delete help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+The keyspace parent, list, show, and delete help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The parent surface was re-verified line-for-line unchanged with the v0.331.0 binary.
 
 ```text
 List, show, and manage keyspaces.
@@ -609,6 +609,65 @@ Aliases:
 Flags:
       --force   Delete a keyspace without confirmation
   -h, --help    help for delete
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace settings
+
+The settings and update-settings help blocks are exact output from the official, checksum-verified PlanetScale CLI v0.331.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `bb554ba88b2dd05bff9b181e9ce64c0ebe8de96076187049d09e2cc36cce0b02`.
+
+```text
+Show the settings for a keyspace
+
+Usage:
+  pscale keyspace settings <database> <branch> <keyspace> [flags]
+
+Flags:
+  -h, --help   help for settings
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace update-settings
+
+```text
+Update the settings for a keyspace
+
+Usage:
+  pscale keyspace update-settings <database> <branch> <keyspace> [flags]
+
+Flags:
+      --disk-scaling-strategy string                         The disk autoscaling strategy (grow, disable, shrink). 'grow' lets dedicated disks grow automatically up to the storage limit; 'disable' turns autoscaling off; 'shrink' recreates disks at their initial size and then disables autoscaling. (default "grow")
+  -h, --help                                                 help for update-settings
+  -i, --interactive                                          Run the command in interactive mode
+      --max-storage int                                      The maximum size in bytes that dedicated disks may autoscale to. Required when the strategy is 'grow'.
+      --replication-durability-constraints-strategy string   By default, replication is configured to maximize safety and data integrity. This setting may be relaxed to favor increased performance and reduced replication lag. Options: maximum, dynamic, minimum (default "maximum")
+      --vreplication-batch-replication-events                When enabled, sends fewer queries to MySQL to improve performance.
+      --vreplication-enable-noblob-binlog-mode               When enabled, omits changed BLOB and TEXT columns from replication events, which reduces binlog sizes. (default true)
+      --vreplication-optimize-inserts                        When enabled, skips sending INSERT events for rows that have yet to be replicated. (default true)
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

@@ -1,7 +1,11 @@
-1.0.23
+1.0.24
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.331.0
+  - Reviewed the upstream release and compare `v0.330.0...v0.331.0` on 2026-09-10.
+  - Added guarded Vitess keyspace disk-autoscaling guidance for `grow`, `disable`, and `shrink`, raw-byte storage limits, explicit non-interactive updates, and read-back verification.
+  - Added the complete `keyspace settings` and `keyspace update-settings` help surfaces and re-verified the unchanged `keyspace` parent from the checksum-verified v0.331.0 macOS arm64 release binary; archive SHA-256 verified as `bb554ba88b2dd05bff9b181e9ce64c0ebe8de96076187049d09e2cc36cce0b02`.
 - PlanetScale CLI v0.330.0
   - Reviewed the upstream release and compare `v0.329.0...v0.330.0` on 2026-09-08.
   - Updated Cloudflare D1 import guidance for SQLite-only function/operator rewrites in `CHECK` and generated expressions, plus `SQLITE_FUNCTION` lint failures for unsupported forms.

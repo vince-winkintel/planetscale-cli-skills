@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring Vitess keyspace disk autoscaling, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, disk autoscaling, disk scaling strategy, max storage, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -40,6 +40,9 @@ pscale database delete <database>
 
 # Delete a Vitess keyspace (destructive; inspect and approve first)
 pscale keyspace delete <database> <branch> <keyspace>
+
+# Inspect a Vitess keyspace's replication and disk-autoscaling settings
+pscale keyspace settings <database> <branch> <keyspace> --format json
 
 # Open database shell
 pscale shell <database> <branch>
@@ -233,6 +236,39 @@ pscale keyspace list <database> <branch> --org <org> --format json
 ```
 
 Without `--force`, the CLI first verifies the keyspace exists and requires a TTY confirmation of `<database>/<branch>/<keyspace>`. JSON/CSV or headless execution requires `--force`; never add it simply to bypass the safety prompt.
+
+### Vitess keyspace disk autoscaling
+
+Inspect the keyspace settings first. The JSON result includes `disk_scaling_strategy` and `max_storage_bytes`; an unconfigured keyspace reports the strategy as `not set` and the byte limit as `0`.
+
+```bash
+# Read current replication and disk-autoscaling settings
+pscale keyspace settings <database> <branch> <keyspace> \
+  --org <org> --format json
+
+# Let dedicated disks grow automatically up to an explicit byte limit
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> \
+  --disk-scaling-strategy=grow \
+  --max-storage=<bytes> \
+  --format json
+
+# Stop future automatic growth without recreating disks
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> --disk-scaling-strategy=disable --format json
+
+# Recreate disks at their initial size, then disable autoscaling
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> --disk-scaling-strategy=shrink --format json
+
+# Verify the persisted strategy and limit after any update
+pscale keyspace settings <database> <branch> <keyspace> \
+  --org <org> --format json
+```
+
+Valid strategies are `grow`, `disable`, and `shrink`. `--max-storage` is a raw byte count and is required when selecting `grow`; it can also be supplied alone to change the cap on an already-growing keyspace. The CLI sends disk-autoscaling fields only when their flags are explicitly present, despite the displayed `grow` flag default.
+
+Use the explicit non-interactive flags above; do not combine disk-autoscaling flags with `--interactive`, whose prompt flow does not apply them. Disabling growth can create a future capacity risk, and `shrink` recreates disks before disabling autoscaling. Confirm the organization, database, branch, keyspace, current allocation, desired strategy, and byte limit; obtain explicit approval before any update; then re-read the settings instead of trusting only the update response.
 
 ## Troubleshooting
 
