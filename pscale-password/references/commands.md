@@ -228,20 +228,22 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale role
 
-```text
-Manage database roles for a Postgres database branch.
+Help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
 
-This command is only supported for Postgres databases.
+```text
+Manage database roles for a Postgres or Neki database branch.
+
+This command is supported for Postgres or Neki databases.
 
 Usage:
   pscale role [command]
 
 Available Commands:
-  create        Create a new role for a Postgres database branch
+  create        Create a new role for a Postgres or Neki database branch
   default       Show the default postgres role
   delete        Delete a role
   get           Retrieve information about a specific role
-  list          List all roles for a Postgres database branch
+  list          List all roles for a Postgres or Neki database branch
   reassign      Reassign objects owned by a role to another role
   renew         Renew a role's expiration
   reset         Reset a role's password
@@ -263,6 +265,67 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale role [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale role list
+
+```text
+List all roles for a Postgres or Neki database branch
+
+Usage:
+  pscale role list <database> <branch> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+  -h, --help            help for list
+      --name string     Filter roles by name using a substring match
+      --page int        Page number to fetch
+      --per-page int    Number of results per page (default 100)
+      --status string   Filter roles by status (active, renewable, disabled, or expired)
+  -w, --web             List roles in your web browser.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale role get
+
+```text
+Retrieve information about a specific role
+
+Usage:
+  pscale role get <database> <branch> <role-id> [flags]
+
+Flags:
+      --bouncer string             Return connection details for a PgBouncer (name).
+  -h, --help                       help for get
+      --read-only-replica string   Return connection details for a read-only replica (name).
+      --replica                    Return connection details for a branch replica.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
@@ -321,21 +384,26 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale role get
-
-This help fence is exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.
+## pscale role create
 
 ```text
-Retrieve information about a specific role
+Create a new role for a Postgres or Neki database branch
 
 Usage:
-  pscale role get <database> <branch> <role-id> [flags]
+  pscale role create <database> <branch> <name> [flags]
+
+Examples:
+  # Create a role with admin access
+  pscale role create mydb main my-role --inherited-roles postgres
+
+  # Create a role with REPLICATION privilege (requires the postgres inherited role)
+  pscale role create mydb main replicator --inherited-roles postgres --with-replication
 
 Flags:
-      --bouncer string             Return connection details for a PgBouncer (name).
-  -h, --help                       help for get
-      --read-only-replica string   Return connection details for a read-only replica (name).
-      --replica                    Return connection details for a branch replica.
+  -h, --help                     help for create
+      --inherited-roles string   Comma-separated list of role names to inherit privileges from. Common values are 'pg_read_all_data' for read access, 'pg_write_all_data' for write access, and 'postgres' for admin access.
+      --ttl duration             TTL defines the time to live for the role. Durations such as "30m", "24h", or bare integers such as "3600" (seconds) are accepted. The default TTL is 0s, which means the role will never expire. (default 0s)
+      --with-replication         When enabled, the role is created with REPLICATION privilege for logical replication. Requires --inherited-roles to include 'postgres'.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -351,24 +419,132 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale role list (Postgres equivalent)
+## pscale role update
 
 ```text
-List all roles for a Postgres database branch
+Update a role's name
 
 Usage:
-  pscale role list <database> <branch> [flags]
-
-Aliases:
-  list, ls
+  pscale role update <database> <branch> <role-id> [flags]
 
 Flags:
-  -h, --help            help for list
-      --name string     Filter roles by name using a substring match
-      --page int        Page number to fetch
-      --per-page int    Number of results per page (default 100)
-      --status string   Filter roles by status (active, renewable, disabled, or expired)
-  -w, --web             List roles in your web browser.
+  -h, --help          help for update
+      --name string   New name for the role (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale role renew
+
+```text
+Renew a role's expiration
+
+Usage:
+  pscale role renew <database> <branch> <role-id> [flags]
+
+Flags:
+  -h, --help   help for renew
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale role reset
+
+```text
+Reset a role's password
+
+Usage:
+  pscale role reset <database> <branch> <role-id> [flags]
+
+Flags:
+      --force   Reset password without confirmation
+  -h, --help    help for reset
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale role delete
+
+```text
+Delete a role
+
+Usage:
+  pscale role delete <database> <branch> <role-id> [flags]
+
+Aliases:
+  delete, rm
+
+Flags:
+      --force              Delete a role without confirmation
+  -h, --help               help for delete
+      --successor string   Role to transfer ownership to before deletion. Usually 'postgres'.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale role reassign
+
+```text
+Reassign objects owned by a role to another role
+
+Usage:
+  pscale role reassign <database> <branch> <role-id> [flags]
+
+Examples:
+  # List roles and copy the source role's id value
+  pscale role list mydb main --org my-org
+
+  # Reassign objects owned by role tq8hnwl1mlty to successor role pscale_api_stqrbvtoy367
+  pscale role reassign mydb main tq8hnwl1mlty --successor pscale_api_stqrbvtoy367 --org my-org
+
+Flags:
+      --force              Reassign objects without confirmation
+  -h, --help               help for reassign
+      --successor string   Successor role to transfer ownership to (required) (required)
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

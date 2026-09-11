@@ -157,8 +157,10 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch maintenance
 
+Help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+
 ```text
-Manage maintenance for a Postgres branch.
+Manage maintenance for a Postgres or Neki branch.
 
 PlanetScale upgrades a branch's image in emergencies, such as patching security
 issues, or when you initiate the upgrade yourself. 'maintenance run' initiates
@@ -170,7 +172,7 @@ Usage:
   pscale branch maintenance [command]
 
 Available Commands:
-  run         Run maintenance for a Postgres branch now (Postgres only)
+  run         Run maintenance for a Postgres or Neki branch now
 
 Flags:
   -h, --help   help for maintenance
@@ -194,8 +196,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ## pscale branch maintenance run
 
 ```text
-Run maintenance for a Postgres branch, updating it to the latest available
-image. Postgres only.
+Run maintenance for a Postgres or Neki branch, updating it to the latest
+available image. Vitess (MySQL) databases are not supported.
 
 This is how regular version bumps, bugfixes, and quality-of-life improvements
 reach a branch. PlanetScale otherwise upgrades images only in emergencies, such

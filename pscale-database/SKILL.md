@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring Vitess keyspace disk autoscaling, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, disk autoscaling, disk scaling strategy, max storage, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases including Neki databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring Vitess keyspace disk autoscaling, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, disk autoscaling, disk scaling strategy, max storage, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -15,6 +15,7 @@ pscale database list --org <org>
 
 # Create database
 pscale database create <database> --org <org>
+pscale database create <database> --org <org> --engine neki --cluster-size <size> --replicas <count> --wait --format json
 
 # Show database details
 pscale database show <database> --format json
@@ -47,6 +48,7 @@ pscale keyspace settings <database> <branch> <keyspace> --format json
 # Open database shell
 pscale shell <database> <branch>
 pscale shell <database> <branch> --db-name <postgres-database>
+pscale shell <database> <branch> --router <neki-router>
 
 # List configured Vitess read-only regions for a keyspace
 pscale keyspace read-only-regions <database> <branch> <keyspace> --format json
@@ -72,10 +74,21 @@ pscale database dump <database> <branch> \
 # Create new database
 pscale database create my-new-db --org my-org
 
+# Create a Neki database after confirming region, size, replicas, and cost
+pscale size cluster list --org my-org --engine neki --format json
+pscale database create my-new-neki-db --org my-org \
+  --engine neki \
+  --cluster-size <size> \
+  --replicas <count> \
+  --wait \
+  --format json
+
 # Create main branch (automatic)
 # Create development branch
 pscale branch create my-new-db development
 ```
+
+Neki-specific topology, shard, profile, router, sidecar, admin, and restore workflows belong in `pscale-neki`; keep this skill to database-level creation and discovery.
 
 ### Database Shell Access
 
@@ -88,12 +101,15 @@ pscale shell my-database main --db-name app_db
 # Equivalent positional form
 pscale shell my-database main app_db
 
+# Neki only: connect through a named router
+pscale shell my-database main --router router-a
+
 # Agent-friendly, non-interactive query path
 pscale sql my-database main --org my-org --format json \
   --dbname app_db --query "SELECT 1"
 ```
 
-`--db-name` and the third positional argument are mutually exclusive and only supported for PostgreSQL; omitting both connects to `postgres`. Vitess/MySQL shells reject either form. PostgreSQL shell access requires an interactive terminal and a locally installed `psql` client. Without a TTY, or when output format is not human, `pscale shell` fails unless `PSCALE_ALLOW_NONINTERACTIVE_SHELL` is set; do not use that bypass for ordinary automation. Use `pscale sql <database> <branch> --org <org> --format json --query '<sql>'` instead. Its PostgreSQL logical-database flag is spelled `--dbname` (no hyphen), not shell's `--db-name`.
+`--db-name` and the third positional argument are mutually exclusive and only supported for PostgreSQL; omitting both connects to `postgres`. Vitess/MySQL shells reject either form. Neki shells can use `--router` to connect through a named router. PostgreSQL and Neki shell access requires an interactive terminal and a locally installed `psql` client. Without a TTY, or when output format is not human, `pscale shell` fails unless `PSCALE_ALLOW_NONINTERACTIVE_SHELL` is set; do not use that bypass for ordinary automation. Use `pscale sql <database> <branch> --org <org> --format json --query '<sql>'` instead. Its PostgreSQL/Neki logical-database flag is spelled `--dbname` (no hyphen), not shell's `--db-name`.
 
 ### Database settings
 

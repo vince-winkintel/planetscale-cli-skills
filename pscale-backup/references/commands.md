@@ -245,18 +245,63 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale backup restore
 
-The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.329.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `2cc70050c1f7397ed1a5c272a5d1bbe1217803966717991466057ffc806c2f7b`.
+Help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
 
 ```text
-Restore a backup to a new branch
+Restore a backup to a new branch.
+
+<new-branch> is the name of the branch to create. It must not already exist.
+The backup is identified by id; the source branch is not a restore argument.
+Preview Neki restore sizes from the source branch with:
+
+  pscale backup restore show <database> <source-branch> <backup>
 
 Usage:
-  pscale backup restore <database> <branch> <backup> [flags]
+  pscale backup restore <database> <new-branch> <backup> [flags]
+  pscale backup restore [command]
+
+Available Commands:
+  show        Show the sizes a Neki backup restore will use if you do not override them
 
 Flags:
-      --cluster-size pscale size cluster list   Cluster size for restored backup branch. Use pscale size cluster list to see the valid sizes. (required) (default "PS-10")
+      --cluster-size pscale size cluster list   Cluster size for restored backup branch. For Neki, omitted unless set so the source default profile size is used. Use pscale size cluster list to see the valid sizes. (default "PS-10")
+      --config-profile stringArray              For Neki backup restores, size and replica count for one configuration profile as name=<profile>[,cluster-size=<size>][,replicas=<n>]. Repeatable. Omitted profiles inherit the source. List names with 'pscale branch config-profile list' on the source branch.
   -h, --help                                    help for restore
       --replicas int                            Number of additional replicas for a PostgreSQL restore. 0 creates a single-node branch; omit to use the target cluster size default.
+      --router stringArray                      For Neki backup restores, size and replica count for one router as name=<router>[,size=<sku>][,replicas-per-cell=<n>]. Repeatable. Omitted routers inherit the source. List names with 'pscale branch router list' on the source branch.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale backup restore [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale backup restore show
+
+```text
+Show the configuration profile and router sizes a Neki backup restore will use.
+
+These values come from the live source branch, the same source the dashboard
+pickers use. They are not stored on the backup. If the source branch was resized
+after the backup, this command shows the current sizes.
+
+<branch> is the source branch the backup belongs to, same as backup show.
+
+Usage:
+  pscale backup restore show <database> <branch> <backup> [flags]
+
+Flags:
+  -h, --help   help for show
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

@@ -1,7 +1,12 @@
-1.0.24
+1.0.25
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.332.0
+  - Reviewed the upstream release and compare `v0.331.0...v0.332.0` on 2026-09-11.
+  - Added standalone Neki operational guidance for database creation, logs, data topology, shards, configuration profiles, routers, sidecars, admin config, maintenance, backup restore sizing, shell, SQL, and roles.
+  - Updated cross-engine database creation, branch maintenance, backup restore, shell/SQL, and role guidance where existing skills would otherwise omit Neki behavior.
+  - Re-captured complete affected help surfaces from the checksum-verified v0.332.0 macOS arm64 release binary; archive SHA-256 verified as `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
 - PlanetScale CLI v0.331.0
   - Reviewed the upstream release and compare `v0.330.0...v0.331.0` on 2026-09-10.
   - Added guarded Vitess keyspace disk-autoscaling guidance for `grow`, `disable`, and `shrink`, raw-byte storage limits, explicit non-interactive updates, and read-back verification.

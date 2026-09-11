@@ -42,6 +42,42 @@ Use "pscale database [command] --help" for more information about a command.
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
+
+## pscale database create
+
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+
+```text
+Create a database instance
+
+Usage:
+  pscale database create <database> [flags]
+
+Flags:
+      --cluster-size pscale size cluster list   cluster size for Scaler Pro databases. Use pscale size cluster list to see the valid sizes.
+      --engine string                           The database engine for the database. Supported values: mysql, postgresql, neki. Defaults to mysql. (default "mysql")
+  -h, --help                                    help for create
+      --major-version string                    For Postgres or Neki databases, the Postgres major version to use. Defaults to the latest available major version.
+      --max-storage int                         Maximum storage size in bytes for autoscaling
+      --min-storage int                         Minimum storage size in bytes
+      --region string                           region for the database
+      --replicas int                            number of replicas for Postgres or Neki databases. Use 0 for single-node Postgres or 2 or more for HA.
+      --wait                                    Wait until the database is ready
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
 ## pscale database aggressive-cutover
 
 ```text
@@ -797,7 +833,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale shell
 
-The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.329.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `2cc70050c1f7397ed1a5c272a5d1bbe1217803966717991466057ffc806c2f7b`.
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
 
 ```text
 Open a shell instance to a database and branch
@@ -836,6 +872,7 @@ Flags:
       --remote-addr hostname:port   PlanetScale Database remote network address. By default the remote address is populated automatically from the PlanetScale API. (format: hostname:port)
       --replica                     When enabled, the password will route all reads to the branch's primary replicas and all read-only regions.
       --role string                 Role defines the access level, allowed values are: reader, writer, readwriter, admin. Defaults to 'reader' for replica passwords, otherwise defaults to 'admin'.
+      --router string               Connect through the named router group. Only supported for Neki databases.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -844,6 +881,39 @@ Global Flags:
       --debug                     Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
       --no-color                  Disable color output
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale size cluster list
+
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+
+```text
+List the sizes that are available for a PlanetScale database. By default, shows all clusters for all engines. Use --engine to filter by a specific engine type.
+
+Usage:
+  pscale size cluster list [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+      --engine string   Filter cluster sizes by database engine. Supported values: mysql, postgresql, neki. If not specified, shows all clusters for all engines.
+  -h, --help            help for list
+      --metal           view cluster sizes and rates for clusters with metal storage
+      --region string   view cluster sizes and rates for a specific region
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 

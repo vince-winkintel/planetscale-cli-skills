@@ -1,11 +1,11 @@
 ---
 name: pscale-password
-description: Create, list, show, update, renew, and delete branch connection passwords, and inspect Postgres roles and their connection targets. Use when creating connection strings for applications, managing database credentials, generating passwords for local development, routing reads to a Vitess read-only region, retrieving Postgres role details for a branch replica, named read-only replica, or PgBouncer, rotating credentials, updating password names or CIDR restrictions, or finding credentials by name, status, or expiration. Triggers on password, connection string, database credentials, create password, show password, update password, CIDR, read-only region password, password status, Postgres role, role get, role status, role expiration, default Postgres role, read-only replica, replica name, PgBouncer connection.
+description: Create, list, show, update, renew, and delete branch connection passwords, and inspect Postgres/Neki roles and their connection targets. Use when creating connection strings for applications, managing database credentials, generating passwords for local development, routing reads to a Vitess read-only region, retrieving Postgres or Neki role details for a branch replica, named read-only replica, or PgBouncer, rotating credentials, updating password names or CIDR restrictions, or finding credentials by name, status, or expiration. Triggers on password, connection string, database credentials, create password, show password, update password, CIDR, read-only region password, password status, Postgres role, Neki role, role get, role status, role expiration, default Postgres role, read-only replica, replica name, PgBouncer connection.
 ---
 
 # pscale password
 
-Create, list, filter, renew, and delete branch passwords for database connections. The `pscale password` command group is for Vitess databases; use `pscale role` for Postgres branch credentials.
+Create, list, filter, renew, and delete branch passwords for database connections. The `pscale password` command group is for Vitess databases; use `pscale role` for Postgres and Neki branch credentials.
 
 ## Common Commands
 
@@ -125,9 +125,9 @@ pscale password create <database> <branch> reporting-reader \
 
 Use `--read-only-region` when reads must stay in one separate region. Use `--replica` instead when reads may route to the primary region's replicas and all read-only regions. The two routing modes are mutually exclusive.
 
-### Postgres role lookup and filtering
+### Postgres and Neki role lookup and filtering
 
-Postgres databases use roles instead of Vitess branch passwords. `pscale role default` is a read-only lookup for the default `postgres` role and does not rotate credentials. Use `pscale role reset-default` only when the user explicitly asks to reset default-role credentials and approves the connection impact. Role list/get/default output includes `status` and `expires_at`; listing supports pagination and name filtering plus status filters for `active`, `renewable`, `disabled`, and `expired`.
+Postgres and Neki databases use roles instead of Vitess branch passwords. `pscale role default` is a read-only lookup for the default `postgres` role and does not rotate credentials. Use `pscale role reset-default` only when the user explicitly asks to reset default-role credentials and approves the connection impact. Role list/get/default output includes `status` and `expires_at`; listing supports pagination and name filtering plus status filters for `active`, `renewable`, `disabled`, and `expired`.
 
 This workflow intentionally lives here because no dedicated `pscale-role` skill exists, and both command groups manage branch credentials.
 
@@ -146,7 +146,7 @@ pscale role get <database> <branch> <role-id> --org <org> --format json --read-o
 pscale role get <database> <branch> <role-id> --org <org> --format json --bouncer <bouncer-name>
 ```
 
-`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. `--read-only-replica` takes the replica name returned by branch infrastructure or replica inventory, not a region slug. A targeted response keeps the normal role shape but can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`. A target-specific `NOT_FOUND` can mean either the role or the requested replica/PgBouncer was not found, so verify both identifiers before retrying. Treat any returned password or connection URL as a secret: capture it directly into an approved secret manager and never print it in logs or commit it.
+`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. `--read-only-replica` takes the replica name returned by branch infrastructure or replica inventory, not a region slug. A targeted response keeps the normal role shape but can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`. For Neki, use `pscale-neki` for router-specific operational context. A target-specific `NOT_FOUND` can mean either the role or the requested replica/PgBouncer was not found, so verify both identifiers before retrying. Treat any returned password or connection URL as a secret: capture it directly into an approved secret manager and never print it in logs or commit it.
 
 ## Troubleshooting
 
