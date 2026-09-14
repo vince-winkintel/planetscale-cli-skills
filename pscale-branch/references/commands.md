@@ -1,6 +1,8 @@
-Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch` and `pscale branch create` surfaces were recaptured from the checksum-verified v0.325.0 binary; the parent output is unchanged from v0.324.0.
+Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch create` surface was recaptured from the checksum-verified v0.325.0 binary. The `pscale branch` parent and maintenance surfaces are noted with their own provenance.
 
 ## pscale branch
+
+Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
 
 ```text
 Create, delete, diff, and manage branches
@@ -8,29 +10,45 @@ Create, delete, diff, and manage branches
 Usage:
   pscale branch [command]
 
-Available Commands:
-  connections     Show and kill branch connections
+MySQL, Postgres, and Neki branch commands:
   create          Create a new branch from a database
   delete          Delete a branch from a database
   demote          Demote a production branch to development
-  diff            Show the diff of a branch
-  extensions      List extensions available on a Postgres branch
-  lint            Lints the schema for a branch
   list            List all branches of a database
-  maintenance     Run maintenance for a Postgres branch
-  parameters      List the configuration parameters of a Postgres branch
   promote         Promote a new branch from a database
-  query-patterns  List, show, delete, and download query pattern reports for a branch
-  refresh-schema  Refresh the schema for a database branch
-  resize          Change a Postgres branch's cluster size, replicas, or parameters
-  routing-rules   Fetch or update your keyspace routing rules
-  safe-migrations Enable or disable safe migrations on a branch
   schema          Show the schema of a branch
   show            Show a specific branch of a database
   switch          Switches the current project to use the specified branch
-  switchover      Switch over the primary of a Postgres branch (Postgres only)
   update          Update a branch's name or deletion protection
+
+MySQL and Postgres:
+  connections     Show and kill MySQL or Postgres branch connections
+
+Vitess/MySQL-specific:
+  diff            Show the schema diff of a MySQL branch
+  lint            Lint the schema of a MySQL branch
+  query-patterns  List, show, delete, and download query pattern reports for a MySQL branch
+  refresh-schema  Refresh the schema for a MySQL branch
+  routing-rules   Fetch or update keyspace routing rules for a MySQL branch
+  safe-migrations Enable or disable safe migrations on a MySQL branch
   vtgate          Manage VTGate size for a Vitess branch
+
+Postgres-specific:
+  extensions      List extensions available on a Postgres branch
+  parameters      List the configuration parameters of a Postgres branch
+  resize          Change a Postgres branch's cluster size, replicas, or parameters
+  switchover      Switch over the primary of a Postgres branch (Postgres only)
+
+Postgres and Neki:
+  maintenance     Run maintenance for a Postgres or Neki branch
+
+Neki-specific:
+  admin           Manage the admin config for a Neki database branch
+  config-profile  Manage configuration profiles for a Neki database branch
+  data-topology   Fetch or update the data topology of a Neki branch
+  router          Manage routers for a Neki database branch
+  shard           Manage shards for a Neki database branch
+  sidecar         Manage sidecars for a Neki database branch
 
 Flags:
   -h, --help         help for branch
@@ -47,6 +65,60 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale branch [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale logs
+
+Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+
+```text
+Query recent logs for a PostgreSQL or Neki branch.
+
+The command obtains a signed logs URL from the PlanetScale API, builds a LogsQL
+query, and prints parsed log entries. By default it returns up to 100 logs from
+the primary server over the last hour, newest first.
+
+Usage:
+  pscale logs <database> <branch> [flags]
+
+Examples:
+  # Recent primary logs
+  pscale logs <database> <branch> --org <org> --format json
+
+  # Errors from a selected pod over the last six hours
+  pscale logs <database> <branch> --org <org> --format json --period 6h --level ERROR --server <pod>
+
+  # Logs from a custom ISO 8601 time range
+  pscale logs <database> <branch> --org <org> --format json \
+    --from 2026-08-20T16:00:00Z --to 2026-08-20T18:00:00Z
+
+  # Search and filter with LogsQL syntax
+  pscale logs <database> <branch> --org <org> --format json --query 'connection refused'
+
+Flags:
+      --from string      Start of a custom time range as an ISO 8601 timestamp
+  -h, --help             help for logs
+      --level strings    Log levels to include (comma-separated or repeatable): DEBUG, INFO, WARNING, ERROR
+      --limit int        Maximum number of logs to return (default 100)
+      --org string       The organization for the current user
+      --page int         Page number to fetch (default 1)
+      --period string    Time period to query: 15m, 1h, 3h, 6h, 12h, 1d, 7d, or 8d (default "1h")
+      --query string     Text or LogsQL expression to search for
+      --server strings   Servers to include (comma-separated or repeatable); primary selects the primary role, other values select pod names (default [primary])
+      --shard strings    Neki shards to include (comma-separated or repeatable)
+      --to string        End of a custom time range as an ISO 8601 timestamp
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
@@ -157,7 +229,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch maintenance
 
-Help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+Help fences in this section and the next (`maintenance`, `maintenance run`) are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
 
 ```text
 Manage maintenance for a Postgres or Neki branch.

@@ -15,7 +15,7 @@ pscale database list --org <org>
 
 # Create database
 pscale database create <database> --org <org>
-pscale database create <database> --org <org> --engine neki --cluster-size <size> --replicas <count> --wait --format json
+pscale database create <database> --org <org> --engine neki --region <region> --cluster-size <size> --replicas <count> --min-storage <bytes> --max-storage <bytes> --wait --format json
 
 # Show database details
 pscale database show <database> --format json
@@ -74,12 +74,15 @@ pscale database dump <database> <branch> \
 # Create new database
 pscale database create my-new-db --org my-org
 
-# Create a Neki database after confirming region, size, replicas, and cost
+# Create a Neki database after confirming region, size, replicas, storage bounds, and cost
 pscale size cluster list --org my-org --engine neki --format json
 pscale database create my-new-neki-db --org my-org \
   --engine neki \
+  --region <region> \
   --cluster-size <size> \
   --replicas <count> \
+  --min-storage <bytes> \
+  --max-storage <bytes> \
   --wait \
   --format json
 
@@ -88,7 +91,7 @@ pscale database create my-new-neki-db --org my-org \
 pscale branch create my-new-db development
 ```
 
-Neki-specific topology, shard, profile, router, sidecar, admin, and restore workflows belong in `pscale-neki`; keep this skill to database-level creation and discovery.
+Use `pscale size cluster list --engine neki` for valid Neki sizes. The `--region`, `--min-storage`, and `--max-storage` flags are Neki creation inputs; storage bounds are byte counts. The help documents `--replicas 0` for single-node Postgres, not Neki, so confirm supported Neki replica counts before creating and use `2` or more for HA. Neki-specific topology, shard, profile, router, sidecar, admin, and restore workflows belong in `pscale-neki`; keep this skill to database-level creation and discovery.
 
 ### Database Shell Access
 

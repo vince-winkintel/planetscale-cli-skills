@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Create, rename, protect, delete, promote, diff, switchover, restore, inspect query patterns, and manage PlanetScale database branches, Postgres/Neki maintenance, Postgres extensions/parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, Lookup Vindexes, and Vitess workflows. Use when creating development branches for schema changes, restoring a PostgreSQL branch to a point in time, renaming branches, changing deletion protection, switching a Postgres primary to a replica, running Postgres or Neki branch maintenance, listing available Postgres extensions, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, creating or completing an owned Lookup Vindex backfill, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, restore point, point-in-time recovery, PITR, rename branch, deletion protection, branch switchover, primary switchover, branch maintenance, Postgres maintenance, Neki maintenance, extensions, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, lookup vindex, owned vindex, continue after copy with owner, vtctld, promote branch, MoveTables, global keyspace.
+description: Create, rename, protect, delete, promote, diff, switchover, restore, inspect query patterns, query PostgreSQL/Neki branch logs, and manage PlanetScale database branches, Postgres/Neki maintenance, Postgres extensions/parameters, Vitess VTGate capacity, tablet throttling, keyspace routing rules, Lookup Vindexes, and Vitess workflows. Use when creating development branches for schema changes, restoring a PostgreSQL branch to a point in time, querying PostgreSQL or Neki branch logs, renaming branches, changing deletion protection, switching a Postgres primary to a replica, running Postgres or Neki branch maintenance, listing available Postgres extensions, viewing schema diffs, changing Postgres branch size, inspecting or resizing VTGates, inspecting or replacing live keyspace routing rules, changing tablet throttler rules, creating or completing an owned Lookup Vindex backfill, promoting branches, or creating vtctld MoveTables workflows. Essential for schema migration workflows and branch-level query analysis. Triggers on branch, create branch, restore point, point-in-time recovery, PITR, pscale logs, branch logs, Postgres logs, Neki logs, rename branch, deletion protection, branch switchover, primary switchover, branch maintenance, Postgres maintenance, Neki maintenance, extensions, schema diff, query patterns, resize branch, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, routing rules, lookup vindex, owned vindex, continue after copy with owner, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -32,6 +32,9 @@ pscale branch list <database> --page 2 --per-page 100 --format json
 
 # Show branch details
 pscale branch show <database> <branch-name>
+
+# Query recent PostgreSQL or Neki branch logs
+pscale logs <database> <branch-name> --org <org> --format json --period 1h
 
 # Rename a branch or change deletion protection (write; inspect and approve first)
 pscale branch update <database> <branch-name> --new-name <new-name> --format json
@@ -219,6 +222,27 @@ pscale branch infra <database> <branch-name> --org <org> --format json
 
 Use this for read-only diagnostics. Do not infer that a schema/deploy operation is safe solely from infra output; combine it with branch status, schema diff, and deploy-request checks.
 
+### PostgreSQL and Neki branch logs
+
+`pscale logs` queries a signed logs endpoint for PostgreSQL and Neki branches; Vitess branches are rejected. Use bounded time windows, prefer JSON output, and avoid exposing sensitive SQL text, usernames, addresses, or application identifiers from log messages.
+
+```bash
+# Last hour from the primary server
+pscale logs <database> <branch> --org <org> --format json --period 1h
+
+# Search errors over a bounded interval
+pscale logs <database> <branch> --org <org> --format json \
+  --period 6h --level ERROR --query "connection refused"
+
+# Use a paired absolute range; Neki can also filter by shard and pod/server
+pscale logs <database> <branch> --org <org> --format json \
+  --from <RFC3339> --to <RFC3339>
+pscale logs <database> <branch> --org <org> --format json \
+  --shard <shard> --server <pod> --page 2
+```
+
+Use either `--period` or paired `--from`/`--to`, not both. `--level`, `--server`, and `--shard` are comma-separated or repeatable. JSON output preserves parsed fields such as `time`, `level`, `message`, `role`, `shard`, `container`, `availability_zone`, `pod`, `stream_id`, and `raw_message`; malformed individual lines are skipped.
+
 ### Postgres branch extensions
 
 `pscale branch extensions list` is read-only and returns the extensions available on the branch's current cluster image. It is not an inventory of installed `CREATE EXTENSION` state inside a database.
@@ -280,9 +304,15 @@ Only one switchover can run on a branch at a time. If the create response contai
 `pscale branch maintenance run` starts asynchronous Postgres or Neki branch image maintenance. PlanetScale applies the image upgrade to replicas first, then switches over from the old primary to an upgraded replica. Expect seconds of unavailability during the switchover, and expect all direct connections to be terminated; applications must rely on retry logic. A single-instance branch has no replica to promote and is unavailable until the instance returns. For Neki configuration-profile maintenance, use `pscale-neki`.
 
 ```bash
-# Inspect instance topology and make sure no resize/change request is in progress
+# PostgreSQL: inspect instance topology and make sure no resize request is in progress
 pscale branch infra <database> <branch> --org <org> --format json
 pscale branch resize status <database> <branch> --org <org> --format json
+
+# Neki: make sure no profile/router/sidecar/admin change request is in progress
+pscale branch config-profile changes list <database> <branch> --org <org> --format json
+pscale branch router changes list <database> <branch> --org <org> --format json
+pscale branch sidecar changes list <database> <branch> --org <org> --format json
+pscale branch admin changes list <database> <branch> --org <org> --format json
 
 # After explicit approval for the target and impact
 pscale branch maintenance run <database> <branch> --org <org> --format json
@@ -292,11 +322,17 @@ pscale branch maintenance run <database> <branch> --org <org> \
   --update-postgres-minor-version \
   --format json
 
-# Track async progress through branch infrastructure
+# Track PostgreSQL async progress through branch infrastructure
 pscale branch infra <database> <branch> --org <org> --format json
+
+# Track Neki async progress with Neki-owned reads
+pscale branch config-profile list <database> <branch> --org <org> --format json
+pscale branch router list <database> <branch> --org <org> --format json
+pscale branch sidecar list <database> <branch> --org <org> --format json
+pscale branch admin show <database> <branch> --org <org> --format json
 ```
 
-Maintenance cannot start while a `branch resize` change request is in progress. Treat this as an availability-impacting operational write: show the target branch, topology, expected connection termination/unavailability, minor-version choice, and incident/rollback plan before asking for approval.
+Maintenance cannot start while a change request is in progress. For PostgreSQL, check `branch resize status`; for Neki, check config-profile, router, sidecar, and admin `changes list` output. Treat this as an availability-impacting operational write: show the target branch, topology or Neki component state, expected connection termination/unavailability, minor-version choice when applicable, and incident/rollback plan before asking for approval.
 
 ### Connection inspection and safe termination
 

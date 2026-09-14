@@ -146,7 +146,7 @@ pscale role get <database> <branch> <role-id> --org <org> --format json --read-o
 pscale role get <database> <branch> <role-id> --org <org> --format json --bouncer <bouncer-name>
 ```
 
-`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. `--read-only-replica` takes the replica name returned by branch infrastructure or replica inventory, not a region slug. A targeted response keeps the normal role shape but can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`. For Neki, use `pscale-neki` for router-specific operational context. A target-specific `NOT_FOUND` can mean either the role or the requested replica/PgBouncer was not found, so verify both identifiers before retrying. Treat any returned password or connection URL as a secret: capture it directly into an approved secret manager and never print it in logs or commit it.
+`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. `--read-only-replica` takes the replica name returned by branch infrastructure or replica inventory, not a region slug. A targeted response keeps the normal role shape but can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`. For Neki, `pscale role get` returns the default access host; router-scoped connections use `pscale shell --router` through `pscale-neki`. A target-specific `NOT_FOUND` can mean either the role or the requested replica/PgBouncer was not found, so verify both identifiers before retrying. Treat any returned password or connection URL as a secret: capture it directly into an approved secret manager and never print it in logs or commit it.
 
 ## Troubleshooting
 

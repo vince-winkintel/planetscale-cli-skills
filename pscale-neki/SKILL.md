@@ -1,6 +1,6 @@
 ---
 name: pscale-neki
-description: Manage PlanetScale Neki databases and branches with pscale. Use for Neki database creation, branch logs, data topology, shards, configuration profiles, routers, sidecars, admin config, Neki maintenance, backup restore sizing, shell, SQL, and roles. Triggers on Neki, pscale database create --engine neki, pscale logs, branch data-topology, branch shard, branch config-profile, branch router, branch sidecar, branch admin, Neki restore, or --router.
+description: Manage PlanetScale Neki branch resources with pscale. Use for Neki data topology, shards, configuration profiles, routers, sidecars, admin config, Neki profile maintenance, restore sizing overrides, and router-scoped access context. Triggers on Neki, branch data-topology, branch shard, branch config-profile, branch router, branch sidecar, branch admin, Neki restore, Neki profile maintenance, or --router.
 ---
 
 # pscale-neki
@@ -25,7 +25,6 @@ Start by confirming engine and branch readiness:
 ```bash
 pscale database show <database> --org <org> --format json
 pscale branch show <database> <branch> --org <org> --format json
-pscale logs <database> <branch> --org <org> --format json
 ```
 
 For size choices, use Neki-scoped discovery rather than Postgres or MySQL defaults:
@@ -39,21 +38,9 @@ pscale branch admin sizes <database> <branch> --org <org> --format json
 
 ## Creation And Access
 
-Create Neki databases only after confirming region, cluster size, replica count, storage bounds, and cost impact:
+Create Neki databases through `pscale-database`; that skill owns the complete command and operational workflow. Before handing off, confirm region, cluster size, replica count, storage bounds, and cost impact. The help documents `0` for single-node Postgres, not Neki, so confirm the supported Neki replica count and use `2` or more for high availability. Treat a timeout or interruption as an unconfirmed provisioning outcome and inspect `database show` before retrying.
 
-```bash
-pscale database create <database> --org <org> \
-  --engine neki \
-  --region <region> \
-  --cluster-size <size> \
-  --replicas <count> \
-  --wait \
-  --format json
-```
-
-Use `pscale size cluster list --engine neki` for valid sizes. Replica count `0` creates a single-node database; use `2` or more for high availability. `--min-storage` and `--max-storage` are byte counts. Treat a timeout or interruption as an unconfirmed provisioning outcome and inspect `database show` before retrying.
-
-Neki uses Postgres-style shell, SQL, and roles. `pscale sql` defaults to the reader role; use write-capable roles only after approval. Ephemeral Neki roles can take time to become connectable, and the CLI waits up to one minute before connecting.
+Neki uses Postgres-style shell, SQL, and roles. `pscale sql` defaults to the reader role; use write-capable roles only after approval. Ephemeral Neki roles can take time to become connectable, and the CLI waits up to one minute before connecting. Role creation, reset, deletion, renewal, update, and reassignment follow `pscale-password`; this skill lists roles only for connection context.
 
 ```bash
 pscale role list <database> <branch> --org <org> --format json
@@ -65,24 +52,8 @@ Use `--router` when connecting through a specific Neki router. Do not expose ret
 
 ## Branch Logs
 
-`pscale logs` queries a signed logs endpoint without sending PlanetScale API credentials to that host. It supports PostgreSQL and Neki branches; Vitess branches are rejected.
+`pscale logs` is owned by `pscale-branch` for both PostgreSQL and Neki branches. Use that skill for the exact help and safety guidance; Neki-specific filters include `--shard` and pod/server selection.
 
-```bash
-# Last hour from the primary server
-pscale logs <database> <branch> --org <org> --format json
-
-# Search errors over a bounded interval
-pscale logs <database> <branch> --org <org> --format json \
-  --period 6h --level ERROR --query "connection refused"
-
-# Use a paired absolute range, or select Neki shards/pods
-pscale logs <database> <branch> --org <org> --format json \
-  --from <RFC3339> --to <RFC3339>
-pscale logs <database> <branch> --org <org> --format json \
-  --shard <shard> --server <pod> --page 2
-```
-
-Use either `--period` or paired `--from`/`--to`, not both. `--level`, `--server`, and `--shard` are comma-separated or repeatable. JSON output preserves parsed fields such as `time`, `level`, `message`, `role`, `shard`, `container`, `availability_zone`, `pod`, `stream_id`, and `raw_message`; malformed individual lines are skipped.
 
 ## Data Topology And Shards
 
@@ -186,15 +157,16 @@ Sidecar update requires one or more `--parameters`; admin update requires `--siz
 
 ## Maintenance
 
-Branch maintenance upgrades all profiles to the latest cluster image, terminates direct connections, and may cause brief unavailability. Inspect branch infrastructure and outstanding profile changes, confirm the impact window and recovery plan, and obtain explicit approval first.
+Branch-wide `pscale branch maintenance run` belongs to `pscale-branch`. Before handing off a Neki branch-wide run, inspect config-profile, router, sidecar, and admin change queues for non-terminal requests, confirm the impact window and recovery plan, and obtain explicit approval for the availability-impacting operation. Keep `pscale branch config-profile maintenance` in this skill for profile-scoped maintenance.
 
 ```bash
-pscale branch infra <database> <branch> --org <org> --format json
-pscale branch maintenance run <database> <branch> --org <org> --format json
-pscale branch infra <database> <branch> --org <org> --format json
+pscale branch config-profile changes list <database> <branch> --org <org> --format json
+pscale branch router changes list <database> <branch> --org <org> --format json
+pscale branch sidecar changes list <database> <branch> --org <org> --format json
+pscale branch admin changes list <database> <branch> --org <org> --format json
 ```
 
-The command returns after maintenance starts. Do not report completion until infrastructure/profile state confirms it.
+After `pscale-branch` starts branch-wide maintenance, verify completion with Neki-owned reads such as `config-profile list/show`, `router list/show`, `sidecar list/show`, and `admin show`; do not rely on `pscale branch infra` for Neki unless an exact help fence proves support.
 
 ## Backup Restore
 

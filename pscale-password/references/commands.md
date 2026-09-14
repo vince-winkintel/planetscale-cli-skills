@@ -1,6 +1,6 @@
 Create, list, show, update, renew, and delete branch passwords.
 
-Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. Role surfaces are included because Postgres branches use roles instead of Vitess passwords.
+Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. Role surfaces are included because Postgres and Neki branches use roles instead of Vitess passwords.
 
 ## pscale password
 

@@ -70,10 +70,10 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | Command | Skill | Use When |
 |---------|-------|----------|
 | **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
-| **branch** | `pscale-branch` | Create, restore to a PostgreSQL recovery point, rename, protect, delete, promote, diff, list, and switchover branches; inspect branch infra, manage Postgres size/replicas/parameters/maintenance/extensions, resize Vitess VTGates, manage live keyspace routing rules, Lookup Vindexes, and tablet throttling, manage query pattern reports, manage Vitess MoveTables workflows |
+| **branch/logs** | `pscale-branch` | Create, restore to a PostgreSQL recovery point, rename, protect, delete, promote, diff, list, and switchover branches; query PostgreSQL/Neki branch logs; inspect branch infra, manage Postgres size/replicas/parameters/maintenance/extensions, run Postgres/Neki branch maintenance, resize Vitess VTGates, manage live keyspace routing rules, Lookup Vindexes, and tablet throttling, manage query pattern reports, manage Vitess MoveTables workflows |
 | **deploy-request** | `pscale-deploy-request` | Create, review, inspect queues/operations, check storage, throttle, deploy, update auto-apply/auto-delete settings, unblock failed deploy/revert queues, force cutover, and revert schema changes |
-| **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level Vitess throttler/aggressive-cutover defaults, keyspace disk autoscaling, PostgreSQL IP restrictions, and read-only regions |
-| **neki/logs** | `pscale-neki` | Create Neki databases, query PostgreSQL/Neki branch logs, and manage Neki data topology, shards, config profiles, routers, sidecars, admin config, maintenance, roles/access context, and restore sizing |
+| **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level Vitess throttler/aggressive-cutover defaults, keyspaces (including disk autoscaling), PostgreSQL IP restrictions, and read-only regions |
+| **neki** | `pscale-neki` | Manage Neki data topology, shards, config profiles, routers, sidecars, admin config, profile maintenance, restore sizing overrides, and router-scoped access context |
 | **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise maintenance schedules, pending versions, deadlines, and historical windows |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
 | **metrics** | `pscale-metrics` | Query historical/current branch metrics and engine-aware grouped performance reports |
@@ -84,7 +84,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; manage scheduled backup policies |
 | **billing** | `pscale-billing` | Inspect invoices and manage organization payment methods with sensitive billing-data safeguards |
 | **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
-| **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions; inspect Postgres role connection targets by replica name |
+| **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions; inspect and mutate Postgres/Neki roles and role connection targets |
 | **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers |
 | **read-only-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, and delete dedicated PostgreSQL read-only replicas |
 | **webhook** | `pscale-webhook` | List, inspect, create, update, test, and delete database webhooks, including authorization headers |
@@ -233,7 +233,6 @@ pscale read-only-replica show <database> <branch> <name> --org <org> --format js
 
 # Database operations
 pscale database create <database> --org <org>
-pscale database create <database> --org <org> --engine neki --cluster-size <size> --replicas <count> --wait --format json
 pscale database list
 pscale database show <database> --format json
 pscale database ip-restriction list <database> --format json
