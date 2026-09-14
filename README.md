@@ -7,7 +7,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ## 🎯 What This Skill Provides
 
-- **20 sub-skills** covering all major `pscale` commands
+- **21 sub-skills** covering all major `pscale` commands
 - **3 automation scripts** for common workflows (create branch, deploy schema, sync)
 - **Decision trees** for common questions (branch vs deploy request, tokens vs passwords)
 - **Troubleshooting sections** for self-service problem solving
@@ -18,7 +18,7 @@ Comprehensive `pscale` command reference and automation workflows for managing P
 
 ### Agent Skills (`npx skills`)
 
-This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 20 standalone `pscale-*` skills.
+This repository is a collection containing the `planetscale-cli-skills` orchestrator plus 21 standalone `pscale-*` skills.
 Each skill lives in its own directory with its own `SKILL.md`; there is intentionally no root `SKILL.md` so Agent Skills can discover every sibling instead of stopping at the repository root.
 
 ```bash
@@ -101,9 +101,10 @@ pscale branch create my-database feature-branch --from main
 | Skill | Use When | Common Commands |
 |-------|----------|----------------|
 | **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
-| **pscale-branch** | Create, restore to a PostgreSQL recovery point, rename, protect, diff, promote, and switchover branches; manage Postgres size/replicas/parameters/maintenance/extensions, resize Vitess VTGates, inspect branch infra, manage live routing rules, Lookup Vindexes, tablet throttling, query pattern reports, and Vitess MoveTables workflows | `pscale branch create/update/switchover/diff/parameters/maintenance/extensions/resize/vtgate/infra/query-patterns/vtctld lookup-vindex` |
+| **pscale-branch** | Create, restore to a PostgreSQL recovery point, rename, protect, diff, promote, and switchover branches; query PostgreSQL/Neki logs; manage Postgres size/replicas/parameters/maintenance/extensions, run Postgres/Neki branch-wide maintenance, resize Vitess VTGates, inspect branch infra, manage live routing rules, Lookup Vindexes, tablet throttling, query pattern reports, and Vitess MoveTables workflows | `pscale branch create/update/switchover/diff/parameters/maintenance/extensions/resize/vtgate/infra/query-patterns/vtctld lookup-vindex`, `pscale logs` |
 | **pscale-deploy-request** | Deploy schema changes safely; inspect queues, operations, reviews, storage, and throttling; update auto-apply/auto-delete settings; unblock failed deploy/revert queues | `pscale deploy-request create/deploy/update/unblock/queue/operations/storage-check/throttler` |
-| **pscale-database** | Manage settings, database-level Vitess throttler and aggressive-cutover defaults, PostgreSQL IP restrictions, shells, keyspaces, and read-only regions/dumps | `pscale database show/update/throttler/aggressive-cutover/ip-restriction`, `pscale keyspace delete/read-only-regions`, `pscale shell` |
+| **pscale-database** | Manage settings, database-level Vitess throttler and aggressive-cutover defaults, keyspaces (including disk autoscaling), PostgreSQL IP restrictions, shells, and read-only regions/dumps | `pscale database show/update/throttler/aggressive-cutover/ip-restriction`, `pscale keyspace settings/update-settings/delete/read-only-regions`, `pscale shell` |
+| **pscale-neki** | Manage Neki data topology, shards, configuration profiles, routers, sidecars, admin config, profile maintenance, restore sizing overrides, and router-scoped access context | `pscale branch data-topology/shard/config-profile/router/sidecar/admin`, `pscale branch config-profile maintenance` |
 | **pscale-maintenance** | Inspect Vitess Enterprise maintenance schedules and windows | `pscale maintenance list/show/windows` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
 | **pscale-metrics** | Query historical/current branch metrics and engine-aware performance reports | `pscale metrics show/instant/report` |
@@ -114,7 +115,7 @@ pscale branch create my-database feature-branch --from main
 | **pscale-backup** | Create/restore backups and manage scheduled policies | `pscale backup create/list/policy` |
 | **pscale-billing** | Inspect invoices and manage organization payment methods | `pscale billing payment-method show/update/delete`, `pscale billing invoice list/show/line-items` |
 | **pscale-audit-log** | List audit events and export authentication attempts | `pscale audit-log list/auth-attempts` |
-| **pscale-password** | Connection passwords and Postgres roles, including Vitess read-only-region credentials, named Postgres replica connection targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role list/get/default` |
+| **pscale-password** | Connection passwords and Postgres/Neki roles, including Vitess read-only-region credentials, role mutations, named Postgres replica connection targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role list/get/default/reset/delete/reassign` |
 | **pscale-pgbouncer** | Dedicated PostgreSQL PgBouncer lifecycle and asynchronous resizing | `pscale pgbouncer list/show/create/resize/delete` |
 | **pscale-read-only-replica** | Dedicated PostgreSQL read-only replica lifecycle, sizing, regions, and parameters | `pscale read-only-replica list/show/create/update/delete` |
 | **pscale-webhook** | Database webhook lifecycle, authorization headers, and test events | `pscale webhook list/show/create/update/test/delete` |
@@ -235,6 +236,9 @@ pscale insights recommendations show my-db <number> --org my-org --format json
 pscale insights queries show my-db main <query-id> --org my-org --format json
 pscale insights queries summary my-db main <fingerprint> --org my-org --keyspace <keyspace> --format json
 pscale insights queries traffic-budgets my-db main <fingerprint> --org my-org --keyspace <keyspace> --format json
+
+# Recent PostgreSQL or Neki branch logs
+pscale logs my-db main --org my-org --format json --period 1h
 
 # Inventory Postgres Traffic Control budgets and their rules
 pscale traffic-control budget list my-db main --org my-org --format json

@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases, deleting a Vitess keyspace, inspecting or changing database settings, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases including Neki databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring Vitess keyspace disk autoscaling, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, disk autoscaling, disk scaling strategy, max storage, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -15,6 +15,7 @@ pscale database list --org <org>
 
 # Create database
 pscale database create <database> --org <org>
+pscale database create <database> --org <org> --engine neki --region <region> --cluster-size <size> --replicas <count> --min-storage <bytes> --max-storage <bytes> --wait --format json
 
 # Show database details
 pscale database show <database> --format json
@@ -41,9 +42,13 @@ pscale database delete <database>
 # Delete a Vitess keyspace (destructive; inspect and approve first)
 pscale keyspace delete <database> <branch> <keyspace>
 
+# Inspect a Vitess keyspace's replication and disk-autoscaling settings
+pscale keyspace settings <database> <branch> <keyspace> --format json
+
 # Open database shell
 pscale shell <database> <branch>
 pscale shell <database> <branch> --db-name <postgres-database>
+pscale shell <database> <branch> --router <neki-router>
 
 # List configured Vitess read-only regions for a keyspace
 pscale keyspace read-only-regions <database> <branch> <keyspace> --format json
@@ -69,10 +74,24 @@ pscale database dump <database> <branch> \
 # Create new database
 pscale database create my-new-db --org my-org
 
+# Create a Neki database after confirming region, size, replicas, storage bounds, and cost
+pscale size cluster list --org my-org --engine neki --format json
+pscale database create my-new-neki-db --org my-org \
+  --engine neki \
+  --region <region> \
+  --cluster-size <size> \
+  --replicas <count> \
+  --min-storage <bytes> \
+  --max-storage <bytes> \
+  --wait \
+  --format json
+
 # Create main branch (automatic)
 # Create development branch
 pscale branch create my-new-db development
 ```
+
+Use `pscale size cluster list --engine neki` for valid Neki sizes. The `--region`, `--min-storage`, and `--max-storage` flags are Neki creation inputs; storage bounds are byte counts. The help documents `--replicas 0` for single-node Postgres, not Neki, so confirm supported Neki replica counts before creating and use `2` or more for HA. Neki-specific topology, shard, profile, router, sidecar, admin, and restore workflows belong in `pscale-neki`; keep this skill to database-level creation and discovery.
 
 ### Database Shell Access
 
@@ -85,12 +104,15 @@ pscale shell my-database main --db-name app_db
 # Equivalent positional form
 pscale shell my-database main app_db
 
+# Neki only: connect through a named router
+pscale shell my-database main --router router-a
+
 # Agent-friendly, non-interactive query path
 pscale sql my-database main --org my-org --format json \
   --dbname app_db --query "SELECT 1"
 ```
 
-`--db-name` and the third positional argument are mutually exclusive and only supported for PostgreSQL; omitting both connects to `postgres`. Vitess/MySQL shells reject either form. PostgreSQL shell access requires an interactive terminal and a locally installed `psql` client. Without a TTY, or when output format is not human, `pscale shell` fails unless `PSCALE_ALLOW_NONINTERACTIVE_SHELL` is set; do not use that bypass for ordinary automation. Use `pscale sql <database> <branch> --org <org> --format json --query '<sql>'` instead. Its PostgreSQL logical-database flag is spelled `--dbname` (no hyphen), not shell's `--db-name`.
+`--db-name` and the third positional argument are mutually exclusive and only supported for PostgreSQL; omitting both connects to `postgres`. Vitess/MySQL shells reject either form. Neki shells can use `--router` to connect through a named router. PostgreSQL and Neki shell access requires an interactive terminal and a locally installed `psql` client. Without a TTY, or when output format is not human, `pscale shell` fails unless `PSCALE_ALLOW_NONINTERACTIVE_SHELL` is set; do not use that bypass for ordinary automation. Use `pscale sql <database> <branch> --org <org> --format json --query '<sql>'` instead. Its PostgreSQL/Neki logical-database flag is spelled `--dbname` (no hyphen), not shell's `--db-name`.
 
 ### Database settings
 
@@ -233,6 +255,39 @@ pscale keyspace list <database> <branch> --org <org> --format json
 ```
 
 Without `--force`, the CLI first verifies the keyspace exists and requires a TTY confirmation of `<database>/<branch>/<keyspace>`. JSON/CSV or headless execution requires `--force`; never add it simply to bypass the safety prompt.
+
+### Vitess keyspace disk autoscaling
+
+Inspect the keyspace settings first. The JSON result includes `disk_scaling_strategy` and `max_storage_bytes`; an unconfigured keyspace reports the strategy as `not set` and the byte limit as `0`.
+
+```bash
+# Read current replication and disk-autoscaling settings
+pscale keyspace settings <database> <branch> <keyspace> \
+  --org <org> --format json
+
+# Let dedicated disks grow automatically up to an explicit byte limit
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> \
+  --disk-scaling-strategy=grow \
+  --max-storage=<bytes> \
+  --format json
+
+# Stop future automatic growth without recreating disks
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> --disk-scaling-strategy=disable --format json
+
+# Recreate disks at their initial size, then disable autoscaling
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> --disk-scaling-strategy=shrink --format json
+
+# Verify the persisted strategy and limit after any update
+pscale keyspace settings <database> <branch> <keyspace> \
+  --org <org> --format json
+```
+
+Valid strategies are `grow`, `disable`, and `shrink`. `--max-storage` is a raw byte count and is required when selecting `grow`; it can also be supplied alone to change the cap on an already-growing keyspace. The CLI sends disk-autoscaling fields only when their flags are explicitly present, despite the displayed `grow` flag default.
+
+Use the explicit non-interactive flags above; do not combine disk-autoscaling flags with `--interactive`, whose prompt flow does not apply them. Disabling growth can create a future capacity risk, and `shrink` recreates disks before disabling autoscaling. Confirm the organization, database, branch, keyspace, current allocation, desired strategy, and byte limit; obtain explicit approval before any update; then re-read the settings instead of trusting only the update response.
 
 ## Troubleshooting
 

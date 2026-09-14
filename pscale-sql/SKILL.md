@@ -1,6 +1,6 @@
 ---
 name: pscale-sql
-description: Execute non-interactive PlanetScale SQL queries with pscale sql using ephemeral credentials. Use when running read-only SQL from agents or scripts, collecting JSON query results, using human table or vertical output, querying replicas/keyspaces/Postgres dbnames, or when a user asks for pscale sql. Triggers on pscale sql, PlanetScale SQL query, non-interactive query, ephemeral credentials, --query, --vertical, trailing \\G.
+description: Execute non-interactive PlanetScale SQL queries with pscale sql using ephemeral credentials. Use when running read-only SQL from agents or scripts, collecting JSON query results, using human table or vertical output, querying replicas/keyspaces/Postgres or Neki dbnames, or when a user asks for pscale sql. Triggers on pscale sql, PlanetScale SQL query, non-interactive query, ephemeral credentials, Neki SQL, --query, --vertical, trailing \\G.
 ---
 
 # pscale sql
@@ -21,7 +21,7 @@ pscale sql <database> <branch> --org <org> --format json --replica --query "SELE
 # MySQL/Vitess: target a specific keyspace when needed
 pscale sql <database> <branch> --org <org> --format json --keyspace <keyspace> --query "SELECT 1"
 
-# PostgreSQL: target a database name; default is postgres
+# PostgreSQL or Neki: target a database name; default is postgres
 pscale sql <database> <branch> --org <org> --format json --dbname app --query "SELECT 1"
 
 # Human output is a table by default; vertical output is available for wide rows
@@ -30,7 +30,7 @@ pscale sql <database> <branch> --org <org> --vertical --query "SHOW REPLICA STAT
 pscale sql <database> <branch> --org <org> --query "SHOW REPLICA STATUS\\G"
 ```
 
-For PostgreSQL targets, the CLI-created temporary connection uses `sslmode=verify-full` by default. Keep that verification in place unless the user has a specific, approved diagnostic reason to alter connection behavior outside this command.
+For PostgreSQL and Neki targets, the CLI-created temporary connection uses `sslmode=verify-full` by default. Keep that verification in place unless the user has a specific, approved diagnostic reason to alter connection behavior outside this command. Neki uses Postgres-style temporary roles; a fresh ephemeral role may not be immediately ready, and the CLI waits up to one minute before connecting.
 
 ## Roles and safety
 
@@ -49,7 +49,7 @@ pscale sql <database> <branch> --org <org> --role admin --force --query "DELETE 
 
 ## Agent workflow
 
-1. Identify `<org>`, `<database>`, `<branch>`, engine context (Vitess/MySQL vs Postgres), and whether the query is read-only.
+1. Identify `<org>`, `<database>`, `<branch>`, engine context (Vitess/MySQL vs Postgres/Neki), and whether the query is read-only.
 2. For reads, prefer `--format json` and keep the default `reader` role.
 3. For writes, confirm the target and exact SQL with the user before running.
 4. Never add `--force` without explicit approval for the exact destructive query.

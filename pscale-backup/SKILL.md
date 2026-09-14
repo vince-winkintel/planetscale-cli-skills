@@ -1,6 +1,6 @@
 ---
 name: pscale-backup
-description: Create, list, show, restore, update protected status, and delete branch backups, and manage scheduled backup policies. Use when creating database backups, restoring from backups, protecting or unprotecting backups, managing backup lifecycle, configuring production/development backup schedules, retention, or policy targets. Triggers on backup, restore, database backup, backup branch, protected backup, backup update, backup policy, retention schedule.
+description: Create, list, show, restore, update protected status, and delete branch backups, and manage scheduled backup policies. Use when creating database backups, restoring from backups including Neki restores, protecting or unprotecting backups, managing backup lifecycle, configuring production/development backup schedules, retention, or policy targets. Triggers on backup, restore, database backup, backup branch, Neki restore, backup restore show, protected backup, backup update, backup policy, retention schedule.
 ---
 
 # pscale backup
@@ -19,9 +19,17 @@ pscale backup list <database> <branch>
 # Show backup details
 pscale backup show <database> <branch> <backup-id>
 
-# Restore to a new branch; --replicas is PostgreSQL-only
+# Restore to a new MySQL branch; pass --cluster-size explicitly
 pscale backup restore <database> <new-branch> <backup-id> --cluster-size <size>
+
+# Restore to a new PostgreSQL branch; optionally set additional replicas
 pscale backup restore <database> <new-branch> <backup-id> --cluster-size <size> --replicas 2
+
+# Restore to a new Neki branch; omit --cluster-size/--replicas unless overriding Neki sizing
+pscale backup restore <database> <new-branch> <backup-id> \
+  --config-profile name=<profile>,cluster-size=<size>,replicas=<count> \
+  --router name=<router>,size=<size>,replicas-per-cell=<count>
+pscale backup restore show <database> <source-branch> <backup-id> --format json
 
 # Protect or unprotect a backup only after explicit approval
 pscale backup update <database> <branch> <backup-id> --protected=true --format json
@@ -38,7 +46,7 @@ pscale backup policy list <database> --format json
 
 ### Restore to a new branch
 
-Inspect the source backup and target database first. `--cluster-size` is required for both engines, but valid SKUs are engine-specific: read the database `kind`, then list sizes with `--engine postgresql` for PostgreSQL or `--engine mysql` for Vitess/MySQL. Do not choose from the unfiltered mixed-engine list. Backup-restore `--cluster-size` completion is generic and not database-kind aware, so verify the selected value against the filtered list. For PostgreSQL restores, optional `--replicas` sets the number of **additional** replicas: `0` creates a single-node branch, while omitting the flag uses the selected cluster size's default. The CLI rejects `--replicas` for Vitess/MySQL restores.
+Inspect the source backup and target database first. Valid SKUs are engine-specific: read the database `kind`, then list sizes with `--engine postgresql`, `--engine mysql`, or `--engine neki`. Do not choose from the unfiltered mixed-engine list. Backup-restore `--cluster-size` completion is generic and not database-kind aware, so verify the selected value against the filtered list. For MySQL and PostgreSQL restores, always pass `--cluster-size` explicitly; only Neki restores may omit it to inherit the source default-profile size. For PostgreSQL restores, optional `--replicas` sets the number of **additional** replicas: `0` creates a single-node branch, while omitting the flag uses the selected cluster size's default. The CLI rejects `--replicas` for Vitess/MySQL restores.
 
 ```bash
 pscale backup show <database> <source-branch> <backup-id> --org <org> --format json
@@ -47,14 +55,22 @@ pscale database show <database> --org <org> --format json
 # Choose the filter that matches the returned database kind
 pscale size cluster list --org <org> --engine postgresql --format json
 # pscale size cluster list --org <org> --engine mysql --format json
+# pscale size cluster list --org <org> --engine neki --format json
 
-# Restore and then verify the new branch
+# Restore MySQL and then verify the new branch
+pscale backup restore <database> <new-branch> <backup-id> --org <org> \
+  --cluster-size <size> --format json
+pscale branch show <database> <new-branch> --org <org> --format json
+
+# Restore PostgreSQL with two additional replicas, then verify the new branch
 pscale backup restore <database> <new-branch> <backup-id> --org <org> \
   --cluster-size <size> --replicas 2 --format json
 pscale branch show <database> <new-branch> --org <org> --format json
 ```
 
-Restoring creates a new branch and can incur capacity cost. Confirm the database, backup ID, new branch name, cluster size, and replica count before execution. Treat the returned branch as provisioning until its readiness fields confirm it can accept connections.
+For Neki restores, use `pscale backup restore show <database> <source-branch> <backup-id> --format json` before restore. It previews the configuration profile and router sizes that will be used when overrides are omitted. Those values come from the live source branch, not the backup, so source-current-state can differ from backup-time sizing. Omitted Neki profile/router values inherit from the source; do not pass PostgreSQL `--replicas`, and omit `--cluster-size` unless intentionally overriding the default profile size. Use repeatable Neki `--config-profile name=<profile>[,cluster-size=<size>][,replicas=<n>]` and `--router name=<router>[,size=<sku>][,replicas-per-cell=<n>]` overrides only after reviewing `pscale-neki`.
+
+Restoring creates a new branch and can incur capacity cost. Confirm the source branch, database, backup ID, new branch name, cluster size or inherited Neki profile/router sizes, and replica count before execution. Treat the returned branch as provisioning until its readiness fields confirm it can accept connections.
 
 ### Backup Before Migration
 
