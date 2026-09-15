@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases including Neki databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring the Vitess keyspace throttler and replication-lag threshold, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, keyspace throttler, throttler enabled, throttler threshold, replication lag, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases including Neki databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring the Vitess keyspace throttler and its threshold, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, keyspace throttler, throttler enabled, throttler threshold, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -42,7 +42,7 @@ pscale database delete <database>
 # Delete a Vitess keyspace (destructive; inspect and approve first)
 pscale keyspace delete <database> <branch> <keyspace>
 
-# Inspect a Vitess keyspace's replication and disk-autoscaling settings
+# Inspect a Vitess keyspace's throttler, durability, and VReplication settings
 pscale keyspace settings <database> <branch> <keyspace> --format json
 
 # Open database shell
@@ -258,7 +258,7 @@ Without `--force`, the CLI first verifies the keyspace exists and requires a TTY
 
 ### Vitess keyspace throttler settings
 
-Inspect the keyspace settings first. The JSON result includes the keyspace throttler's `enabled` state and replication-lag `threshold`. This keyspace-level control pauses schema migrations and VReplication workflows when lag exceeds the threshold; it is separate from the database default, per-deploy-request ratios, and tablet/vtctld throttler.
+Inspect the keyspace settings first. The JSON result may include the keyspace throttler's `enabled` state and replication-lag `threshold`. This persisted database/keyspace settings API, `pscale keyspace update-settings --throttler-*`, is distinct from live vtctld tablet/keyspace throttler policy under `pscale branch vtctld throttler ... --keyspace`. It is also separate from the database default and per-deploy-request ratios.
 
 ```bash
 # Read current replication and throttler settings
@@ -282,11 +282,17 @@ pscale keyspace settings <database> <branch> <keyspace> \
   --org <org> --format json
 ```
 
-`--throttler-enabled` is a boolean flag with a displayed default of `true`, but the CLI sends it only when the flag is explicitly present. A threshold-only update therefore does not silently enable or disable throttling. `--throttler-threshold` accepts seconds as a floating-point value and rejects values below zero.
+`--throttler-enabled` is a boolean flag with a displayed default of `true`. Always pass it as `--throttler-enabled=true` or `--throttler-enabled=false`. Do not use the space-separated form `--throttler-enabled false`: pflag treats the bare boolean flag as `true` and leaves `false` as a positional argument, so operator intent is ambiguous and unsafe. `--throttler-threshold` accepts seconds as a floating-point value and rejects values below zero.
 
-Changing throttler settings affects live migrations and replication workflows. Confirm the organization, database, branch, keyspace, current state, desired enabled state, and threshold; obtain explicit approval before any update; then re-read the settings instead of trusting only the update response. The interactive flow also exposes throttler controls, but explicit flags are preferable for auditable automation.
+For a threshold-only update, the CLI reads the current keyspace settings first, initializes the update request from those settings, and only overrides `enabled` when `--throttler-enabled` is explicitly passed. If the API currently returns no `throttler` object at all, a threshold-only update sends only `threshold` and leaves `enabled` unset rather than inventing an enabled value.
 
-The current release does **not** expose the older `--disk-scaling-strategy` or `--max-storage` flags on `pscale keyspace update-settings`. Do not reuse examples from older CLI releases or attempt to infer an unsupported replacement; inspect current help and use the PlanetScale UI/API only under its own documented and approved workflow.
+`pscale keyspace settings --format json` prints the raw keyspace resource, so `throttler` can be `null` on an unconfigured keyspace. When `throttler` is present, `enabled` and `threshold` can still be absent; a present `threshold` is a JSON number. Human and CSV output are display-oriented: thresholds append `s`, and unset values may appear as `not set`. Use null-safe checks such as `jq '.throttler // {} | {enabled, threshold}'` or `jq -e '(.throttler // {}) | has("threshold")'` instead of assuming every key exists.
+
+Changing throttler settings affects live migrations and replication workflows. Confirm the organization, database, branch, keyspace, current state, desired enabled state, and threshold; obtain explicit approval before any update; then re-read the settings instead of trusting only the update response.
+
+Avoid `pscale keyspace update-settings --interactive` unless you intentionally want to review and write every setting. The interactive path returns before explicit flag handling, so do not combine it with flags. It writes all settings, can seed an absent throttler to `enabled=true` and `threshold=5` if defaults are accepted, and emits only a human success line even with `--format json`; do not rely on JSON output from the interactive write for verification. Re-run `pscale keyspace settings --format json` after any interactive update.
+
+Do not use `--disk-scaling-strategy` or `--max-storage` with `pscale keyspace update-settings`; they are not supported there and have no CLI replacement. Inspect current help and use the PlanetScale UI/API only under its own documented and approved workflow.
 
 ## Troubleshooting
 

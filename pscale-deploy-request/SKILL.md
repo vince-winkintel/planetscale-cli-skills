@@ -160,7 +160,7 @@ Unblocking does not repair the failed migration, retry it, apply a gated cutover
 
 ### Manage per-deploy throttling
 
-This throttler is scoped to one deploy request; it is separate from the database/tablet throttler under `pscale branch vtctld throttler`. Inspect the current eligible keyspaces and configuration first. Updating it changes live migration behavior and requires explicit approval.
+This throttler is scoped to one deploy request. It is separate from the database-level default at `pscale database throttler`, persisted keyspace settings at `pscale keyspace update-settings --throttler-*`, and live tablet/keyspace vtctld policy under `pscale branch vtctld throttler`. Inspect the current eligible keyspaces and configuration first. Updating it changes live migration behavior and requires explicit approval.
 
 ```bash
 pscale deploy-request throttler show <database> <number> --org <org> --format json
