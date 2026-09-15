@@ -1,7 +1,12 @@
-1.0.25
+1.0.26
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.333.0
+  - Reviewed the upstream release and compare `v0.332.0...v0.333.0` on 2026-09-15.
+  - Added guarded Vitess keyspace throttler guidance for reading `enabled`/`threshold`, explicitly enabling or disabling throttling, changing the non-negative replication-lag threshold, and verifying the persisted settings.
+  - Corrected stale disk-autoscaling guidance: the `--disk-scaling-strategy` and `--max-storage` flags present in v0.331.0 are absent from the v0.332.0 and v0.333.0 release sources and from the v0.333.0 binary, so the skill no longer recommends those unsupported writes.
+  - Re-captured `keyspace update-settings` and re-verified the unchanged `keyspace` and `keyspace settings` help surfaces from the checksum-verified v0.333.0 macOS arm64 release binary; archive SHA-256 verified as `6544cc6fa5d82dc78744579cc3a54204c1cfde352bf13ceae340bd7df5799771`.
 - PlanetScale CLI v0.332.0
   - Reviewed the upstream release and compare `v0.331.0...v0.332.0` on 2026-09-11.
   - Added standalone Neki operational guidance for database creation, logs, data topology, shards, configuration profiles, routers, sidecars, admin config, maintenance, backup restore sizing, shell, SQL, and roles.

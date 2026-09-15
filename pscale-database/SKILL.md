@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases including Neki databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring Vitess keyspace disk autoscaling, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, disk autoscaling, disk scaling strategy, max storage, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases including Neki databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring the Vitess keyspace throttler and replication-lag threshold, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, keyspace throttler, throttler enabled, throttler threshold, replication lag, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
 ---
 
 # pscale database
@@ -256,38 +256,37 @@ pscale keyspace list <database> <branch> --org <org> --format json
 
 Without `--force`, the CLI first verifies the keyspace exists and requires a TTY confirmation of `<database>/<branch>/<keyspace>`. JSON/CSV or headless execution requires `--force`; never add it simply to bypass the safety prompt.
 
-### Vitess keyspace disk autoscaling
+### Vitess keyspace throttler settings
 
-Inspect the keyspace settings first. The JSON result includes `disk_scaling_strategy` and `max_storage_bytes`; an unconfigured keyspace reports the strategy as `not set` and the byte limit as `0`.
+Inspect the keyspace settings first. The JSON result includes the keyspace throttler's `enabled` state and replication-lag `threshold`. This keyspace-level control pauses schema migrations and VReplication workflows when lag exceeds the threshold; it is separate from the database default, per-deploy-request ratios, and tablet/vtctld throttler.
 
 ```bash
-# Read current replication and disk-autoscaling settings
+# Read current replication and throttler settings
 pscale keyspace settings <database> <branch> <keyspace> \
   --org <org> --format json
 
-# Let dedicated disks grow automatically up to an explicit byte limit
+# Disable the keyspace throttler explicitly
 pscale keyspace update-settings <database> <branch> <keyspace> \
-  --org <org> \
-  --disk-scaling-strategy=grow \
-  --max-storage=<bytes> \
-  --format json
+  --org <org> --throttler-enabled=false --format json
 
-# Stop future automatic growth without recreating disks
+# Enable it with an explicit non-negative lag threshold in seconds
 pscale keyspace update-settings <database> <branch> <keyspace> \
-  --org <org> --disk-scaling-strategy=disable --format json
+  --org <org> --throttler-enabled=true --throttler-threshold=5 --format json
 
-# Recreate disks at their initial size, then disable autoscaling
+# Change only the threshold; the CLI preserves the current enabled state
 pscale keyspace update-settings <database> <branch> <keyspace> \
-  --org <org> --disk-scaling-strategy=shrink --format json
+  --org <org> --throttler-threshold=10 --format json
 
-# Verify the persisted strategy and limit after any update
+# Verify the persisted state after any update
 pscale keyspace settings <database> <branch> <keyspace> \
   --org <org> --format json
 ```
 
-Valid strategies are `grow`, `disable`, and `shrink`. `--max-storage` is a raw byte count and is required when selecting `grow`; it can also be supplied alone to change the cap on an already-growing keyspace. The CLI sends disk-autoscaling fields only when their flags are explicitly present, despite the displayed `grow` flag default.
+`--throttler-enabled` is a boolean flag with a displayed default of `true`, but the CLI sends it only when the flag is explicitly present. A threshold-only update therefore does not silently enable or disable throttling. `--throttler-threshold` accepts seconds as a floating-point value and rejects values below zero.
 
-Use the explicit non-interactive flags above; do not combine disk-autoscaling flags with `--interactive`, whose prompt flow does not apply them. Disabling growth can create a future capacity risk, and `shrink` recreates disks before disabling autoscaling. Confirm the organization, database, branch, keyspace, current allocation, desired strategy, and byte limit; obtain explicit approval before any update; then re-read the settings instead of trusting only the update response.
+Changing throttler settings affects live migrations and replication workflows. Confirm the organization, database, branch, keyspace, current state, desired enabled state, and threshold; obtain explicit approval before any update; then re-read the settings instead of trusting only the update response. The interactive flow also exposes throttler controls, but explicit flags are preferable for auditable automation.
+
+The current release does **not** expose the older `--disk-scaling-strategy` or `--max-storage` flags on `pscale keyspace update-settings`. Do not reuse examples from older CLI releases or attempt to infer an unsupported replacement; inspect current help and use the PlanetScale UI/API only under its own documented and approved workflow.
 
 ## Troubleshooting
 
