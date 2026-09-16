@@ -31,7 +31,7 @@ pscale metrics report <database> <branch> \
   --format json
 ```
 
-`report` detects the database engine and requests curated sections for MySQL or PostgreSQL. PostgreSQL reports also include selected current-value sections such as connection and storage capacity. JSON returns one composite `MetricsReport` with target, engine, range, and section results. CSV emits one row per historical sample or current value, with the section and kind preserved.
+`report` detects the database engine and requests curated sections for MySQL, PostgreSQL, or Neki. Neki reports combine query workload/latency with shard and router resource series, storage, WAL/replication, locks, pod health, current capacity, and backup activity. PostgreSQL and Neki reports also include selected current-value sections such as connection and storage capacity. JSON returns one composite `MetricsReport` with target, engine, range, and section results. CSV emits one row per historical sample or current value, with the section and kind preserved.
 
 Named report periods are `15m`, `1h`, `3h`, `6h`, `12h`, `1d`, `2d`, `7d`, and `8d`; the default is `1d`. Use `--steps <positive-count>` to request a particular historical resolution. Do not combine `--period` with `--from`/`--to`, and always pass both range endpoints together.
 

@@ -120,6 +120,7 @@ pscale branch vtctld throttler status <database> <branch-name> \
   --tablet-alias <zone-tablet-alias> --format json
 
 # Create a Vitess MoveTables workflow whose generated sequence tables live in a global keyspace
+pscale branch vtctld move-tables list <database> <branch-name> --format json
 pscale branch vtctld move-tables create <database> <branch-name> \
   --workflow <workflow> \
   --source-keyspace <source-keyspace> \
@@ -580,9 +581,15 @@ Do not externalize until the copy/backfill state and lookup-table consistency ar
 
 ### Vitess MoveTables and global sequences
 
+Start with `pscale branch vtctld move-tables list` to inventory workflows on the branch. Use `--target-keyspace` only when the branch default is not the intended target. Each JSON workflow that exposes its name and target keyspace includes a generated `next_steps` status command while preserving the API's original wrapper or raw-array shape.
+
 `pscale branch vtctld move-tables create` supports `--global-keyspace`. Use it with `--sharded-auto-increment-handling REPLACE` when backing sequence tables for sharded auto-increment columns must be created in a specific unsharded keyspace.
 
 ```bash
+# Discover current workflows before creating or advancing one
+pscale branch vtctld move-tables list <database> <branch-name> \
+  --org <org> --format json
+
 pscale branch vtctld move-tables create <database> <branch-name> \
   --workflow move-commerce \
   --source-keyspace source \
@@ -594,6 +601,8 @@ pscale branch vtctld move-tables create <database> <branch-name> \
 ```
 
 This command creates a data-movement workflow and starts it automatically unless `--auto-start=false` is supplied. Before running it, confirm the database, branch, source and target keyspaces, table selection, workflow name, and global keyspace with the user. Prefer `--stop-after-copy` or `--auto-start=false` when the workflow requires review before traffic switching.
+
+JSON create/show/status/list results may include `next_steps` commands. Treat them as state-derived proposals, not authorization. Copy/replication in progress yields another status check; an unswitched running workflow proposes VDiff before replica traffic; later traffic states propose primary switching or cleanup preview. Review current status and VDiff results, obtain approval before every traffic switch or completion, and run the exact command only if its target still matches. If the API already returns `next_steps`, the CLI preserves those instead of replacing them.
 
 ### Branch Cleanup
 

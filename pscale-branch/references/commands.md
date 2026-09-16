@@ -2,7 +2,7 @@ Unless noted otherwise, help fences below are exact output from the official, ch
 
 ## pscale branch
 
-Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
 
 ```text
 Create, delete, diff, and manage branches
@@ -44,6 +44,7 @@ Postgres and Neki:
 
 Neki-specific:
   admin           Manage the admin config for a Neki database branch
+  changes         List change requests across a Neki branch
   config-profile  Manage configuration profiles for a Neki database branch
   data-topology   Fetch or update the data topology of a Neki branch
   router          Manage routers for a Neki database branch
@@ -1389,6 +1390,74 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ```
 
 `--throttle-app` and `--unthrottle-app` are mutually exclusive. `--app-name` and `--app-metrics` are required together.
+
+## pscale branch vtctld move-tables
+
+The MoveTables parent, list, and create help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
+
+```text
+Manage MoveTables workflows
+
+Usage:
+  pscale branch vtctld move-tables [command]
+
+Available Commands:
+  cancel          Cancel a MoveTables workflow
+  complete        Complete a MoveTables workflow
+  create          Create a MoveTables workflow
+  list            List MoveTables workflows
+  reverse-traffic Reverse traffic for a MoveTables workflow
+  show            Show details of a MoveTables workflow
+  status          Show the status of a MoveTables workflow
+  switch-traffic  Switch traffic for a MoveTables workflow
+
+Flags:
+  -h, --help   help for move-tables
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale branch vtctld move-tables [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld move-tables list
+
+```text
+List MoveTables workflows
+
+Usage:
+  pscale branch vtctld move-tables list <database> <branch> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+  -h, --help                     help for list
+      --target-keyspace string   Target keyspace (defaults to the branch's default keyspace)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
 
 ## pscale branch vtctld move-tables create
 

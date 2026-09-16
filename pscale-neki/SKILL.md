@@ -1,6 +1,6 @@
 ---
 name: pscale-neki
-description: Manage PlanetScale Neki branch resources with pscale. Use for Neki data topology, shards, configuration profiles, routers, sidecars, admin config, Neki profile maintenance, restore sizing overrides, and router-scoped access context. Triggers on Neki, branch data-topology, branch shard, branch config-profile, branch router, branch sidecar, branch admin, Neki restore, Neki profile maintenance, or --router.
+description: Manage PlanetScale Neki branch resources with pscale. Use for Neki data topology, shards, branch-wide change requests, configuration profiles, routers, sidecars, admin config, Neki profile maintenance, restore sizing overrides, and router-scoped access context. Triggers on Neki, branch data-topology, branch shard, branch changes, Neki changes, branch config-profile, branch router, branch sidecar, branch admin, Neki restore, Neki profile maintenance, or --router.
 ---
 
 # pscale-neki
@@ -17,6 +17,25 @@ For exact command surfaces, read [references/commands.md](references/commands.md
 - Never log or commit secrets, connection strings, role passwords, or SQL that contains sensitive data.
 - JSON input for `branch data-topology update` must be a JSON object. `--format json` only controls output; it does not make stdin JSON.
 - Sidecars and admins are managed as branch-owned components; use the CLI's show/list/update surfaces and do not assume they can be created or deleted independently.
+
+## Branch-wide change requests
+
+Use `branch changes` for one inventory across Neki admin, cluster, configuration-profile, router, and sidecar requests. Per-resource `changes` commands remain useful when the target component is already known.
+
+```bash
+# Inventory the branch; repeat/comma-separate state and target-type filters
+pscale branch changes list <database> <branch> --org <org> --format json
+pscale branch changes list <database> <branch> --org <org> --format json \
+  --state pending --target-type config-profile --period 1d
+
+# Inspect the exact request before taking action
+pscale branch changes show <database> <branch> <change-id> --org <org> --format json
+
+# Operational write: run only after approval for this pending request
+pscale branch changes cancel <database> <branch> <change-id> --org <org> --format json
+```
+
+`--target-type` accepts `admin`, `cluster`, `config-profile`, `router`, or `sidecar`; `--target-id` requires a target type. List filters also include `--completed-at`, `--page`, and `--per-page`. JSON preserves the API change objects rather than reducing them to the human table. Cancellation is not a generic rollback: confirm the request is still pending, identify its target and impact, obtain explicit approval for that change ID, then re-run `show` and read back the affected component.
 
 ## Discovery
 
@@ -157,13 +176,10 @@ Sidecar update requires one or more `--parameters`; admin update requires `--siz
 
 ## Maintenance
 
-Branch-wide `pscale branch maintenance run` belongs to `pscale-branch`. Before handing off a Neki branch-wide run, inspect config-profile, router, sidecar, and admin change queues for non-terminal requests, confirm the impact window and recovery plan, and obtain explicit approval for the availability-impacting operation. Keep `pscale branch config-profile maintenance` in this skill for profile-scoped maintenance.
+Branch-wide `pscale branch maintenance run` belongs to `pscale-branch`. Before handing off a Neki branch-wide run, inspect the consolidated branch change queue for non-terminal requests, confirm the impact window and recovery plan, and obtain explicit approval for the availability-impacting operation. Keep `pscale branch config-profile maintenance` in this skill for profile-scoped maintenance.
 
 ```bash
-pscale branch config-profile changes list <database> <branch> --org <org> --format json
-pscale branch router changes list <database> <branch> --org <org> --format json
-pscale branch sidecar changes list <database> <branch> --org <org> --format json
-pscale branch admin changes list <database> <branch> --org <org> --format json
+pscale branch changes list <database> <branch> --org <org> --format json
 ```
 
 After `pscale-branch` starts branch-wide maintenance, verify completion with Neki-owned reads such as `config-profile list/show`, `router list/show`, `sidecar list/show`, and `admin show`; do not rely on `pscale branch infra` for Neki unless an exact help fence proves support.
