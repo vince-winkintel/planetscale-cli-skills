@@ -313,9 +313,9 @@ pscale branch resize status <database> <branch> --org <org> --format json
 
 # Neki: page through the consolidated branch-wide in-flight change inventory
 pscale branch changes list <database> <branch> --org <org> \
-  --state pending,applying --page 1 --per-page 100 --format json
+  --page 1 --per-page 100 --format json
 pscale branch changes list <database> <branch> --org <org> \
-  --state pending,applying --page 2 --per-page 100 --format json
+  --page 2 --per-page 100 --format json
 
 # After explicit approval for the target and impact
 pscale branch maintenance run <database> <branch> --org <org> --format json
@@ -335,7 +335,7 @@ pscale branch sidecar list <database> <branch> --org <org> --format json
 pscale branch admin show <database> <branch> --org <org> --format json
 ```
 
-Maintenance cannot start while a change request is in progress. For PostgreSQL, check `branch resize status`; for Neki, use `pscale branch changes list` because it inventories admin, cluster, configuration-profile, router, and sidecar requests in one branch-wide surface. Query both `pending` and `applying` with explicit `--page` and `--per-page`, continue until the JSON page is empty, and do not rely on one default page. If an unfiltered inventory exposes another unfamiliar state without a completion time, fail closed and inspect it rather than assuming it is terminal. Treat this as an availability-impacting operational write: show the target branch, topology or Neki component state, expected connection termination/unavailability, minor-version choice when applicable, and incident/rollback plan before asking for approval.
+Maintenance cannot start while a change request is in progress. For PostgreSQL, check `branch resize status`; for Neki, use `pscale branch changes list` because it inventories admin, cluster, configuration-profile, router, and sidecar requests in one branch-wide surface. Do not apply a state filter: query the unfiltered JSON inventory with explicit `--page` and `--per-page`, continue until a page is empty, and treat every entry with `completed_at: null` as in flight. This avoids hiding current or future non-terminal states behind a hard-coded filter. Treat this as an availability-impacting operational write: show the target branch, topology or Neki component state, expected connection termination/unavailability, minor-version choice when applicable, and incident/rollback plan before asking for approval.
 
 ### Connection inspection and safe termination
 
