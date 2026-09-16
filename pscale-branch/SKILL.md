@@ -119,6 +119,9 @@ pscale branch vtctld lookup-vindex show <database> <branch-name> \
 pscale branch vtctld throttler status <database> <branch-name> \
   --tablet-alias <zone-tablet-alias> --format json
 
+# Discover current MoveTables workflows before creating or advancing one
+pscale branch vtctld move-tables list <database> <branch-name> --format json
+
 # Create a Vitess MoveTables workflow whose generated sequence tables live in a global keyspace
 pscale branch vtctld move-tables create <database> <branch-name> \
   --workflow <workflow> \
@@ -308,11 +311,11 @@ Only one switchover can run on a branch at a time. If the create response contai
 pscale branch infra <database> <branch> --org <org> --format json
 pscale branch resize status <database> <branch> --org <org> --format json
 
-# Neki: make sure no profile/router/sidecar/admin change request is in progress
-pscale branch config-profile changes list <database> <branch> --org <org> --format json
-pscale branch router changes list <database> <branch> --org <org> --format json
-pscale branch sidecar changes list <database> <branch> --org <org> --format json
-pscale branch admin changes list <database> <branch> --org <org> --format json
+# Neki: page through the consolidated branch-wide in-flight change inventory
+pscale branch changes list <database> <branch> --org <org> \
+  --page 1 --per-page 100 --format json
+pscale branch changes list <database> <branch> --org <org> \
+  --page 2 --per-page 100 --format json
 
 # After explicit approval for the target and impact
 pscale branch maintenance run <database> <branch> --org <org> --format json
@@ -332,7 +335,7 @@ pscale branch sidecar list <database> <branch> --org <org> --format json
 pscale branch admin show <database> <branch> --org <org> --format json
 ```
 
-Maintenance cannot start while a change request is in progress. For PostgreSQL, check `branch resize status`; for Neki, check config-profile, router, sidecar, and admin `changes list` output. Treat this as an availability-impacting operational write: show the target branch, topology or Neki component state, expected connection termination/unavailability, minor-version choice when applicable, and incident/rollback plan before asking for approval.
+Maintenance cannot start while a change request is in progress. For PostgreSQL, check `branch resize status`; for Neki, use `pscale branch changes list` because it inventories admin, cluster, configuration-profile, router, and sidecar requests in one branch-wide surface. Do not apply a state filter: query the unfiltered JSON inventory with explicit `--page` and `--per-page`, continue until a page is empty, and treat every entry with `completed_at: null` as in flight. This avoids hiding current or future non-terminal states behind a hard-coded filter. Treat this as an availability-impacting operational write: show the target branch, topology or Neki component state, expected connection termination/unavailability, minor-version choice when applicable, and incident/rollback plan before asking for approval.
 
 ### Connection inspection and safe termination
 
@@ -580,9 +583,15 @@ Do not externalize until the copy/backfill state and lookup-table consistency ar
 
 ### Vitess MoveTables and global sequences
 
+Start with `pscale branch vtctld move-tables list` to inventory workflows on the branch. Workflows are scoped by target keyspace: omit `--target-keyspace` only when the branch default is the intended target, and pass the same target keyspace you plan to create or advance when it differs. Each JSON workflow that exposes its name and target keyspace includes a generated `next_steps` status command while preserving the API's original wrapper or raw-array shape.
+
 `pscale branch vtctld move-tables create` supports `--global-keyspace`. Use it with `--sharded-auto-increment-handling REPLACE` when backing sequence tables for sharded auto-increment columns must be created in a specific unsharded keyspace.
 
 ```bash
+# Discover current workflows before creating or advancing one
+pscale branch vtctld move-tables list <database> <branch-name> \
+  --org <org> --target-keyspace commerce --format json
+
 pscale branch vtctld move-tables create <database> <branch-name> \
   --workflow move-commerce \
   --source-keyspace source \
@@ -594,6 +603,19 @@ pscale branch vtctld move-tables create <database> <branch-name> \
 ```
 
 This command creates a data-movement workflow and starts it automatically unless `--auto-start=false` is supplied. Before running it, confirm the database, branch, source and target keyspaces, table selection, workflow name, and global keyspace with the user. Prefer `--stop-after-copy` or `--auto-start=false` when the workflow requires review before traffic switching.
+
+JSON results from `move-tables create`, `show`, `status`, `list`, `switch-traffic`, `reverse-traffic`, `complete --dry-run`, `vdiff create`, and `vdiff show` may include `next_steps` commands. Treat generated commands as state-derived proposals, not authorization. If the API already returns `next_steps`, the CLI preserves those instead of replacing them.
+
+For `move-tables status`, the CLI generates this state matrix:
+
+- Copy/replication in progress, `traffic_state: "Not Created"`, or an unknown traffic state: run `move-tables status` again.
+- No workflow streams yet with reads and writes unswitched: run `move-tables status` again.
+- Streams running with reads and writes unswitched: two alternatives are returned, `vdiff create` and `move-tables switch-traffic --tablet-types REPLICA,RDONLY`. The latter is explicitly the skip-VDiff path and bypasses VDiff review.
+- Writes switched while reads are not switched: `move-tables switch-traffic --tablet-types REPLICA,RDONLY`.
+- All reads switched while writes are not switched: `move-tables switch-traffic --tablet-types PRIMARY`.
+- All reads and writes switched: `move-tables complete --keep-data=false --keep-routing-rules=false --dry-run` for destructive cleanup preview.
+
+VDiff reads and cleanup previews can return executable traffic-switching or destructive completion proposals. Review fresh `status` output and VDiff results, obtain approval before every traffic switch or completion, and run a proposed command only if its organization, database, branch, workflow, target keyspace, tablet types, and cleanup flags still match the approved operation.
 
 ### Branch Cleanup
 

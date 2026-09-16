@@ -129,12 +129,15 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## `pscale metrics report`
 
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
+
 ```text
 Produce a curated performance report for a database branch.
 
-The database engine is detected automatically. MySQL and PostgreSQL reports use
-different metric sections, including current-value sections where applicable.
-Section headings are bold in human output and plain text with --no-color.
+The database engine is detected automatically. MySQL, PostgreSQL, and Neki
+reports use different metric sections, including current-value sections where
+applicable. Section headings are bold in human output and plain text with
+--no-color.
 
 Usage:
   pscale metrics report <database> <branch> [flags]
@@ -176,7 +179,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 - `show` and `instant` require one or more `--metric` values.
 - `--from` and `--to` must be used together and cannot be combined with `--period`; `--steps`, when set, must be greater than zero.
 - Human `show` output summarizes each returned series; CSV emits every timestamped sample; JSON preserves the complete metrics API response.
-- `report` selects curated sections by database engine. PostgreSQL includes both historical and selected current-value sections; unsupported engines fail rather than returning a partial report.
+- `report` selects curated sections by database engine. PostgreSQL and Neki include both historical and selected current-value sections; unsupported engines fail rather than returning a partial report.
 
 ## pscale metrics parent with specialized commands
 

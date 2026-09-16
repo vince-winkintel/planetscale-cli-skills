@@ -2,7 +2,7 @@ Unless noted otherwise, help fences below are exact output from the official, ch
 
 ## pscale branch
 
-Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
 
 ```text
 Create, delete, diff, and manage branches
@@ -44,6 +44,7 @@ Postgres and Neki:
 
 Neki-specific:
   admin           Manage the admin config for a Neki database branch
+  changes         List change requests across a Neki branch
   config-profile  Manage configuration profiles for a Neki database branch
   data-topology   Fetch or update the data topology of a Neki branch
   router          Manage routers for a Neki database branch
@@ -1390,6 +1391,74 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 `--throttle-app` and `--unthrottle-app` are mutually exclusive. `--app-name` and `--app-metrics` are required together.
 
+## pscale branch vtctld move-tables
+
+The MoveTables and VDiff help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
+
+```text
+Manage MoveTables workflows
+
+Usage:
+  pscale branch vtctld move-tables [command]
+
+Available Commands:
+  cancel          Cancel a MoveTables workflow
+  complete        Complete a MoveTables workflow
+  create          Create a MoveTables workflow
+  list            List MoveTables workflows
+  reverse-traffic Reverse traffic for a MoveTables workflow
+  show            Show details of a MoveTables workflow
+  status          Show the status of a MoveTables workflow
+  switch-traffic  Switch traffic for a MoveTables workflow
+
+Flags:
+  -h, --help   help for move-tables
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale branch vtctld move-tables [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld move-tables list
+
+```text
+List MoveTables workflows
+
+Usage:
+  pscale branch vtctld move-tables list <database> <branch> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+  -h, --help                     help for list
+      --target-keyspace string   Target keyspace (defaults to the branch's default keyspace)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
 ## pscale branch vtctld move-tables create
 
 ```text
@@ -1417,6 +1486,314 @@ Flags:
       --target-keyspace string                   Target keyspace (required)
       --tenant-id string                         Tenant ID
       --workflow string                          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld move-tables show
+
+```text
+Show details of a MoveTables workflow
+
+Usage:
+  pscale branch vtctld move-tables show <database> <branch> [flags]
+
+Flags:
+  -h, --help                     help for show
+      --target-keyspace string   Target keyspace (required)
+      --workflow string          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld move-tables status
+
+```text
+Show the status of a MoveTables workflow
+
+Usage:
+  pscale branch vtctld move-tables status <database> <branch> [flags]
+
+Flags:
+  -h, --help                     help for status
+      --target-keyspace string   Target keyspace (required)
+      --workflow string          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld move-tables switch-traffic
+
+```text
+Switch traffic for a MoveTables workflow
+
+Usage:
+  pscale branch vtctld move-tables switch-traffic <database> <branch> [flags]
+
+Flags:
+      --dry-run                           Only show what would be done
+  -h, --help                              help for switch-traffic
+      --initialize-target-sequences       Initialize target sequences
+      --max-replication-lag-allowed int   Maximum replication lag allowed in seconds
+      --tablet-types strings              Tablet types to switch traffic for (comma-separated) (required)
+      --target-keyspace string            Target keyspace (required)
+      --workflow string                   Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld move-tables reverse-traffic
+
+```text
+Reverse traffic for a MoveTables workflow
+
+Usage:
+  pscale branch vtctld move-tables reverse-traffic <database> <branch> [flags]
+
+Flags:
+      --dry-run                           Only show what would be done
+  -h, --help                              help for reverse-traffic
+      --max-replication-lag-allowed int   Maximum replication lag allowed in seconds
+      --tablet-types strings              Tablet types to reverse traffic for (comma-separated)
+      --target-keyspace string            Target keyspace (required)
+      --workflow string                   Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld move-tables complete
+
+```text
+Complete a MoveTables workflow
+
+Usage:
+  pscale branch vtctld move-tables complete <database> <branch> [flags]
+
+Flags:
+      --dry-run                  Only show what would be done
+  -h, --help                     help for complete
+      --keep-data                Keep the data in the target keyspace (required)
+      --keep-routing-rules       Keep the routing rules (required)
+      --rename-tables            Rename source tables instead of dropping them
+      --target-keyspace string   Target keyspace (required)
+      --workflow string          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld move-tables cancel
+
+```text
+Cancel a MoveTables workflow
+
+Usage:
+  pscale branch vtctld move-tables cancel <database> <branch> [flags]
+
+Flags:
+  -h, --help                     help for cancel
+      --keep-data                Keep the data in the target keyspace (required)
+      --keep-routing-rules       Keep the routing rules (required)
+      --target-keyspace string   Target keyspace (required)
+      --workflow string          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld vdiff
+
+```text
+Manage VDiff operations
+
+Usage:
+  pscale branch vtctld vdiff [command]
+
+Available Commands:
+  create      Create a VDiff
+  delete      Delete a VDiff
+  list        List VDiffs
+  resume      Resume a stopped VDiff
+  show        Show details of a VDiff
+  stop        Stop a VDiff
+
+Flags:
+  -h, --help   help for vdiff
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale branch vtctld vdiff [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld vdiff create
+
+```text
+Create a VDiff
+
+Usage:
+  pscale branch vtctld vdiff create <database> <branch> [flags]
+
+Flags:
+      --auto-retry                           Automatically retry on error (default true)
+      --auto-start                           Automatically start the VDiff (default true)
+      --debug-query                          Log the queries used for the VDiff
+      --filtered-replication-wait-time int   Filtered replication wait time in seconds
+  -h, --help                                 help for create
+      --limit int                            Maximum number of rows to compare
+      --max-extra-rows-to-compare int        Maximum extra rows to compare
+      --max-report-sample-rows int           Maximum number of sample rows in report
+      --only-pks                             Only compare primary keys
+      --row-diff-column-truncate-at int      Truncate column values at this length in the report
+      --tables strings                       Tables to compare (comma-separated)
+      --tablet-selection-preference string   Tablet selection preference
+      --tablet-types strings                 Tablet types to use (comma-separated)
+      --target-keyspace string               Target keyspace (required)
+      --update-table-stats                   Update table statistics before the VDiff
+      --verbose                              Verbose output
+      --workflow string                      Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld vdiff show
+
+```text
+Show details of a VDiff
+
+Usage:
+  pscale branch vtctld vdiff show <database> <branch> [flags]
+
+Flags:
+  -h, --help                     help for show
+      --target-keyspace string   Target keyspace (required)
+      --uuid string              UUID of the VDiff (required)
+      --workflow string          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctld vdiff resume
+
+```text
+Resume a stopped VDiff
+
+Usage:
+  pscale branch vtctld vdiff resume <database> <branch> [flags]
+
+Flags:
+  -h, --help                     help for resume
+      --target-keyspace string   Target keyspace (required)
+      --target-shards strings    Target shards to resume (comma-separated)
+      --uuid string              UUID of the VDiff (required)
+      --workflow string          Name of the workflow (required)
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

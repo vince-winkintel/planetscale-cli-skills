@@ -1,4 +1,133 @@
-Exact help output below was captured from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1` (archive SHA-256 `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`) after normalizing only trailing whitespace.
+Exact help output below was captured from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1` (archive SHA-256 `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`) after normalizing only trailing whitespace. The branch-wide change-request surfaces are separately identified as v0.334.0 captures.
+
+## pscale branch changes
+
+The four branch-wide change-request help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
+
+```text
+List, show, and cancel change requests across a Neki branch.
+
+This includes admin, cluster, configuration profile, router, and sidecar
+changes. Per-resource commands still exist under admin, config-profile,
+router, and sidecar. This command is only supported for Neki databases.
+
+Usage:
+  pscale branch changes [command]
+
+Aliases:
+  changes, neki-changes
+
+Available Commands:
+  cancel      Cancel a pending Neki branch change request
+  list        List change requests for a Neki branch
+  show        Show a Neki branch change request
+
+Flags:
+  -h, --help   help for changes
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale branch changes [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch changes list
+
+```text
+List change requests for a Neki branch
+
+Usage:
+  pscale branch changes list <database> <branch> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+      --completed-at string   Only show changes completed in this time range
+  -h, --help                  help for list
+      --page int              Page number to fetch
+      --per-page int          Number of results per page (default 100)
+      --period string         Only show changes from this period
+      --state strings         Filter by state (repeat or comma-separate)
+      --target-id string      Filter by target ID. Requires --target-type
+      --target-type strings   Filter by target type: admin, cluster, config-profile, router, or sidecar
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch changes show
+
+```text
+Show a Neki branch change request
+
+Usage:
+  pscale branch changes show <database> <branch> <change-id> [flags]
+
+Aliases:
+  show, get
+
+Flags:
+  -h, --help   help for show
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch changes cancel
+
+```text
+Cancel a pending Neki branch change request
+
+Usage:
+  pscale branch changes cancel <database> <branch> <change-id> [flags]
+
+Flags:
+  -h, --help   help for cancel
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
 
 ## pscale branch data-topology
 
