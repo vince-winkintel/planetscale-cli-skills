@@ -7,7 +7,7 @@ description: Manage PlanetScale Neki branch resources with pscale. Use for Neki 
 
 Use this skill for Neki-specific PlanetScale CLI operations. Prefer `--format json`, pass explicit `--org`, inspect current state before writes, and verify by reading the target back after every mutation.
 
-For exact command surfaces, read [references/commands.md](references/commands.md). Its help fences are captured from the verified release binary; do not infer flags from older Postgres or Vitess commands.
+For exact command surfaces, read [references/commands.md](references/commands.md). Its help fences are captured from the verified binary; do not infer flags from older Postgres or Vitess commands.
 
 ## Safety model
 
@@ -26,7 +26,7 @@ Use `branch changes` for one inventory across Neki admin, cluster, configuration
 # Inventory the branch; repeat/comma-separate state and target-type filters
 pscale branch changes list <database> <branch> --org <org> --format json
 pscale branch changes list <database> <branch> --org <org> --format json \
-  --state pending --target-type config-profile --period 1d
+  --state pending,applying --target-type config-profile
 
 # Inspect the exact request before taking action
 pscale branch changes show <database> <branch> <change-id> --org <org> --format json
@@ -35,7 +35,9 @@ pscale branch changes show <database> <branch> <change-id> --org <org> --format 
 pscale branch changes cancel <database> <branch> <change-id> --org <org> --format json
 ```
 
-`--target-type` accepts `admin`, `cluster`, `config-profile`, `router`, or `sidecar`; `--target-id` requires a target type. List filters also include `--completed-at`, `--page`, and `--per-page`. JSON preserves the API change objects rather than reducing them to the human table. Cancellation is not a generic rollback: confirm the request is still pending, identify its target and impact, obtain explicit approval for that change ID, then re-run `show` and read back the affected component.
+`--target-type` accepts `admin`, `cluster`, `config-profile`, `router`, or `sidecar`; `--target-id` requires a target type and takes the API `target_id` from JSON output, not the resource name shown in human tables. List filters also include `--completed-at`, `--page`, and `--per-page`. Treat both `pending` and `applying` as in-flight states. For state-safe pre-checks, query both explicitly, for example `--state pending,applying --page 1 --per-page 100 --format json`, then advance `--page` until the returned JSON page is empty. The CLI exposes page selection but does not auto-paginate `changes list`, so do not rely on one default page. If an unfiltered inventory exposes another unfamiliar state without a completion time, fail closed and inspect it rather than assuming it is terminal.
+
+JSON preserves the API change objects rather than reducing them to the human table. Cancellation is not a generic rollback: `show` the exact change immediately before canceling and require both `state: "pending"` and `can_delete: true`. Pending alone is insufficient, and applying, maintenance-driven, or otherwise uncancellable changes must not be canceled. Identify the target and impact, obtain explicit approval for that change ID, then re-run `show` and read back the affected component.
 
 ## Discovery
 
@@ -176,10 +178,13 @@ Sidecar update requires one or more `--parameters`; admin update requires `--siz
 
 ## Maintenance
 
-Branch-wide `pscale branch maintenance run` belongs to `pscale-branch`. Before handing off a Neki branch-wide run, inspect the consolidated branch change queue for non-terminal requests, confirm the impact window and recovery plan, and obtain explicit approval for the availability-impacting operation. Keep `pscale branch config-profile maintenance` in this skill for profile-scoped maintenance.
+Branch-wide `pscale branch maintenance run` belongs to `pscale-branch`. Before handing off a Neki branch-wide run, inspect the consolidated branch change queue for pending and applying requests across admin, cluster, configuration-profile, router, and sidecar targets, confirm the impact window and recovery plan, and obtain explicit approval for the availability-impacting operation. Keep `pscale branch config-profile maintenance` in this skill for profile-scoped maintenance.
 
 ```bash
-pscale branch changes list <database> <branch> --org <org> --format json
+pscale branch changes list <database> <branch> --org <org> \
+  --state pending,applying --page 1 --per-page 100 --format json
+pscale branch changes list <database> <branch> --org <org> \
+  --state pending,applying --page 2 --per-page 100 --format json
 ```
 
 After `pscale-branch` starts branch-wide maintenance, verify completion with Neki-owned reads such as `config-profile list/show`, `router list/show`, `sidecar list/show`, and `admin show`; do not rely on `pscale branch infra` for Neki unless an exact help fence proves support.
