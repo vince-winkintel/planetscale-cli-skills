@@ -124,7 +124,7 @@ Metric labels and dimensions can include operational identifiers such as pod, sh
 ## Related skills
 
 - **pscale-insights** — server-side query fingerprints, execution samples, errors, anomalies, tags, and schema recommendations
-- **pscale-inspect** — point-in-time MySQL/Vitess and PostgreSQL connection-level diagnostics
+- **pscale-inspect** — point-in-time MySQL/Vitess, PostgreSQL, and Neki connection-target diagnostics
 - **pscale-database** — database settings, throttler defaults, keyspaces, IP restrictions, and dumps
 - **pscale-pgbouncer** — dedicated PostgreSQL PgBouncer lifecycle and sizing
 

@@ -73,18 +73,18 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **branch/logs** | `pscale-branch` | Create, restore to a PostgreSQL recovery point, rename, protect, delete, promote, diff, list, and switchover branches; query PostgreSQL/Neki branch logs; inspect branch infra, manage Postgres size/replicas/parameters/maintenance/extensions, run Postgres/Neki branch maintenance, resize Vitess VTGates, manage live keyspace routing rules, Lookup Vindexes, and tablet throttling, manage query pattern reports, manage Vitess MoveTables workflows |
 | **deploy-request** | `pscale-deploy-request` | Create, review, inspect queues/operations, check storage, throttle, deploy, update auto-apply/auto-delete settings, unblock failed deploy/revert queues, force cutover, and revert schema changes |
 | **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level and keyspace-level Vitess throttlers, aggressive-cutover defaults, keyspaces, PostgreSQL IP restrictions, and read-only regions |
-| **neki** | `pscale-neki` | Manage Neki data topology, shards, branch-wide change requests, config profiles, routers, sidecars, admin config, profile maintenance, restore sizing overrides, and router-scoped access context |
+| **neki** | `pscale-neki` | Manage Neki data topology, shards, branch-wide change requests, config profiles, routers, sidecars, admin config, profile maintenance, restore sizing overrides, target-specific inspection, and router/shard role access |
 | **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise maintenance schedules, pending versions, deadlines, and historical windows |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
 | **metrics** | `pscale-metrics` | Query historical/current branch metrics and engine-aware grouped performance reports |
 | **insights** | `pscale-insights` | Analyze production query statistics, execution samples, query tags, error details, anomaly correlations, and schema recommendations |
 | **traffic-control** | `pscale-traffic-control` | Inventory and safely manage Postgres Traffic Control budgets and fingerprint/keyspace/tag rules |
-| **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess and PostgreSQL diagnostic checks |
+| **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess, PostgreSQL, and Neki diagnostic checks against one connection target |
 | **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
 | **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; manage scheduled backup policies |
 | **billing** | `pscale-billing` | Inspect invoices and manage organization payment methods with sensitive billing-data safeguards |
 | **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
-| **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions; inspect and mutate Postgres/Neki roles and role connection targets |
+| **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions; inspect and mutate Postgres/Neki roles, inherited-role pairings, and connection targets |
 | **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers |
 | **read-only-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, and delete dedicated PostgreSQL read-only replicas |
 | **webhook** | `pscale-webhook` | List, inspect, create, update, test, and delete database webhooks, including authorization headers |
@@ -262,6 +262,8 @@ pscale sql <database> <branch> --org <org> --format json --query "SELECT 1"
 
 # Point-in-time diagnostics, branch metrics, and query-fingerprint analysis
 pscale inspect all <database> <branch> --org <org> --format json
+# Neki: pin one shard and optionally select its router/replica path
+pscale inspect all <database> <branch> --org <org> --shard <shard-id> --router <router> --replica --format json
 pscale metrics report <database> <branch> --org <org> --period 1d --format json
 pscale metrics show <database> <branch> --org <org> --metric queries --metric latency_p99 --period 1h --format json
 pscale insights queries <database> <branch> --org <org> --sort p99Latency --period 1h --format json
