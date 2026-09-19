@@ -1,7 +1,20 @@
-1.0.27
+1.0.28
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.337.0
+  - Reviewed the upstream security release and compare `v0.336.0...v0.337.0` on 2026-09-19.
+  - Updated D1 import guidance to require a current CLI for untrusted exports after the upstream CHECK-expression parser fix; command help was unchanged.
+- PlanetScale CLI v0.336.0
+  - Reviewed the upstream release and compare `v0.335.0...v0.336.0` on 2026-09-19.
+  - Added guarded external-MySQL keyspace creation with compatibility dry runs, secret-safe credential handling, TLS verification, lint-error gates, external size discovery, and post-create readiness verification.
+  - Added keyspace `max_rollout` inspection and guarded `--max-rollout` updates, Neki configuration-profile extension-set replacement, and guidance to prefer `branch vtctld move-tables` over the legacy `workflow` family.
+  - Re-captured every affected help surface from the checksum-verified v0.337.0 macOS arm64 release binary; archive SHA-256 verified as `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`.
+- PlanetScale CLI v0.335.0
+  - Reviewed the upstream release and compare `v0.334.0...v0.335.0` on 2026-09-17.
+  - Added Neki-aware `pscale inspect` targeting with `--shard`, `--router`, and combinable replica routing, including one-target-at-a-time guidance and exclusion of Neki internal schemas from customer-facing results.
+  - Added Neki inherited-role pairings plus role connection lookup through router, shard, and replica combinations, while preserving the Postgres-only restrictions for named read-only replicas and PgBouncers.
+  - Re-captured the changed `pscale role create` and `pscale role get` help surfaces and re-verified their parent plus representative inspect help from the checksum-verified v0.335.0 macOS arm64 release binary; archive SHA-256 verified as `706ecf9f4084d4d5af257e92f0fe3395ed0ddd69b543604881a27d6dd5daf612`.
 - PlanetScale CLI v0.334.0
   - Reviewed the upstream release and compare `v0.333.0...v0.334.0` on 2026-09-16.
   - Added branch-wide Neki change-request inventory, filtering, detail, and guarded cancellation guidance alongside the existing per-resource queues.

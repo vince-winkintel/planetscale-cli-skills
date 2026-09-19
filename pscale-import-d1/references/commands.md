@@ -1,6 +1,6 @@
 ## pscale import
 
-All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace; they were re-verified line-for-line unchanged against the checksum-verified v0.330.0 binary.
+All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace; they were re-verified line-for-line unchanged against the checksum-verified v0.337.0 binary. The v0.337.0 archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`.
 
 ```text
 Import databases from external sources into PlanetScale Postgres.

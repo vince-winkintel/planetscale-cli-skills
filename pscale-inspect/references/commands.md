@@ -1,6 +1,6 @@
 # `pscale inspect` command reference
 
-Behavior was re-verified against the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary. The compact fences below are curated usage excerpts, not byte-for-byte help captures.
+Behavior was re-verified against the official, checksum-verified PlanetScale CLI v0.335.0 macOS arm64 release binary (archive SHA-256 `706ecf9f4084d4d5af257e92f0fe3395ed0ddd69b543604881a27d6dd5daf612`). The compact fences below are curated usage excerpts, not byte-for-byte help captures.
 
 ## Command group
 
@@ -38,6 +38,8 @@ pscale inspect <check> <database> <branch> [flags]
 --dbname string     PostgreSQL database to inspect (default "postgres")
 --keyspace string   Vitess keyspace, optionally with shard/tablet target
 --replica           Run checks against a replica instead of the primary
+--shard string      Neki shard ID to inspect
+--router string     Neki router group to inspect through
 --role string       Ephemeral credential role: reader, writer, readwriter, admin
 ```
 
@@ -56,7 +58,18 @@ pscale sql <database> <branch> --org <org> --format json \
   --query "SHOW VITESS_SHARDS"
 ```
 
-The default role is `reader`. On PostgreSQL, it may lack `CONNECT` for a non-default `--dbname`; the CLI reports this and suggests `--role admin`.
+The default role is `reader`. On PostgreSQL or Neki, it may lack `CONNECT` for a non-default `--dbname`; the CLI reports this and suggests `--role admin`.
+
+For Neki, list shard IDs and router names before selecting one:
+
+```bash
+pscale branch shard list <database> <branch> --org <org> --format json
+pscale branch router list <database> <branch> --org <org> --format json
+pscale inspect all <database> <branch> --org <org> \
+  --shard <shard-id> --router <router-name> --replica --format json
+```
+
+`--shard`, `--router`, and `--replica` can be combined on Neki. The first two are rejected for other engines, and Neki `--shard` rejects Vitess-style `keyspace/shard` values.
 
 ## Output formats
 
@@ -70,19 +83,19 @@ The root `--format` flag accepts `human`, `json`, or `csv`.
 
 ## Engine applicability
 
-| Check | MySQL/Vitess | PostgreSQL | Notes |
+| Check | MySQL/Vitess | PostgreSQL/Neki | Notes |
 |---|---:|---:|---|
-| `table-sizes` | yes | yes | PostgreSQL table size excludes separately reported index storage |
+| `table-sizes` | yes | yes | PostgreSQL/Neki table size excludes separately reported index storage |
 | `index-sizes` | yes | yes | Largest first |
 | `unused-indexes` | yes | yes | Usage statistics are evidence, not automatic drop approval |
-| `redundant-indexes` | yes | no | PostgreSQL uses `insights recommendations` |
+| `redundant-indexes` | yes | no | PostgreSQL/Neki uses `insights recommendations` |
 | `invalid-indexes` | no | yes | Failed concurrent index builds |
-| `seq-scans` | yes | yes | PostgreSQL lists only tables with actual sequential scans |
+| `seq-scans` | yes | yes | PostgreSQL/Neki lists only tables with actual sequential scans |
 | `long-running-queries` | yes | yes | Threshold is five minutes |
 | `locks` | yes | yes | Reports blocking relationships rather than routine granted locks |
 | `outliers` | no | yes | Requires `pg_stat_statements`; MySQL uses `insights queries --sort totalTime` |
 | `calls` | no | yes | Requires `pg_stat_statements`; MySQL uses `insights queries --sort count` |
-| `bloat` | yes | yes | MySQL fragmentation / PostgreSQL estimated table and index bloat |
+| `bloat` | yes | yes | MySQL fragmentation / PostgreSQL/Neki estimated table and index bloat |
 | `vacuum-stats` | no | yes | Includes per-table autovacuum settings and thresholds |
 | `replication-slots` | no | yes | Slot state, WAL retention/headroom, lag |
 | `subscriptions` | no | yes | Subscriber-side per-table logical replication progress |
@@ -94,6 +107,7 @@ pscale inspect all <database> <branch> --org <org> --format json
 ```
 
 - A single ephemeral SQL session is used for the selected target.
+- A Neki run stays pinned to the requested shard/router/replica path and does not fan out; customer-facing results omit the internal `__neki` schema.
 - Each diagnostic is one bounded, read-only query with a 30-second timeout.
 - An unavailable check is represented as skipped with an explanation.
 - A failed check is recorded as skipped and does not abort later checks.

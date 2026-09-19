@@ -1,6 +1,6 @@
 ---
 name: pscale-neki
-description: Manage PlanetScale Neki branch resources with pscale. Use for Neki data topology, shards, branch-wide change requests, configuration profiles, routers, sidecars, admin config, Neki profile maintenance, restore sizing overrides, and router-scoped access context. Triggers on Neki, branch data-topology, branch shard, branch changes, Neki changes, branch config-profile, branch router, branch sidecar, branch admin, Neki restore, Neki profile maintenance, or --router.
+description: Manage PlanetScale Neki branch resources with pscale. Use for Neki data topology, shards, branch-wide change requests, configuration profiles and extension sets, routers, sidecars, admin config, Neki profile maintenance, restore sizing overrides, target-specific inspection, inherited roles, and router/shard access context. Triggers on Neki, branch data-topology, branch shard, branch changes, Neki changes, branch config-profile, config-profile extensions, branch router, branch sidecar, branch admin, Neki restore, Neki profile maintenance, Neki inspect, Neki role, --router, or --shard.
 ---
 
 # pscale-neki
@@ -61,15 +61,30 @@ pscale branch admin sizes <database> <branch> --org <org> --format json
 
 Create Neki databases through `pscale-database`; that skill owns the complete command and operational workflow. Before handing off, confirm region, cluster size, replica count, storage bounds, and cost impact. The help documents `0` for single-node Postgres, not Neki, so confirm the supported Neki replica count and use `2` or more for high availability. Treat a timeout or interruption as an unconfirmed provisioning outcome and inspect `database show` before retrying.
 
-Neki uses Postgres-style shell, SQL, and roles. `pscale sql` defaults to the reader role; use write-capable roles only after approval. Ephemeral Neki roles can take time to become connectable, and the CLI waits up to one minute before connecting. Role creation, reset, deletion, renewal, update, and reassignment follow `pscale-password`; this skill lists roles only for connection context.
+Neki uses Postgres-style shell, SQL, and roles. `pscale sql` defaults to the reader role; use write-capable roles only after approval. Ephemeral Neki roles can take time to become connectable, and the CLI waits up to one minute before connecting. Role creation, reset, deletion, renewal, update, reassignment, inherited-role pairings, and persistent connection details follow `pscale-password`.
 
 ```bash
 pscale role list <database> <branch> --org <org> --format json
 pscale sql <database> <branch> --org <org> --format json --query "SELECT 1"
 pscale shell <database> <branch> --org <org> --router <router-name>
+pscale role get <database> <branch> <role-id> --org <org> --format json \
+  --shard <shard-name> --router <router-name> --replica
 ```
 
-Use `--router` when connecting through a specific Neki router. Do not expose returned role credentials or database URLs in logs.
+For `role get`, the shard selector is the shard **name** returned by `branch shard list`; it is distinct from the shard ID accepted by `pscale inspect --shard`. Neki can combine `--shard`, `--router`, and `--replica`: router selection suffixes the username, while shard/replica selection is returned in libpq `options` and encoded into `database_url`. Do not expose returned role credentials, options, or database URLs in logs.
+
+## Targeted Inspection
+
+Use `pscale-inspect` for live, read-only checks pinned to one Neki connection target. Inventory the target first; inspect does not fan out across shards.
+
+```bash
+pscale branch shard list <database> <branch> --org <org> --format json
+pscale branch router list <database> <branch> --org <org> --format json
+pscale inspect all <database> <branch> --org <org> \
+  --shard <shard-id> --router <router-name> --replica --format json
+```
+
+Unlike `role get`, `pscale inspect --shard` accepts the shard **ID**. `--shard` and `--router` are Neki-only, and Neki internal `__neki` relations are excluded from customer-facing diagnostic results.
 
 ## Branch Logs
 
@@ -128,10 +143,12 @@ pscale branch config-profile create <database> <branch> <profile> --org <org> \
   --cluster-size <size> --replicas 2 --format json
 pscale branch config-profile update <database> <branch> <profile> --org <org> \
   --parameters pgconf.max_connections=200 --format json
+pscale branch config-profile update <database> <branch> <profile> --org <org> \
+  --extensions hll,pg_stat_statements --format json
 pscale branch config-profile set-default <database> <branch> <profile> --org <org> --format json
 ```
 
-Create/update sends only explicitly supplied flags. Storage flags use bytes for `--min-storage` and `--max-storage`, MiB/s for `--storage-throughput`, and explicit booleans for `--storage-autoscaling`. Repeat `--parameters namespace.name=value` for multiple settings. Only extensions marked enablable can be toggled. Profile changes may be asynchronous; inspect `changes list/show`, and cancel only an identified cancelable request after approval.
+Create/update sends only explicitly supplied flags. Storage flags use bytes for `--min-storage` and `--max-storage`, MiB/s for `--storage-throughput`, and explicit booleans for `--storage-autoscaling`. Repeat `--parameters namespace.name=value` for multiple settings. `update --extensions` **replaces** the complete enabled extension set: omit it to preserve the set, pass a reviewed comma-separated set to replace it, or pass `--extensions=` to disable all customer-managed extensions. Blank names inside a non-empty list are rejected. Inspect the current extension catalog and enabled set first; only extensions marked enablable can be selected, and extension removal can break dependent objects or parameters. Profile changes may be asynchronous; inspect `changes list/show`, and cancel only an identified cancelable request after approval.
 
 `config-profile maintenance` can target one or multiple profiles and returns before completion. It can cause brief unavailability. Use branch-wide `branch maintenance run` when every profile should be maintained. Profile deletion is destructive and requires exact-target approval before `--force`.
 

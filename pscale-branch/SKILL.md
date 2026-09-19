@@ -583,6 +583,8 @@ Do not externalize until the copy/backfill state and lookup-table consistency ar
 
 ### Vitess MoveTables and global sequences
 
+Prefer `pscale branch vtctld move-tables` for new table-movement work. The older top-level `pscale workflow` family remains available but is planned for deprecation; do not start a new workflow through that legacy surface when the equivalent MoveTables command is available.
+
 Start with `pscale branch vtctld move-tables list` to inventory workflows on the branch. Workflows are scoped by target keyspace: omit `--target-keyspace` only when the branch default is the intended target, and pass the same target keyspace you plan to create or advance when it differs. Each JSON workflow that exposes its name and target keyspace includes a generated `next_steps` status command while preserving the API's original wrapper or raw-array shape.
 
 `pscale branch vtctld move-tables create` supports `--global-keyspace`. Use it with `--sharded-auto-increment-handling REPLACE` when backing sequence tables for sharded auto-increment columns must be created in a specific unsharded keyspace.
