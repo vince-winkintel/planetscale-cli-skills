@@ -1,6 +1,6 @@
 ---
 name: pscale-neki
-description: Manage PlanetScale Neki branch resources with pscale. Use for Neki data topology, shards, branch-wide change requests, configuration profiles, routers, sidecars, admin config, Neki profile maintenance, restore sizing overrides, target-specific inspection, inherited roles, and router/shard access context. Triggers on Neki, branch data-topology, branch shard, branch changes, Neki changes, branch config-profile, branch router, branch sidecar, branch admin, Neki restore, Neki profile maintenance, Neki inspect, Neki role, --router, or --shard.
+description: Manage PlanetScale Neki branch resources with pscale. Use for Neki data topology, shards, branch-wide change requests, configuration profiles and extension sets, routers, sidecars, admin config, Neki profile maintenance, restore sizing overrides, target-specific inspection, inherited roles, and router/shard access context. Triggers on Neki, branch data-topology, branch shard, branch changes, Neki changes, branch config-profile, config-profile extensions, branch router, branch sidecar, branch admin, Neki restore, Neki profile maintenance, Neki inspect, Neki role, --router, or --shard.
 ---
 
 # pscale-neki
@@ -143,10 +143,12 @@ pscale branch config-profile create <database> <branch> <profile> --org <org> \
   --cluster-size <size> --replicas 2 --format json
 pscale branch config-profile update <database> <branch> <profile> --org <org> \
   --parameters pgconf.max_connections=200 --format json
+pscale branch config-profile update <database> <branch> <profile> --org <org> \
+  --extensions hll,pg_stat_statements --format json
 pscale branch config-profile set-default <database> <branch> <profile> --org <org> --format json
 ```
 
-Create/update sends only explicitly supplied flags. Storage flags use bytes for `--min-storage` and `--max-storage`, MiB/s for `--storage-throughput`, and explicit booleans for `--storage-autoscaling`. Repeat `--parameters namespace.name=value` for multiple settings. Only extensions marked enablable can be toggled. Profile changes may be asynchronous; inspect `changes list/show`, and cancel only an identified cancelable request after approval.
+Create/update sends only explicitly supplied flags. Storage flags use bytes for `--min-storage` and `--max-storage`, MiB/s for `--storage-throughput`, and explicit booleans for `--storage-autoscaling`. Repeat `--parameters namespace.name=value` for multiple settings. `update --extensions` **replaces** the complete enabled extension set: omit it to preserve the set, pass a reviewed comma-separated set to replace it, or pass `--extensions=` to disable all customer-managed extensions. Blank names inside a non-empty list are rejected. Inspect the current extension catalog and enabled set first; only extensions marked enablable can be selected, and extension removal can break dependent objects or parameters. Profile changes may be asynchronous; inspect `changes list/show`, and cancel only an identified cancelable request after approval.
 
 `config-profile maintenance` can target one or multiple profiles and returns before completion. It can cause brief unavailability. Use branch-wide `branch maintenance run` when every profile should be maintained. Profile deletion is destructive and requires exact-target approval before `--force`.
 

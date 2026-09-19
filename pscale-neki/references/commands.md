@@ -584,6 +584,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch config-profile update
 
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`.
+
 ```text
 Update a Neki configuration profile
 
@@ -592,6 +594,7 @@ Usage:
 
 Flags:
       --cluster-size string             New cluster size for shards in the profile
+      --extensions strings              Extensions to enable; replaces the current set. Use --extensions= to disable extensions
   -h, --help                            help for update
       --max-storage int                 Maximum storage size in bytes for autoscaling
       --min-storage int                 Minimum storage size in bytes
