@@ -228,7 +228,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale role
 
-Help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+The role parent fence and the changed role-create and role-get fences were re-verified against the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`. Other unchanged role fences remain exact v0.332.0 captures.
 
 ```text
 Manage database roles for a Postgres or Neki database branch.
@@ -311,10 +311,12 @@ Usage:
   pscale role get <database> <branch> <role-id> [flags]
 
 Flags:
-      --bouncer string             Return connection details for a PgBouncer (name).
+      --bouncer string             Return connection details for a PgBouncer (name). Postgres only.
   -h, --help                       help for get
-      --read-only-replica string   Return connection details for a read-only replica (name).
-      --replica                    Return connection details for a branch replica.
+      --read-only-replica string   Return connection details for a read-only replica (name). Postgres only.
+      --replica                    Return connection details for a branch replica. On Neki this sets libpq options, not a username suffix.
+      --router string              Return connection details for a Neki router group (name). List routers with: pscale branch router list <database> <branch>.
+      --shard string               Return connection details that pin a Neki shard (name from pscale branch shard list).
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -399,9 +401,13 @@ Examples:
   # Create a role with REPLICATION privilege (requires the postgres inherited role)
   pscale role create mydb main replicator --inherited-roles postgres --with-replication
 
+  # Neki: neki_viewer requires pg_read_all_data; neki_operator requires postgres
+  pscale role create mydb main viewer --inherited-roles neki_viewer,pg_read_all_data
+  pscale role create mydb main operator --inherited-roles neki_operator,postgres
+
 Flags:
   -h, --help                     help for create
-      --inherited-roles string   Comma-separated list of role names to inherit privileges from. Common values are 'pg_read_all_data' for read access, 'pg_write_all_data' for write access, and 'postgres' for admin access.
+      --inherited-roles string   Comma-separated list of roles to inherit privileges from. Postgres: pg_read_all_data (read), pg_write_all_data (write), postgres (admin). Neki also accepts neki_viewer (requires pg_read_all_data) and neki_operator (requires postgres).
       --ttl duration             TTL defines the time to live for the role. Durations such as "30m", "24h", or bare integers such as "3600" (seconds) are accepted. The default TTL is 0s, which means the role will never expire. (default 0s)
       --with-replication         When enabled, the role is created with REPLICATION privilege for logical replication. Requires --inherited-roles to include 'postgres'.
 

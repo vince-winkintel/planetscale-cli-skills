@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Create, list, show, update, delete, dump, discover regions, and manage PlanetScale databases, keyspaces, settings, PostgreSQL IP restrictions, database-level Vitess migration throttling, and aggressive cutover. Use when creating databases including Neki databases, deleting a Vitess keyspace, inspecting or changing database or keyspace settings, configuring the Vitess keyspace throttler and its threshold, discovering database regions or read-only regions, managing Postgres CIDR allowlists, setting future deploy-request throttler defaults, enabling or disabling aggressive cutover for future Vitess deploy requests, opening database shells, managing Vitess read-only regions, or dumping Vitess data. Triggers on database, create database, database regions, available regions, read-only regions, keyspace delete, keyspace settings, keyspace throttler, throttler enabled, throttler threshold, database settings, database throttler, aggressive cutover, migration ratio, IP restriction, CIDR, database dump, read-only region, database shell, pscale shell.
+description: Manage PlanetScale databases and keyspaces, including lifecycle operations, external MySQL keyspaces, regions, settings, rollout concurrency, PostgreSQL IP restrictions, Vitess migration throttling, aggressive cutover, dumps, and shell access. Use for database or Neki database creation, external-keyspace dry runs and creation, keyspace deletion or settings, throttlers, max rollout, region discovery, CIDR allowlists, deploy defaults, cutover policy, read-only regions, dumps, or shells. Triggers on pscale database, pscale keyspace, create-external, external keyspace, keyspace settings, max rollout, read-only region, IP restriction, CIDR, database throttler, aggressive cutover, database dump, pscale shell.
 ---
 
 # pscale database
@@ -44,6 +44,13 @@ pscale keyspace delete <database> <branch> <keyspace>
 
 # Inspect a Vitess keyspace's throttler, durability, and VReplication settings
 pscale keyspace settings <database> <branch> <keyspace> --format json
+
+# Compatibility-check an existing MySQL source before creating an external keyspace
+# SOURCE_PASSWORD must be injected into this same trusted shell invocation.
+pscale keyspace create-external <database> <production-branch> <keyspace> \
+  --org <org> --host <host> --source-database <remote-database> \
+  --username <user> --password "${SOURCE_PASSWORD:?source password not set}" \
+  --ssl-mode verify_identity --dry-run --format json
 
 # Open database shell
 pscale shell <database> <branch>
@@ -256,6 +263,66 @@ pscale keyspace list <database> <branch> --org <org> --format json
 
 Without `--force`, the CLI first verifies the keyspace exists and requires a TTY confirmation of `<database>/<branch>/<keyspace>`. JSON/CSV or headless execution requires `--force`; never add it simply to bypass the safety prompt.
 
+### Create an external Vitess keyspace
+
+`create-external` connects a **production** Vitess branch to an existing MySQL database. Treat this as an infrastructure and data-movement change. Confirm the organization, PlanetScale database, production branch, new keyspace name, remote database, network path, TLS policy, target size, ownership, and rollback plan before creation.
+
+```bash
+# Discover sizes intended for external keyspaces
+pscale size cluster list --org <org> --external --format json
+
+# Have the user or an approved secret manager inject SOURCE_PASSWORD into this
+# same trusted one-shot shell. Never ask for it in chat or write it to a file.
+(
+  set -euo pipefail
+  trap 'unset SOURCE_PASSWORD DRY_RUN_JSON SSL_CA_PATH' EXIT
+  : "${SOURCE_PASSWORD:?source password not set}"
+  : "${SSL_CA_PATH:?reviewed CA path not set}"
+  test -r "$SSL_CA_PATH"
+
+  DRY_RUN_JSON="$(
+    pscale keyspace create-external <database> <production-branch> <keyspace> \
+      --org <org> --host <host> --port 3306 \
+      --source-database <remote-database> --username <user> \
+      --password "${SOURCE_PASSWORD:?source password not set}" \
+      --ssl-mode verify_identity --ssl-server-name <server-name> \
+      --ssl-certificate-authority "$SSL_CA_PATH" \
+      --cluster-size <external-size> --dry-run --format json
+  )"
+
+  jq '{can_connect, lint_errors, has_foreign_keys, server_version, total_storage_bytes}' \
+    <<<"$DRY_RUN_JSON"
+  jq -e '.can_connect == true and (.error // "") == "" and ((.lint_errors // []) | length == 0)' \
+    <<<"$DRY_RUN_JSON" >/dev/null
+)
+
+# After the dry-run shell exits, review every displayed field and obtain approval.
+# Then inject SOURCE_PASSWORD afresh into the same shell that performs the create.
+(
+  set -euo pipefail
+  trap 'unset SOURCE_PASSWORD SSL_CA_PATH' EXIT
+  : "${SOURCE_PASSWORD:?source password not set}"
+  : "${SSL_CA_PATH:?reviewed CA path not set}"
+  test -r "$SSL_CA_PATH"
+
+  pscale keyspace create-external <database> <production-branch> <keyspace> \
+    --org <org> --host <host> --port 3306 \
+    --source-database <remote-database> --username <user> \
+    --password "${SOURCE_PASSWORD:?source password not set}" \
+    --ssl-mode verify_identity --ssl-server-name <server-name> \
+    --ssl-certificate-authority "$SSL_CA_PATH" \
+    --cluster-size <external-size> --wait --format json
+)
+pscale keyspace show <database> <production-branch> <keyspace> \
+  --org <org> --format json
+```
+
+Required connection flags are `--host`, `--source-database`, `--username`, `--password`, and `--ssl-mode`. Prefer `verify_identity` with a reviewed CA and server name; do not weaken TLS merely to make a dry run pass. Do not carry a source password across an approval boundary: let the dry-run shell clear its local copy, then have the user or approved secret manager inject it afresh into the one-shot create shell. If a parent shell exported the variable, clear that parent copy immediately after each command. Keep credentials out of shell history, logs, PRs, and command transcripts; never invent or persist the source password. Because the CLI accepts the password as a flag, command-line process inspection can expose it transiently: run from a trusted host and minimize concurrent access.
+
+Certificate flags accept PEM text or a file path. When a path is intended, verify each CA, client-certificate, and client-key file with `test -r` or use a reviewed absolute path before invoking `pscale`: an unreadable or mistyped path is otherwise treated as literal certificate text.
+
+The dry run checks connectivity and returns schema lint findings without creating the keyspace, but lint findings do **not** make the CLI exit non-zero. Gate the workflow on structured JSON: require `can_connect: true`, an empty `error`, and an empty `lint_errors` array, then review `has_foreign_keys`, `server_version`, and `total_storage_bytes`. A normal create can still proceed over table-level lint errors even without `--skip-lint-errors`, so it is not a lint backstop. Do not use `--skip-lint-errors` unless the organization allows it, every lint error has been reviewed, and the user explicitly approves bypassing those exact findings. Omit `--cluster-size` only when allowing PlanetScale to select from source storage is intentional. Do not use internal-keyspace `--additional-replicas` for external keyspaces.
+
 ### Vitess keyspace throttler settings
 
 Inspect the keyspace settings first. The JSON result may include the keyspace throttler's `enabled` state and replication-lag `threshold`. This persisted database/keyspace settings API, `pscale keyspace update-settings --throttler-*`, is distinct from live vtctld tablet/keyspace throttler policy under `pscale branch vtctld throttler ... --keyspace`. It is also separate from the database default and per-deploy-request ratios.
@@ -277,6 +344,10 @@ pscale keyspace update-settings <database> <branch> <keyspace> \
 pscale keyspace update-settings <database> <branch> <keyspace> \
   --org <org> --throttler-threshold=10 --format json
 
+# Change rollout concurrency after reviewing shard count and migration capacity
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> --max-rollout=2 --format json
+
 # Verify the persisted state after any update
 pscale keyspace settings <database> <branch> <keyspace> \
   --org <org> --format json
@@ -284,13 +355,17 @@ pscale keyspace settings <database> <branch> <keyspace> \
 
 `--throttler-enabled` is a boolean flag with a displayed default of `true`. Always pass it as `--throttler-enabled=true` or `--throttler-enabled=false`. Do not use the space-separated form `--throttler-enabled false`: pflag treats the bare boolean flag as `true` and leaves `false` as a positional argument, so operator intent is ambiguous and unsafe. `--throttler-threshold` accepts seconds as a floating-point value and rejects values below zero.
 
-For a threshold-only update, the CLI reads the current keyspace settings first, initializes the update request from those settings, and only overrides `enabled` when `--throttler-enabled` is explicitly passed. If the API currently returns no `throttler` object at all, a threshold-only update sends only `threshold` and leaves `enabled` unset rather than inventing an enabled value.
+For a threshold-only update, the CLI sends only the `threshold` field and leaves `enabled` unset, so the API preserves the current enabled state without the CLI fetching or resending unrelated setting groups. Likewise, an enabled-only update omits the threshold. This focused-payload behavior is specific to the throttler group; verify the preserved sibling field from a fresh settings read after every update.
 
-`pscale keyspace settings --format json` prints the raw keyspace resource, so `throttler` can be `null` on an unconfigured keyspace. When `throttler` is present, `enabled` and `threshold` can still be absent; a present `threshold` is a JSON number. Human and CSV output are display-oriented: thresholds append `s`, and unset values may appear as `not set`. Use null-safe checks such as `jq '.throttler // {} | {enabled, threshold}'` or `jq -e '(.throttler // {}) | has("threshold")'` instead of assuming every key exists.
+`pscale keyspace settings --format json` prints the raw keyspace resource, so `throttler` can be `null` on an unconfigured keyspace and `max_rollout` can be absent. When `throttler` is present, `enabled` and `threshold` can still be absent; a present `threshold` is a JSON number. Human and CSV output are display-oriented: thresholds append `s`, and unset values may appear as `not set`. Use null-safe checks such as `jq '{max_rollout, throttler: (.throttler // {})}'` instead of assuming every key exists.
+
+`--max-rollout` accepts `1` through `32` and controls how many shards receive changes concurrently. Higher concurrency can increase rollout load and reduce the opportunity to stop between shards. Inspect current settings and shard count, propose the smallest sufficient value, obtain approval, update only that field, then re-read `max_rollout` from JSON.
 
 Changing throttler settings affects live migrations and replication workflows. Confirm the organization, database, branch, keyspace, current state, desired enabled state, and threshold; obtain explicit approval before any update; then re-read the settings instead of trusting only the update response.
 
-Avoid `pscale keyspace update-settings --interactive` unless you intentionally want to review and write every setting. The interactive path returns before explicit flag handling, so do not combine it with flags. It writes all settings, can seed an absent throttler to `enabled=true` and `threshold=5` if defaults are accepted, and emits only a human success line even with `--format json`; do not rely on JSON output from the interactive write for verification. Re-run `pscale keyspace settings --format json` after any interactive update.
+Avoid `pscale keyspace update-settings --interactive` unless you intentionally want to review and write the durability, VReplication, and throttler groups shown by the form. The interactive path returns before explicit flag handling, so do not combine it with flags. It can seed an absent throttler to `enabled=true` and `threshold=5` if defaults are accepted, and emits only a human success line even with `--format json`; do not rely on JSON output from the interactive write for verification. Re-run `pscale keyspace settings --format json` after any interactive update.
+
+Non-interactive updates send only changed top-level groups, with one important exception inside VReplication: changing any `--vreplication-*` flag first fetches the current keyspace, copies all three VReplication flags, overrides the requested flag, and resends the complete group because the API replaces that group wholesale. A concurrent sibling-flag update can therefore be overwritten. Read fresh settings immediately before a VReplication change, avoid concurrent updates, and re-read all three VReplication flags afterward. Durability, throttler, and `--max-rollout` updates do not implicitly rewrite the other top-level groups.
 
 Do not use `--disk-scaling-strategy` or `--max-storage` with `pscale keyspace update-settings`; they are not supported there and have no CLI replacement. Inspect current help and use the PlanetScale UI/API only under its own documented and approved workflow.
 

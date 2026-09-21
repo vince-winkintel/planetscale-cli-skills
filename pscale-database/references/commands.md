@@ -546,7 +546,7 @@ These commands are Vitess-only. `add` uses a slug from `pscale region list`; upd
 
 ## pscale keyspace
 
-The keyspace parent, list, show, and delete help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The parent surface was re-verified line-for-line unchanged with the v0.333.0 binary.
+The keyspace parent help block below is exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`. The list, show, and delete help blocks remain exact v0.324.0 captures and were re-verified line-for-line unchanged with the v0.337.0 binary.
 
 ```text
 List, show, and manage keyspaces.
@@ -558,6 +558,7 @@ Usage:
 
 Available Commands:
   create            Create a new keyspace within a branch
+  create-external   Create an external keyspace on a branch
   delete            Delete a keyspace from a branch
   list              List all keyspaces within a branch
   read-only-regions List read-only regions for a keyspace
@@ -583,6 +584,55 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale keyspace [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace create-external
+
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+```text
+Create an external keyspace by connecting a branch to an existing MySQL database.
+
+Connection flags follow pscale data-imports start. --source-database is the
+remote MySQL database name, not the PlanetScale database. --cluster-size is
+optional and selects the external tablet size; when omitted, PlanetScale
+chooses a size from the source storage. Managed organizations should pass a
+size from pscale size cluster list.
+
+Usage:
+  pscale keyspace create-external <database> <branch> <keyspace> [flags]
+
+Flags:
+      --cluster-size pscale size cluster list   External tablet size. Optional; defaults from source storage. Use pscale size cluster list for valid sizes.
+      --dry-run                                 Check compatibility with the external database without creating the keyspace
+  -h, --help                                    help for create-external
+      --host string                             Host name of the external database (required)
+      --min-tls-version string                  Minimum TLS version
+      --password string                         Password to connect to the external database (required)
+      --port int                                Port number to connect to the external database (default 3306)
+      --skip-lint-errors                        Create even if datasource lint reports errors, when the organization allows it
+      --source-database string                  Name of the database on the external MySQL server (required)
+      --ssl-certificate-authority string        CA certificate chain, or a path to a PEM file
+      --ssl-client-certificate string           Client certificate, or a path to a PEM file
+      --ssl-client-key string                   Client private key, or a path to a PEM file
+      --ssl-mode string                         SSL verification mode, allowed values: disabled, preferred, required, verify_ca, verify_identity (required)
+      --ssl-server-name string                  SSL server name override
+      --tablet-cell string                      Cell where the external tablet runs
+      --username string                         Username to connect to the external database (required)
+      --wait                                    Wait until the keyspace is ready
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
@@ -668,7 +718,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale keyspace settings
 
-The `pscale keyspace settings` and `pscale keyspace update-settings` help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.333.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `6544cc6fa5d82dc78744579cc3a54204c1cfde352bf13ceae340bd7df5799771`.
+The `pscale keyspace settings` and `pscale keyspace update-settings` help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`.
 
 ```text
 Show the settings for a keyspace
@@ -704,6 +754,7 @@ Usage:
 Flags:
   -h, --help                                                 help for update-settings
   -i, --interactive                                          Run the command in interactive mode
+      --max-rollout int                                      Maximum number of shards to roll out changes to concurrently (1-32). (default 1)
       --replication-durability-constraints-strategy string   By default, replication is configured to maximize safety and data integrity. This setting may be relaxed to favor increased performance and reduced replication lag. Options: maximum, dynamic, minimum (default "maximum")
       --throttler-enabled                                    Pause schema migrations and VReplication workflows when replication lag rises above the threshold. (default true)
       --throttler-threshold float                            Replication lag in seconds above which migrations and workflows are paused. (default 5)
@@ -909,7 +960,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale size cluster list
 
-The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`.
 
 ```text
 List the sizes that are available for a PlanetScale database. By default, shows all clusters for all engines. Use --engine to filter by a specific engine type.
@@ -922,6 +973,7 @@ Aliases:
 
 Flags:
       --engine string   Filter cluster sizes by database engine. Supported values: mysql, postgresql, neki. If not specified, shows all clusters for all engines.
+      --external        view cluster sizes for external keyspaces
   -h, --help            help for list
       --metal           view cluster sizes and rates for clusters with metal storage
       --region string   view cluster sizes and rates for a specific region

@@ -1,11 +1,11 @@
 ---
 name: pscale-inspect
-description: Run read-only PlanetScale database diagnostics with pscale inspect for table/index size, scans, locks, long-running queries, bloat, autovacuum, replication, and related health checks. Use for point-in-time MySQL/Vitess or PostgreSQL diagnostics, exact shard targeting, replica inspection, or when a user asks for pscale inspect. Triggers on pscale inspect, database diagnostics, table sizes, index sizes, unused indexes, redundant indexes, sequential scans, long-running queries, blocking locks, bloat, vacuum stats, replication slots, subscriptions.
+description: Run read-only PlanetScale database diagnostics with pscale inspect for table/index size, scans, locks, long-running queries, bloat, autovacuum, replication, and related health checks. Use for point-in-time MySQL/Vitess, PostgreSQL, or Neki diagnostics, exact shard targeting, router or replica inspection, or when a user asks for pscale inspect. Triggers on pscale inspect, database diagnostics, table sizes, index sizes, unused indexes, redundant indexes, sequential scans, long-running queries, blocking locks, bloat, vacuum stats, replication slots, subscriptions, Neki shard inspect, Neki router inspect.
 ---
 
 # pscale inspect
 
-Run bounded, read-only diagnostic queries against a PlanetScale database branch using ephemeral credentials. Checks adapt to MySQL/Vitess or PostgreSQL and complement the server-side production-traffic analysis in `pscale insights`.
+Run bounded, read-only diagnostic queries against a PlanetScale database branch using ephemeral credentials. Checks adapt to MySQL/Vitess, PostgreSQL, or Neki and complement the server-side production-traffic analysis in `pscale insights`.
 
 ## Start with a combined report
 
@@ -21,11 +21,16 @@ pscale inspect all <database> <branch> --org <org> \
 pscale inspect all <database> <branch> --org <org> \
   --keyspace '<keyspace>/<shard>' --format json
 
-# Run against a replica when primary-only evidence is unnecessary
-pscale inspect all <database> <branch> --org <org> --replica --format json
+# Neki: pin one shard ID on the primary path by default
+pscale inspect all <database> <branch> --org <org> \
+  --shard <shard-id> --format json
+
+# Select a router and/or replica only when evidence from that path is intended
+pscale inspect all <database> <branch> --org <org> \
+  --shard <shard-id> --router <router-name> --replica --format json
 ```
 
-Always pass `--org` explicitly in agent workflows so the organization target is unambiguous. The default ephemeral role is `reader`; keep it unless the connection itself fails for a justified permission reason. On PostgreSQL, `--dbname` defaults to `postgres`, the temporary connection uses `sslmode=verify-full` by default, and the reader role may lack `CONNECT` on another database. Use `--role admin` only after confirming that this is the actual failure and that elevated access is acceptable.
+Always pass `--org` explicitly in agent workflows so the organization target is unambiguous. The default ephemeral role is `reader`; keep it unless the connection itself fails for a justified permission reason. On PostgreSQL and Neki, `--dbname` defaults to `postgres`, the temporary connection uses `sslmode=verify-full` by default, and the reader role may lack `CONNECT` on another database. Use `--role admin` only after confirming that this is the actual failure and that elevated access is acceptable.
 
 ## Check catalog
 
@@ -53,6 +58,7 @@ Run one check with the same positional arguments and target flags:
 pscale inspect locks <database> <branch> --org <org> --format json
 pscale inspect seq-scans <database> <branch> --org <org> --replica --format json
 pscale inspect table-sizes <database> <branch> --org <org> --keyspace '<keyspace>/<shard>' --format csv
+pscale inspect locks <database> <branch> --org <org> --shard <shard-id> --format json
 ```
 
 Single checks support human, JSON, and CSV output. `inspect all` supports human and JSON; CSV is rejected because the checks have different result schemas.
@@ -61,12 +67,14 @@ Single checks support human, JSON, and CSV output. `inspect all` supports human 
 
 - **Vitess/MySQL:** checks query `information_schema`, `mysql`, and `sys`. On sharded databases, one run reflects one shard's MySQL instance. Use `pscale sql <database> <branch> --query "SHOW VITESS_SHARDS"` to enumerate targets, then pass `--keyspace <keyspace>/<shard>`; append `@replica` when an exact tablet type is needed.
 - **PostgreSQL:** checks query `pg_catalog` and `pg_stat` views for one PostgreSQL database selected by `--dbname`. `outliers` and `calls` require `pg_stat_statements`.
+- **Neki:** checks use the PostgreSQL query set against one connection target. List targets with `pscale branch shard list` and `pscale branch router list`; pass a shard **ID** to `--shard`, optionally combine `--router`, and add `--replica` only when replica evidence is appropriate. Neki's internal `__neki` schema is excluded from customer-facing table, index, scan, bloat, and vacuum results.
+- `--shard` and `--router` are rejected for non-Neki databases. Do not pass a Vitess `keyspace/shard` value to Neki `--shard`.
 - Checks unavailable for the detected engine return a skipped explanation and, when available, a copy-pasteable `pscale insights` next step.
 - Each check is bounded and has a 30-second query timeout. In `inspect all`, one failed check is recorded as skipped instead of aborting the remaining report.
 
 ## Investigation workflow
 
-1. Confirm organization, database, branch, engine, and exact database/keyspace/shard target.
+1. Confirm organization, database, branch, engine, and exact database/keyspace/shard/router target.
 2. Run `inspect all ... --format json` with the default reader role.
 3. Separate successful results, empty results, skipped checks, and failed/timed-out checks.
 4. Follow the report's `next_steps` with `pscale insights queries|errors|anomalies|recommendations` for traffic-aware evidence.
