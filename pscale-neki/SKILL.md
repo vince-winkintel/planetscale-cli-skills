@@ -80,6 +80,10 @@ Use `pscale-inspect` for live, read-only checks pinned to one Neki connection ta
 ```bash
 pscale branch shard list <database> <branch> --org <org> --format json
 pscale branch router list <database> <branch> --org <org> --format json
+# Primary-path evidence is the default
+pscale inspect all <database> <branch> --org <org> \
+  --shard <shard-id> --format json
+# Select a router and/or replica only when that target path is intentional
 pscale inspect all <database> <branch> --org <org> \
   --shard <shard-id> --router <router-name> --replica --format json
 ```

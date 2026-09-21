@@ -158,7 +158,9 @@ pscale role get <database> <branch> <role-id> --org <org> --format json \
 
 Neki `--inherited-roles` supports `neki_viewer` only with `pg_read_all_data`, and `neki_operator` only with `postgres`; the API rejects an incomplete pairing. Role creation returns a credential, so obtain approval for the exact role name and privilege set, then capture the secret directly into an approved secret manager.
 
-`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. Named `--read-only-replica` and `--bouncer` targets are Postgres-only and cannot combine with Neki `--router` or `--shard`. On Neki, `--replica`, `--router`, and `--shard` can be combined: router selection rewrites the username, while replica and shard selection produce libpq `options` and an options-bearing `database_url`. Use the shard **name** from `pscale branch shard list`, not its API ID; `pscale inspect --shard` is different and takes the ID. PgBouncer URLs use port `6432`.
+`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. Named `--read-only-replica` and `--bouncer` targets are Postgres-only and cannot combine with Neki `--router` or `--shard`. `--read-only-replica` takes the replica **name** returned by branch infrastructure or `pscale read-only-replica list`, not a read-only-region slug. A targeted response can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`.
+
+On Neki, `--replica`, `--router`, and `--shard` can be combined: router selection rewrites the username, while replica and shard selection produce libpq `options` and an options-bearing `database_url`. Use the shard **name** from `pscale branch shard list`, not its API ID; `pscale inspect --shard` is different and takes the ID.
 
 A target-specific `NOT_FOUND` can mean the role or any requested target was not found, so verify every identifier before retrying. Treat returned passwords, connection URLs, and libpq options as secrets: capture them directly into an approved secret manager and never print them in logs or commit them.
 

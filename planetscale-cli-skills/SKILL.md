@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: PlanetScale CLI (pscale) command reference and workflows. Use for authentication, organizations, SSO, directory sync, teams, members, billing, invoices, payment methods, databases, branches, Neki operations and change requests, PostgreSQL point-in-time recovery, branch maintenance, extension catalogs, logs, metrics, insights, diagnostics, SQL, deploy requests, schema migrations, internal or external keyspaces, keyspace throttling and rollout concurrency, Lookup Vindexes, MoveTables, VTGate sizing, database/deploy/tablet throttlers, aggressive cutover, Postgres switchovers, Traffic Control, PgBouncers, PostgreSQL read-only replicas, Postgres/Neki role connection targets, Postgres IP restrictions, Vitess read-only regions, backups, webhooks, audit logs, service tokens, passwords, binary-native agent guidance, Cloudflare D1 imports, and automation. Routes to specialized pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, Neki, pscale logs, branch changes, branch data-topology, branch shard, branch config-profile, config-profile extensions, branch router, branch sidecar, branch admin, restore point, point-in-time recovery, PITR, pscale maintenance, maintenance window, pscale metrics, performance report, pscale insights, pscale inspect, pscale sql, pscale role get, deploy request, deploy queue, unblock deploy, aggressive cutover, branch maintenance, branch extensions, branch switchover, move-tables, lookup vindex, traffic control, force cutover, storage readiness, external keyspace, create-external, keyspace routing rules, keyspace settings, max rollout, keyspace throttler, throttler threshold, database settings, database branch, VTGate resize, pgbouncer, read-only replica, pscale webhook, database webhook, webhook authorization header, billing, invoice, payment method, backup policy, database diagnostics, organization SSO, directory sync, org member, org team, or pscale import d1.
+description: PlanetScale CLI command reference and workflows. Use for authentication; org, SSO, teams, and billing; databases, branches, Neki, internal or external keyspaces, logs, maintenance, extensions, metrics, insights, inspect, and SQL; deploy requests, schema migrations, MoveTables, throttlers, rollout concurrency, and Traffic Control; PgBouncers, read-only replicas, roles, passwords, backups, webhooks, audit logs, service tokens, D1 imports, and automation. Routes to focused pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, database, branch, Neki, keyspace, create-external, external keyspace, deploy request, move-tables, vtctld, max rollout, throttler, traffic-control, metrics, insights, inspect, SQL, role, password, pgbouncer, read-only replica, backup, webhook, audit-log, billing, org, SSO, service token, import d1.
 requirements:
   binaries:
     - pscale
@@ -262,8 +262,9 @@ pscale sql <database> <branch> --org <org> --format json --query "SELECT 1"
 
 # Point-in-time diagnostics, branch metrics, and query-fingerprint analysis
 pscale inspect all <database> <branch> --org <org> --format json
-# Neki: pin one shard and optionally select its router/replica path
-pscale inspect all <database> <branch> --org <org> --shard <shard-id> --router <router> --replica --format json
+# Neki: pin one shard on the primary path by default
+pscale inspect all <database> <branch> --org <org> --shard <shard-id> --format json
+# Add --router <router> and/or --replica only for that explicit target path
 pscale metrics report <database> <branch> --org <org> --period 1d --format json
 pscale metrics show <database> <branch> --org <org> --metric queries --metric latency_p99 --period 1h --format json
 pscale insights queries <database> <branch> --org <org> --sort p99Latency --period 1h --format json

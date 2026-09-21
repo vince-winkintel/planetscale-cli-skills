@@ -21,12 +21,13 @@ pscale inspect all <database> <branch> --org <org> \
 pscale inspect all <database> <branch> --org <org> \
   --keyspace '<keyspace>/<shard>' --format json
 
-# Neki: pin one shard ID and optionally select its router and replica path
+# Neki: pin one shard ID on the primary path by default
+pscale inspect all <database> <branch> --org <org> \
+  --shard <shard-id> --format json
+
+# Select a router and/or replica only when evidence from that path is intended
 pscale inspect all <database> <branch> --org <org> \
   --shard <shard-id> --router <router-name> --replica --format json
-
-# Run against a replica when primary-only evidence is unnecessary
-pscale inspect all <database> <branch> --org <org> --replica --format json
 ```
 
 Always pass `--org` explicitly in agent workflows so the organization target is unambiguous. The default ephemeral role is `reader`; keep it unless the connection itself fails for a justified permission reason. On PostgreSQL and Neki, `--dbname` defaults to `postgres`, the temporary connection uses `sslmode=verify-full` by default, and the reader role may lack `CONNECT` on another database. Use `--role admin` only after confirming that this is the actual failure and that elevated access is acceptable.

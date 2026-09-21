@@ -219,8 +219,9 @@ pscale sql my-db main --org my-org --role admin --query "UPDATE users SET disabl
 ```bash
 # Point-in-time, connection-level diagnostics (JSON combined report)
 pscale inspect all my-db main --org my-org --format json
-# Neki: inspect exactly one shard, optionally through a router or replica
-pscale inspect all my-db main --org my-org --shard <shard-id> --router <router> --replica --format json
+# Neki: inspect exactly one shard on the primary path by default
+pscale inspect all my-db main --org my-org --shard <shard-id> --format json
+# Add --router <router> and/or --replica only for that explicit target path
 
 # Historical/current branch metrics and a curated engine-aware report
 pscale metrics report my-db main --org my-org --period 1d --format json

@@ -228,7 +228,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale role
 
-The role parent fence was re-verified as unchanged, and the changed role-create and role-get fences were re-captured, from the official, checksum-verified PlanetScale CLI v0.335.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `706ecf9f4084d4d5af257e92f0fe3395ed0ddd69b543604881a27d6dd5daf612`. Other unchanged role fences remain exact v0.332.0 captures.
+The role parent fence and the changed role-create and role-get fences were re-verified against the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`. Other unchanged role fences remain exact v0.332.0 captures.
 
 ```text
 Manage database roles for a Postgres or Neki database branch.

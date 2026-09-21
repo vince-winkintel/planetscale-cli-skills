@@ -1,6 +1,6 @@
 # `pscale inspect` command reference
 
-Behavior was re-verified against the official, checksum-verified PlanetScale CLI v0.335.0 macOS arm64 release binary (archive SHA-256 `706ecf9f4084d4d5af257e92f0fe3395ed0ddd69b543604881a27d6dd5daf612`). The compact fences below are curated usage excerpts, not byte-for-byte help captures.
+Behavior was re-verified against the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary (archive SHA-256 `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`). The compact fences below are curated usage excerpts, not byte-for-byte help captures.
 
 ## Command group
 
@@ -65,6 +65,10 @@ For Neki, list shard IDs and router names before selecting one:
 ```bash
 pscale branch shard list <database> <branch> --org <org> --format json
 pscale branch router list <database> <branch> --org <org> --format json
+# Primary-path evidence is the default
+pscale inspect all <database> <branch> --org <org> \
+  --shard <shard-id> --format json
+# Select a router and/or replica only when that target path is intentional
 pscale inspect all <database> <branch> --org <org> \
   --shard <shard-id> --router <router-name> --replica --format json
 ```
