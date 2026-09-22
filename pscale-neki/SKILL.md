@@ -147,12 +147,30 @@ pscale branch config-profile create <database> <branch> <profile> --org <org> \
   --cluster-size <size> --replicas 2 --format json
 pscale branch config-profile update <database> <branch> <profile> --org <org> \
   --parameters pgconf.max_connections=200 --format json
+
+# Change the branch default profile (separate approval)
+pscale branch config-profile set-default <database> <branch> <profile> --org <org> --format json
+
+# Toggle one extension while preserving the enabled set from the CLI's catalog snapshot
+pscale branch config-profile extensions enable <database> <branch> <profile> <extension> \
+  --org <org> --format json
+pscale branch config-profile extensions disable <database> <branch> <profile> <extension> \
+  --org <org> --format json
+
+# Replace the complete enabled extension set in one request
 pscale branch config-profile update <database> <branch> <profile> --org <org> \
   --extensions hll,pg_stat_statements --format json
-pscale branch config-profile set-default <database> <branch> <profile> --org <org> --format json
 ```
 
-Create/update sends only explicitly supplied flags. Storage flags use bytes for `--min-storage` and `--max-storage`, MiB/s for `--storage-throughput`, and explicit booleans for `--storage-autoscaling`. Repeat `--parameters namespace.name=value` for multiple settings. `update --extensions` **replaces** the complete enabled extension set: omit it to preserve the set, pass a reviewed comma-separated set to replace it, or pass `--extensions=` to disable all customer-managed extensions. Blank names inside a non-empty list are rejected. Inspect the current extension catalog and enabled set first; only extensions marked enablable can be selected, and extension removal can break dependent objects or parameters. Profile changes may be asynchronous; inspect `changes list/show`, and cancel only an identified cancelable request after approval.
+Create/update sends only explicitly supplied flags. Storage flags use bytes for `--min-storage` and `--max-storage`, MiB/s for `--storage-throughput`, and explicit booleans for `--storage-autoscaling`. Repeat `--parameters namespace.name=value` for multiple settings.
+
+Every profile write can be asynchronous. Before a write, page through unfiltered `pscale branch changes list <database> <branch> --org <org> --target-type config-profile --page <n> --per-page 100 --format json` results until a page is empty; block the write if any entry has `completed_at: null`, and snapshot all existing change IDs. After the write, page through the same list again and diff the IDs. If the write is asynchronous, require exactly one new entry matching the intended profile; do not guess when no unique request can be identified. Poll it with `pscale branch changes show <database> <branch> <change-id> --org <org> --format json` until `completed_at` is non-null, then read the affected profile or default back. Cancel only under the branch-wide `state: "pending"` plus `can_delete: true` rule above and only after approval for that exact change ID.
+
+Use `extensions enable|disable` only with a current CLI: if any entry from `extensions --format json` lacks `can_enable`, upgrade before toggling. Read the catalog first and review the target's `name`, `enabled`, `can_enable`, `internal`, and `loader`; `shared_preload_libraries` can signal restart or availability impact. Skip the command when `enabled` already matches the requested state. The CLI rejects an unknown target or one with `can_enable: false`, but it does not short-circuit no-ops. It builds a complete set from one catalog snapshot, carrying forward every other entry currently marked `enabled`, including internal or non-enablable entries, and submits that set through the profile update API without a concurrency precondition. Therefore serialize toggles, re-read the catalog only after the prior request has `completed_at` non-null, and use one reviewed `update --extensions` request—not back-to-back toggles—for a multi-extension change.
+
+The toggle's JSON output is the pre-update target catalog entry with `enabled` changed client-side, not an updated profile, server-confirmed extension, or change request. Use the before/after change-ID procedure above to identify the resulting request, wait for `completed_at` to become non-null, and then re-read `extensions` to verify the persisted set.
+
+Use `update --extensions` only when intentionally replacing the complete enabled set: omit it to preserve the set, or pass one reviewed comma-separated set to replace it. Carry forward every currently enabled internal or `can_enable: false` entry unless its removal is explicitly intended, approved, and known to be accepted by the target API; only add entries whose catalog record has `can_enable: true`. Passing `--extensions=` submits an empty set, but the CLI does not establish how the API treats required or internal entries, so do not treat it as a complete, predictable disable-all operation. Blank names inside a non-empty list are rejected. Extension removal can break dependent objects or parameters; verify the completed request and persisted catalog.
 
 `config-profile maintenance` can target one or multiple profiles and returns before completion. It can cause brief unavailability. Use branch-wide `branch maintenance run` when every profile should be maintained. Profile deletion is destructive and requires exact-target approval before `--force`.
 
