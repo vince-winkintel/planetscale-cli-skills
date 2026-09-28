@@ -198,12 +198,14 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale database throttler
 
+This parent and its `show`/`update` help fences were re-captured from the official, checksum-verified PlanetScale CLI v0.339.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `1e396701709cd49d1d1cccca252e2bd81f224b2830ca189a84a16983bde182e8`.
+
 ```text
 Show or update database-level Vitess migration throttler configuration.
 
 This sets the default throttler for future deploy requests on the database.
 It is not the per-deploy-request throttler (pscale deploy-request throttler)
-and not the tablet/vtctld throttler (pscale branch vtctld throttler).
+and not the tablet/vtctl throttler (pscale branch vtctl throttler).
 
 Usage:
   pscale database throttler [command]

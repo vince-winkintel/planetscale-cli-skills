@@ -1,14 +1,14 @@
 # Lookup Vindex command reference
 
-All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.
+All help fences below were re-captured from the official, checksum-verified PlanetScale CLI v0.339.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `1e396701709cd49d1d1cccca252e2bd81f224b2830ca189a84a16983bde182e8`.
 
-## pscale branch vtctld lookup-vindex
+## pscale branch vtctl lookup-vindex
 
 ```text
 Manage Lookup Vindex operations
 
 Usage:
-  pscale branch vtctld lookup-vindex [command]
+  pscale branch vtctl lookup-vindex [command]
 
 Available Commands:
   cancel      Cancel a Lookup Vindex creation
@@ -32,18 +32,18 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale branch vtctld lookup-vindex [command] --help" for more information about a command.
+Use "pscale branch vtctl lookup-vindex [command] --help" for more information about a command.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld lookup-vindex create
+## pscale branch vtctl lookup-vindex create
 
 ```text
 Create a Lookup Vindex
 
 Usage:
-  pscale branch vtctld lookup-vindex create <database> <branch> [flags]
+  pscale branch vtctl lookup-vindex create <database> <branch> [flags]
 
 Flags:
       --cells strings                      Cells to replicate from (comma-separated)
@@ -75,13 +75,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld lookup-vindex show
+## pscale branch vtctl lookup-vindex show
 
 ```text
 Show details of a Lookup Vindex
 
 Usage:
-  pscale branch vtctld lookup-vindex show <database> <branch> [flags]
+  pscale branch vtctl lookup-vindex show <database> <branch> [flags]
 
 Flags:
   -h, --help                    help for show
@@ -102,13 +102,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld lookup-vindex externalize
+## pscale branch vtctl lookup-vindex externalize
 
 ```text
 Externalize a Lookup Vindex
 
 Usage:
-  pscale branch vtctld lookup-vindex externalize <database> <branch> [flags]
+  pscale branch vtctl lookup-vindex externalize <database> <branch> [flags]
 
 Flags:
       --delete                  Delete the workflow after externalizing
@@ -131,13 +131,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld lookup-vindex internalize
+## pscale branch vtctl lookup-vindex internalize
 
 ```text
 Internalize a Lookup Vindex
 
 Usage:
-  pscale branch vtctld lookup-vindex internalize <database> <branch> [flags]
+  pscale branch vtctl lookup-vindex internalize <database> <branch> [flags]
 
 Flags:
   -h, --help                    help for internalize
@@ -159,13 +159,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld lookup-vindex cancel
+## pscale branch vtctl lookup-vindex cancel
 
 ```text
 Cancel a Lookup Vindex creation
 
 Usage:
-  pscale branch vtctld lookup-vindex cancel <database> <branch> [flags]
+  pscale branch vtctl lookup-vindex cancel <database> <branch> [flags]
 
 Flags:
   -h, --help                    help for cancel
@@ -186,13 +186,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld lookup-vindex complete
+## pscale branch vtctl lookup-vindex complete
 
 ```text
 Complete a Lookup Vindex creation
 
 Usage:
-  pscale branch vtctld lookup-vindex complete <database> <branch> [flags]
+  pscale branch vtctl lookup-vindex complete <database> <branch> [flags]
 
 Flags:
   -h, --help                    help for complete

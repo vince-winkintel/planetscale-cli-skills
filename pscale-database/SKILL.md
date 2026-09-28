@@ -141,7 +141,7 @@ The CLI rejects Vitess-only flags for PostgreSQL databases. `--default-branch`, 
 
 ### Database-level Vitess migration throttler
 
-This configuration sets the default migration-throttling ratio for future deploy requests on a Vitess database. It is distinct from both `pscale deploy-request throttler` for one deploy request and `pscale branch vtctld throttler` for tablet/keyspace throttler policy.
+This configuration sets the default migration-throttling ratio for future deploy requests on a Vitess database. It is distinct from both `pscale deploy-request throttler` for one deploy request and `pscale branch vtctl throttler` for tablet/keyspace throttler policy.
 
 ```bash
 # Inspect current database defaults and eligible keyspaces
@@ -247,8 +247,8 @@ Keyspace deletion is destructive. Confirm the organization, database, branch, ex
 ```bash
 # Inspect the target and related branch state first
 pscale keyspace show <database> <branch> <keyspace> --org <org> --format json
-pscale branch vtctld get-keyspace-routing-rules <database> <branch> --org <org> --format json
-pscale branch vtctld list-workflows <database> <branch> --org <org> \
+pscale branch vtctl get-keyspace-routing-rules <database> <branch> --org <org> --format json
+pscale branch vtctl list-workflows <database> <branch> --org <org> \
   --keyspace <keyspace> --format json
 
 # Interactive deletion requires typing database/branch/keyspace exactly
@@ -325,7 +325,7 @@ The dry run checks connectivity and returns schema lint findings without creatin
 
 ### Vitess keyspace throttler settings
 
-Inspect the keyspace settings first. The JSON result may include the keyspace throttler's `enabled` state and replication-lag `threshold`. This persisted database/keyspace settings API, `pscale keyspace update-settings --throttler-*`, is distinct from live vtctld tablet/keyspace throttler policy under `pscale branch vtctld throttler ... --keyspace`. It is also separate from the database default and per-deploy-request ratios.
+Inspect the keyspace settings first. The JSON result may include the keyspace throttler's `enabled` state and replication-lag `threshold`. This persisted database/keyspace settings API, `pscale keyspace update-settings --throttler-*`, is distinct from live vtctld tablet/keyspace throttler policy under `pscale branch vtctl throttler ... --keyspace`. It is also separate from the database default and per-deploy-request ratios.
 
 ```bash
 # Read current replication and throttler settings

@@ -39,6 +39,8 @@ Use the current CLI before converting an untrusted D1 export. The CHECK-expressi
 
 The current converter preserves and translates more SQLite schema semantics, including column- and table-level `CHECK` constraints, named constraints, generated columns, `NUMERIC`/`DECIMAL` precision, and common computed defaults such as `date('now')`, `time('now')`, `randomblob()`, UUID generators, and `CAST(unixepoch() AS TEXT)`. For columns inferred as PostgreSQL booleans, integer `0`/`1` literals in applicable `CHECK` comparisons, `IN`, and `BETWEEN` expressions are rewritten to `false`/`true`; non-boolean columns and decimal-like literals are left unchanged. SQLite `VIRTUAL` generated columns are materialized as PostgreSQL `STORED` generated columns because PostgreSQL 16 supports only stored generated columns.
 
+Cloudflare's `_cf_METADATA` table is internal D1 bookkeeping. The current CLI excludes it from schema conversion, data loading, and verification rather than importing it as application data.
+
 Inside `CHECK` and generated expressions, the converter rewrites selected SQLite-only forms when it recognizes a supported shape that produces valid PostgreSQL syntax—for example, `ifnull()` to `coalesce()`, `iif()` to `CASE`, `instr()` to `strpos()`, `json_valid()` to `IS JSON`, `==` to `=`, and literal `GLOB`/`REGEXP` operators to `~`. Supported date/time rewrites are limited to current-time forms; JSON paths and pattern operands generally need string literals. Function forms `glob()` and `regexp()` are not rewritten, and both are reported as `SQLITE_FUNCTION`. Issue messages hard-code uppercase `GLOB()`/`REGEXP()` for non-literal operator cases; function-form `glob()` preserves the spelling used in the schema (for example, `glob()`), while function-form `regexp()` is detected by the operator fallback and reported as uppercase `REGEXP()`.
 
 These rewrites guarantee neither source semantic equivalence nor complete lint coverage. `json_valid(value, flags)` currently drops the flags argument; `unixepoch()` in `CHECK` and generated expressions maps to `now()` without consulting the destination column type, so an integer-epoch comparison can convert silently and fail at DDL apply; `strftime('%s', 'now')` remains unconverted and is reported as `SQLITE_FUNCTION`; and a double-quoted `GLOB`/`REGEXP` right operand that matches a column name can be misread as a literal. Other unsupported calls—including scalar `max()`/`min()`, function-form `like()`, `format()`, and `date(column)`/`time(column)`—can pass `lint` and then fail or behave differently when PostgreSQL loads or evaluates the DDL. Any lint error blocks `start`, including `--dry-run`.
@@ -114,6 +116,8 @@ If `<branch>` is omitted, pscale uses the default branch. Prefer passing the bra
 5. Use an explicit branch argument and `--dbname` when the destination PostgreSQL database name is not `postgres`.
 6. PostgreSQL connections created during import use verified TLS by default; do not weaken that behavior in surrounding tooling.
 7. Verify after loading; do not call the migration complete until `verify` succeeds.
+
+The generated destination connection uses `sslmode=verify-full` with `sslrootcert=system`, avoiding libpq's fallback to a missing `~/.postgresql/root.crt`. Verification normalizes UUID case before comparing source and destination signatures. If `verify` is given an explicit `--sqlite` path, it still loads the saved original input path from `--migration-id` for schema/type context; preserve the migration state and use the matching export.
 
 ## Troubleshooting
 
