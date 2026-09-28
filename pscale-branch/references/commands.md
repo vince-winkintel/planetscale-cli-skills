@@ -923,15 +923,17 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch routing-rules
 
+This parent and its `get`/`update` help fences are exact output from the official, checksum-verified PlanetScale CLI v0.339.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `1e396701709cd49d1d1cccca252e2bd81f224b2830ca189a84a16983bde182e8`.
+
 ```text
-Fetch or update your keyspace routing rules
+Fetch or update routing rules for a MySQL branch
 
 Usage:
   pscale branch routing-rules [command]
 
 Available Commands:
-  get         Show the routing rules of a branch
-  update      Update the routing rules of a branch
+  get         Show the routing rules of a MySQL branch
+  update      Replace the routing rules of a MySQL branch
 
 Flags:
   -h, --help   help for routing-rules
@@ -955,7 +957,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ## pscale branch routing-rules get
 
 ```text
-Show the routing rules of a branch
+Show the routing rules of a MySQL branch
 
 Usage:
   pscale branch routing-rules get <database> <branch> [flags]
@@ -980,7 +982,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ## pscale branch routing-rules update
 
 ```text
-Update the routing rules of a branch
+Replace the branch routing rules. This is a full replacement, not a merge. The request fails while a vtctld schema mutation is in progress or the branch schema snapshot is not ready, because the rules you read may not describe live routing.
 
 Usage:
   pscale branch routing-rules update <database> <branch> --routing-rules <file> [flags]
@@ -1165,15 +1167,18 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 Cancel is an operational write. Confirm the target and latest request state before running it, then re-run `resize status` and `vtgate show` to verify the result and applied configuration.
 
-## pscale branch vtctld
+## pscale branch vtctl
 
-The parent and keyspace-routing-rule help blocks below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+All `vtctl` help fences below through `get-routing-rules` are exact output from the official, checksum-verified PlanetScale CLI v0.339.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `1e396701709cd49d1d1cccca252e2bd81f224b2830ca189a84a16983bde182e8`. The legacy `vtctld` alias was also executed and verified to render the same canonical `vtctl` parent surface.
 
 ```text
-Run vtctld commands against a branch. This command is only supported for Vitess databases.
+Run vtctl commands against a branch. This command is only supported for Vitess databases.
 
 Usage:
-  pscale branch vtctld [command]
+  pscale branch vtctl [command]
+
+Aliases:
+  vtctl, vtctld
 
 Available Commands:
   apply-keyspace-routing-rules Replace live keyspace routing rules for a branch
@@ -1195,7 +1200,7 @@ Available Commands:
   vdiff                        Manage VDiff operations
 
 Flags:
-  -h, --help   help for vtctld
+  -h, --help   help for vtctl
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -1208,18 +1213,18 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale branch vtctld [command] --help" for more information about a command.
+Use "pscale branch vtctl [command] --help" for more information about a command.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld get-keyspace-routing-rules
+## pscale branch vtctl get-keyspace-routing-rules
 
 ```text
 Get live keyspace routing rules for a branch
 
 Usage:
-  pscale branch vtctld get-keyspace-routing-rules <database> <branch> [flags]
+  pscale branch vtctl get-keyspace-routing-rules <database> <branch> [flags]
 
 Flags:
   -h, --help   help for get-keyspace-routing-rules
@@ -1238,13 +1243,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld apply-keyspace-routing-rules
+## pscale branch vtctl apply-keyspace-routing-rules
 
 ```text
 Replace live keyspace routing rules for a branch
 
 Usage:
-  pscale branch vtctld apply-keyspace-routing-rules <database> <branch> [flags]
+  pscale branch vtctl apply-keyspace-routing-rules <database> <branch> [flags]
 
 Flags:
       --cells strings       Limit SrvVSchema rebuilding to these cells
@@ -1267,13 +1272,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld throttler
+## pscale branch vtctl throttler
 
 ```text
 Inspect and configure the tablet throttler
 
 Usage:
-  pscale branch vtctld throttler [command]
+  pscale branch vtctl throttler [command]
 
 Available Commands:
   check         Issue a throttler check against a single tablet
@@ -1294,18 +1299,18 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale branch vtctld throttler [command] --help" for more information about a command.
+Use "pscale branch vtctl throttler [command] --help" for more information about a command.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld throttler status
+## pscale branch vtctl throttler status
 
 ```text
-Get the throttler status for a single tablet, identified by its alias. Discover tablet aliases with `pscale branch vtctld list-tablets`.
+Get the throttler status for a single tablet, identified by its alias. Discover tablet aliases with `pscale branch vtctl list-tablets`.
 
 Usage:
-  pscale branch vtctld throttler status <database> <branch> [flags]
+  pscale branch vtctl throttler status <database> <branch> [flags]
 
 Flags:
   -h, --help                  help for status
@@ -1325,13 +1330,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld throttler check
+## pscale branch vtctl throttler check
 
 ```text
-Issue a throttler check against a single tablet, identified by its alias. Discover tablet aliases with `pscale branch vtctld list-tablets`.
+Issue a throttler check against a single tablet, identified by its alias. Discover tablet aliases with `pscale branch vtctl list-tablets`.
 
 Usage:
-  pscale branch vtctld throttler check <database> <branch> [flags]
+  pscale branch vtctl throttler check <database> <branch> [flags]
 
 Flags:
       --app-name string           App to issue the check on behalf of (e.g. "online-ddl"). Defaults to the throttler's default app.
@@ -1355,13 +1360,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld throttler update-config
+## pscale branch vtctl throttler update-config
 
 ```text
 Update the tablet throttler configuration for a keyspace. Omit --enabled to leave the keyspace enable state unchanged. Flag behavior mirrors vtctldclient UpdateThrottlerConfig: --throttle-app and --unthrottle-app are mutually exclusive; --app-name and --app-metrics are required together.
 
 Usage:
-  pscale branch vtctld throttler update-config <database> <branch> [flags]
+  pscale branch vtctl throttler update-config <database> <branch> [flags]
 
 Flags:
       --app-metrics strings              Metrics to check for --app-name (e.g. lag,loadavg)
@@ -1391,15 +1396,15 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 `--throttle-app` and `--unthrottle-app` are mutually exclusive. `--app-name` and `--app-metrics` are required together.
 
-## pscale branch vtctld move-tables
+## pscale branch vtctl move-tables
 
-The MoveTables and VDiff help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
+The MoveTables and VDiff help fences below were re-captured from the same checksum-verified v0.339.0 binary.
 
 ```text
 Manage MoveTables workflows
 
 Usage:
-  pscale branch vtctld move-tables [command]
+  pscale branch vtctl move-tables [command]
 
 Available Commands:
   cancel          Cancel a MoveTables workflow
@@ -1408,7 +1413,9 @@ Available Commands:
   list            List MoveTables workflows
   reverse-traffic Reverse traffic for a MoveTables workflow
   show            Show details of a MoveTables workflow
+  start           Start a MoveTables workflow
   status          Show the status of a MoveTables workflow
+  stop            Stop a MoveTables workflow
   switch-traffic  Switch traffic for a MoveTables workflow
 
 Flags:
@@ -1425,25 +1432,25 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale branch vtctld move-tables [command] --help" for more information about a command.
+Use "pscale branch vtctl move-tables [command] --help" for more information about a command.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld move-tables list
+## pscale branch vtctl move-tables list
 
 ```text
 List MoveTables workflows
 
 Usage:
-  pscale branch vtctld move-tables list <database> <branch> [flags]
+  pscale branch vtctl move-tables list <database> <branch> [flags]
 
 Aliases:
   list, ls
 
 Flags:
   -h, --help                     help for list
-      --target-keyspace string   Target keyspace (defaults to the branch's default keyspace)
+      --target-keyspace string   Filter by target keyspace (lists all keyspaces if omitted)
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
@@ -1459,13 +1466,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld move-tables create
+## pscale branch vtctl move-tables create
 
 ```text
 Create a MoveTables workflow
 
 Usage:
-  pscale branch vtctld move-tables create <database> <branch> [flags]
+  pscale branch vtctl move-tables create <database> <branch> [flags]
 
 Flags:
       --all-tables                               Move all tables from the source keyspace
@@ -1501,13 +1508,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld move-tables show
+## pscale branch vtctl move-tables show
 
 ```text
 Show details of a MoveTables workflow
 
 Usage:
-  pscale branch vtctld move-tables show <database> <branch> [flags]
+  pscale branch vtctl move-tables show <database> <branch> [flags]
 
 Flags:
   -h, --help                     help for show
@@ -1528,13 +1535,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld move-tables status
+## pscale branch vtctl move-tables status
 
 ```text
 Show the status of a MoveTables workflow
 
 Usage:
-  pscale branch vtctld move-tables status <database> <branch> [flags]
+  pscale branch vtctl move-tables status <database> <branch> [flags]
 
 Flags:
   -h, --help                     help for status
@@ -1555,13 +1562,67 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld move-tables switch-traffic
+## pscale branch vtctl move-tables start
+
+```text
+Start a MoveTables workflow
+
+Usage:
+  pscale branch vtctl move-tables start <database> <branch> [flags]
+
+Flags:
+  -h, --help                     help for start
+      --target-keyspace string   Target keyspace (required)
+      --workflow string          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctl move-tables stop
+
+```text
+Stop a MoveTables workflow
+
+Usage:
+  pscale branch vtctl move-tables stop <database> <branch> [flags]
+
+Flags:
+  -h, --help                     help for stop
+      --target-keyspace string   Target keyspace (required)
+      --workflow string          Name of the workflow (required)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch vtctl move-tables switch-traffic
 
 ```text
 Switch traffic for a MoveTables workflow
 
 Usage:
-  pscale branch vtctld move-tables switch-traffic <database> <branch> [flags]
+  pscale branch vtctl move-tables switch-traffic <database> <branch> [flags]
 
 Flags:
       --dry-run                           Only show what would be done
@@ -1586,13 +1647,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld move-tables reverse-traffic
+## pscale branch vtctl move-tables reverse-traffic
 
 ```text
 Reverse traffic for a MoveTables workflow
 
 Usage:
-  pscale branch vtctld move-tables reverse-traffic <database> <branch> [flags]
+  pscale branch vtctl move-tables reverse-traffic <database> <branch> [flags]
 
 Flags:
       --dry-run                           Only show what would be done
@@ -1616,18 +1677,18 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld move-tables complete
+## pscale branch vtctl move-tables complete
 
 ```text
 Complete a MoveTables workflow
 
 Usage:
-  pscale branch vtctld move-tables complete <database> <branch> [flags]
+  pscale branch vtctl move-tables complete <database> <branch> [flags]
 
 Flags:
       --dry-run                  Only show what would be done
   -h, --help                     help for complete
-      --keep-data                Keep the data in the target keyspace (required)
+      --keep-data                Keep the source tables instead of dropping them. Use this when the source is an external keyspace (required)
       --keep-routing-rules       Keep the routing rules (required)
       --rename-tables            Rename source tables instead of dropping them
       --target-keyspace string   Target keyspace (required)
@@ -1647,17 +1708,17 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld move-tables cancel
+## pscale branch vtctl move-tables cancel
 
 ```text
 Cancel a MoveTables workflow
 
 Usage:
-  pscale branch vtctld move-tables cancel <database> <branch> [flags]
+  pscale branch vtctl move-tables cancel <database> <branch> [flags]
 
 Flags:
   -h, --help                     help for cancel
-      --keep-data                Keep the data in the target keyspace (required)
+      --keep-data                Keep the data copied into the target keyspace instead of deleting it (required)
       --keep-routing-rules       Keep the routing rules (required)
       --target-keyspace string   Target keyspace (required)
       --workflow string          Name of the workflow (required)
@@ -1676,13 +1737,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld vdiff
+## pscale branch vtctl vdiff
 
 ```text
 Manage VDiff operations
 
 Usage:
-  pscale branch vtctld vdiff [command]
+  pscale branch vtctl vdiff [command]
 
 Available Commands:
   create      Create a VDiff
@@ -1706,18 +1767,18 @@ Global Flags:
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
-Use "pscale branch vtctld vdiff [command] --help" for more information about a command.
+Use "pscale branch vtctl vdiff [command] --help" for more information about a command.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld vdiff create
+## pscale branch vtctl vdiff create
 
 ```text
 Create a VDiff
 
 Usage:
-  pscale branch vtctld vdiff create <database> <branch> [flags]
+  pscale branch vtctl vdiff create <database> <branch> [flags]
 
 Flags:
       --auto-retry                           Automatically retry on error (default true)
@@ -1752,13 +1813,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld vdiff show
+## pscale branch vtctl vdiff show
 
 ```text
 Show details of a VDiff
 
 Usage:
-  pscale branch vtctld vdiff show <database> <branch> [flags]
+  pscale branch vtctl vdiff show <database> <branch> [flags]
 
 Flags:
   -h, --help                     help for show
@@ -1780,13 +1841,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld vdiff resume
+## pscale branch vtctl vdiff resume
 
 ```text
 Resume a stopped VDiff
 
 Usage:
-  pscale branch vtctld vdiff resume <database> <branch> [flags]
+  pscale branch vtctl vdiff resume <database> <branch> [flags]
 
 Flags:
   -h, --help                     help for resume
@@ -1809,13 +1870,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld get-shard
+## pscale branch vtctl get-shard
 
 ```text
 Get a live shard record from the cluster via vtctld, including tablet controls and denied tables.
 
 Usage:
-  pscale branch vtctld get-shard <database> <branch> [flags]
+  pscale branch vtctl get-shard <database> <branch> [flags]
 
 Flags:
   -h, --help              help for get-shard
@@ -1836,13 +1897,13 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-## pscale branch vtctld get-routing-rules
+## pscale branch vtctl get-routing-rules
 
 ```text
 Get live routing rules from the cluster via vtctld. This reads the current cluster state, unlike `pscale branch routing-rules get`, which reads from the schema snapshot.
 
 Usage:
-  pscale branch vtctld get-routing-rules <database> <branch> [flags]
+  pscale branch vtctl get-routing-rules <database> <branch> [flags]
 
 Flags:
   -h, --help   help for get-routing-rules

@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: PlanetScale CLI command reference and workflows. Use for authentication; org, SSO, teams, and billing; databases, branches, Neki, internal or external keyspaces, logs, maintenance, extensions, metrics, insights, inspect, and SQL; deploy requests, schema migrations, MoveTables, throttlers, rollout concurrency, and Traffic Control; PgBouncers, read-only replicas, roles, passwords, backups, webhooks, audit logs, service tokens, D1 imports, and automation. Routes to focused pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, database, branch, Neki, keyspace, create-external, external keyspace, deploy request, move-tables, vtctld, max rollout, throttler, traffic-control, metrics, insights, inspect, SQL, role, password, pgbouncer, read-only replica, backup, webhook, audit-log, billing, org, SSO, service token, import d1.
+description: PlanetScale CLI command reference and workflows. Use for authentication; org, SSO, teams, and billing; databases, branches, Neki, internal or external keyspaces, logs, maintenance, extensions, metrics, insights, inspect, and SQL; deploy requests, schema migrations, MoveTables, throttlers, rollout concurrency, and Traffic Control; PgBouncers, read-only replicas, roles, passwords, backups, webhooks, audit logs, service tokens, D1 imports, and automation. Routes to focused pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, database, branch, Neki, keyspace, create-external, external keyspace, deploy request, move-tables, vtctl, vtctld, max rollout, throttler, traffic-control, metrics, insights, inspect, SQL, role, password, pgbouncer, read-only replica, backup, webhook, audit-log, billing, org, SSO, service token, import d1.
 requirements:
   binaries:
     - pscale
@@ -55,7 +55,8 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Directory-local `.pscale.yml` files are project configuration, not trusted credential configuration. The CLI accepts only `org`, `database`, and `branch` from them and warns while ignoring keys such as API endpoints or tokens.
 - Keep API URLs and credentials in the user config, environment/secret manager, or explicit approved flags. Never commit them to a repository-local config.
 - `pscale api` follows cross-host redirects without forwarding authentication or caller-supplied headers. Even with this protection, pass secret-bearing headers only to an explicitly verified API host and do not expose them in logs.
-- When `--format json` is active, API error codes are preserved in the top-level `code` field instead of being collapsed to `COMMAND_FAILED`. Branch automation should branch on exact codes when present; for `schema_mutation_blocked`, wait for the active vtctld mutation or deploy to finish before retrying.
+- When `--format json` is active, raw API error codes are preserved in `issues[0].code` instead of being collapsed to `COMMAND_FAILED`. Branch automation should branch on that exact nested code when present.
+- `schema_mutation_blocked` and `schema_snapshot_not_ready` responses use `status: "action_required"` and one CLI-generated `next_steps` instruction. Treat them as retryable waits, not hard failures or permission to retry blindly: wait for the active vtctld mutation or deploy to finish, or for the branch schema snapshot to become ready, then re-read state before retrying.
 
 ## Binary-native agent bootstrap
 

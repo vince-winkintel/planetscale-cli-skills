@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs and query patterns; and managing Postgres/Neki maintenance, Postgres extensions, parameters and sizing, Vitess VTGate capacity, tablet throttling, routing rules, Lookup Vindexes, and vtctld MoveTables. Use for schema branch workflows, PITR, branch logs, deletion protection, primary switchovers, maintenance, extensions, diffs, resize, VTGate, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctld, promote branch, MoveTables, global keyspace.
+description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs and query patterns; and managing Postgres/Neki maintenance, Postgres extensions, parameters and sizing, Vitess VTGate capacity, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, deletion protection, primary switchovers, maintenance, extensions, diffs, resize, VTGate, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -104,26 +104,26 @@ pscale branch query-patterns download <database> <branch-name> --output - > quer
 
 # Inspect Vitess routing rules and tablet state
 pscale branch routing-rules get <database> <branch-name>
-pscale branch vtctld get-routing-rules <database> <branch-name>
-pscale branch vtctld get-keyspace-routing-rules <database> <branch-name> --format json
-pscale branch vtctld get-shard <database> <branch-name> --keyspace <keyspace> --shard <shard>
-pscale branch vtctld list-tablets <database> <branch-name> --format json
+pscale branch vtctl get-routing-rules <database> <branch-name>
+pscale branch vtctl get-keyspace-routing-rules <database> <branch-name> --format json
+pscale branch vtctl get-shard <database> <branch-name> --keyspace <keyspace> --shard <shard>
+pscale branch vtctl list-tablets <database> <branch-name> --format json
 
 # Inspect one Lookup Vindex workflow; table-keyspace is where the lookup table/workflow lives
-pscale branch vtctld lookup-vindex show <database> <branch-name> \
+pscale branch vtctl lookup-vindex show <database> <branch-name> \
   --table-keyspace <lookup-table-keyspace> \
   --name <vindex-name> \
   --format json
 
 # Inspect one tablet's throttler state before proposing a change
-pscale branch vtctld throttler status <database> <branch-name> \
+pscale branch vtctl throttler status <database> <branch-name> \
   --tablet-alias <zone-tablet-alias> --format json
 
 # Discover current MoveTables workflows before creating or advancing one
-pscale branch vtctld move-tables list <database> <branch-name> --format json
+pscale branch vtctl move-tables list <database> <branch-name> --format json
 
 # Create a Vitess MoveTables workflow whose generated sequence tables live in a global keyspace
-pscale branch vtctld move-tables create <database> <branch-name> \
+pscale branch vtctl move-tables create <database> <branch-name> \
   --workflow <workflow> \
   --source-keyspace <source-keyspace> \
   --target-keyspace <target-keyspace> \
@@ -455,51 +455,51 @@ At least one resize flag is required. Omitted flags preserve their current value
 pscale branch routing-rules get <database> <branch-name>
 
 # Vitess only: read live routing rules from vtctld/current cluster state
-pscale branch vtctld get-routing-rules <database> <branch-name>
+pscale branch vtctl get-routing-rules <database> <branch-name>
 
 # Vitess only: read live keyspace-to-keyspace routing rules
-pscale branch vtctld get-keyspace-routing-rules <database> <branch-name> --format json
+pscale branch vtctl get-keyspace-routing-rules <database> <branch-name> --format json
 
 # Update routing rules from a file
 pscale branch routing-rules update <database> <branch-name> --routing-rules routing-rules.json
 
 # Replace live keyspace routing rules (approved write)
-pscale branch vtctld apply-keyspace-routing-rules <database> <branch-name> \
+pscale branch vtctl apply-keyspace-routing-rules <database> <branch-name> \
   --rules-file keyspace-routing-rules.json --format json
 ```
 
-Use `vtctld get-routing-rules` when debugging propagation/live cluster state; use `routing-rules get` when you need the schema snapshot contract.
+Use `vtctl get-routing-rules` when debugging propagation/live cluster state; use `routing-rules get` when you need the MySQL branch schema-snapshot contract. `routing-rules update` is a full replacement, not a merge. It refuses to write while a vtctld schema mutation is active (`schema_mutation_blocked`) or the branch schema snapshot is not ready (`schema_snapshot_not_ready`); wait, re-read both snapshot and live state, then rebuild the proposed replacement before retrying.
 
 Keyspace routing rules are a separate live map of `from_keyspace` to `to_keyspace`. Before replacing them, save `get-keyspace-routing-rules` output, validate every entry includes both fields, show the complete proposed replacement, and obtain explicit approval. `apply-keyspace-routing-rules` requires exactly one of `--rules` or `--rules-file`; an empty `rules` array clears all live keyspace routing rules. By default the command rebuilds SrvVSchema objects; use `--cells` only to scope that rebuild deliberately, and use `--skip-rebuild` only with an explicit propagation plan. Re-run `get-keyspace-routing-rules` after the write and compare the full returned set.
 
 ### Vitess shard inspection
 
-`pscale branch vtctld get-shard` reads a live shard record from vtctld, including tablet controls and denied tables. It is Vitess-only and requires both `--keyspace` and `--shard`.
+`pscale branch vtctl get-shard` reads a live shard record from vtctld, including tablet controls and denied tables. It is Vitess-only and requires both `--keyspace` and `--shard`.
 
 ```bash
 # Inspect an unsharded keyspace
-pscale branch vtctld get-shard <database> <branch-name> \
+pscale branch vtctl get-shard <database> <branch-name> \
   --keyspace main \
   --shard '-'
 
 # Inspect a sharded keyspace shard
-pscale branch vtctld get-shard <database> <branch-name> \
+pscale branch vtctl get-shard <database> <branch-name> \
   --keyspace commerce \
   --shard '-80'
 ```
 
 ### Vitess tablet throttler configuration
 
-`pscale branch vtctld throttler update-config` mutates a Vitess keyspace's tablet-throttler policy. Inspect tablet aliases and current state first, show the exact keyspace/app/metrics/rule to the user, and obtain explicit approval before changing it.
+`pscale branch vtctl throttler update-config` mutates a Vitess keyspace's tablet-throttler policy. Inspect tablet aliases and current state first, show the exact keyspace/app/metrics/rule to the user, and obtain explicit approval before changing it.
 
 ```bash
 # Discover tablets and inspect current throttler state
-pscale branch vtctld list-tablets <database> <branch> --org <org> --format json
-pscale branch vtctld throttler status <database> <branch> --org <org> \
+pscale branch vtctl list-tablets <database> <branch> --org <org> --format json
+pscale branch vtctl throttler status <database> <branch> --org <org> \
   --tablet-alias <zone-tablet-alias> --format json
 
 # Temporarily throttle an app at 50% for 30 minutes
-pscale branch vtctld throttler update-config <database> <branch> --org <org> \
+pscale branch vtctl throttler update-config <database> <branch> --org <org> \
   --keyspace <keyspace> \
   --throttle-app rowstreamer \
   --throttle-app-ratio 0.5 \
@@ -507,16 +507,16 @@ pscale branch vtctld throttler update-config <database> <branch> --org <org> \
   --format json
 
 # Remove one app throttle rule
-pscale branch vtctld throttler update-config <database> <branch> --org <org> \
+pscale branch vtctl throttler update-config <database> <branch> --org <org> \
   --keyspace <keyspace> --unthrottle-app rowstreamer --format json
 
 # Assign the metrics checked for one app
-pscale branch vtctld throttler update-config <database> <branch> --org <org> \
+pscale branch vtctl throttler update-config <database> <branch> --org <org> \
   --keyspace <keyspace> --app-name vreplication \
   --app-metrics lag,loadavg --format json
 
 # Change the keyspace's overall enable state explicitly
-pscale branch vtctld throttler update-config <database> <branch> --org <org> \
+pscale branch vtctl throttler update-config <database> <branch> --org <org> \
   --keyspace <keyspace> --enabled=false --format json
 ```
 
@@ -531,7 +531,7 @@ Rules:
 
 ### Vitess Lookup Vindex lifecycle
 
-`pscale branch vtctld lookup-vindex` creates and manages a Vitess Lookup Vindex backfill workflow. Every lifecycle action changes live workflow or VSchema state except `show`. Confirm the organization, database, branch, owner table, owner columns, lookup table, both keyspaces, vindex type, and recovery plan before creating or advancing one.
+`pscale branch vtctl lookup-vindex` creates and manages a Vitess Lookup Vindex backfill workflow. Every lifecycle action changes live workflow or VSchema state except `show`. Confirm the organization, database, branch, owner table, owner columns, lookup table, both keyspaces, vindex type, and recovery plan before creating or advancing one.
 
 The keyspace flags have distinct meanings:
 
@@ -543,13 +543,13 @@ Do not swap them. `--table-keyspace` and `--name` identify the workflow for ever
 ```bash
 # Inspect branch schema/routing and any existing workflow first
 pscale branch schema <database> <branch> --org <org>
-pscale branch vtctld lookup-vindex show <database> <branch> --org <org> \
+pscale branch vtctl lookup-vindex show <database> <branch> --org <org> \
   --table-keyspace <lookup-table-keyspace> \
   --name <vindex-name> \
   --format json
 
 # After explicit approval, create the lookup table and backfill workflow
-pscale branch vtctld lookup-vindex create <database> <branch> --org <org> \
+pscale branch vtctl lookup-vindex create <database> <branch> --org <org> \
   --keyspace <owner-table-keyspace> \
   --table-keyspace <lookup-table-keyspace> \
   --name <vindex-name> \
@@ -560,20 +560,20 @@ pscale branch vtctld lookup-vindex create <database> <branch> --org <org> \
   --format json
 
 # Verify progress before any lifecycle transition
-pscale branch vtctld lookup-vindex show <database> <branch> --org <org> \
+pscale branch vtctl lookup-vindex show <database> <branch> --org <org> \
   --table-keyspace <lookup-table-keyspace> --name <vindex-name> --format json
 
 # Run only the specifically approved transition
-pscale branch vtctld lookup-vindex externalize <database> <branch> --org <org> \
+pscale branch vtctl lookup-vindex externalize <database> <branch> --org <org> \
   --keyspace <owner-table-keyspace> --table-keyspace <lookup-table-keyspace> \
   --name <vindex-name> --format json
-pscale branch vtctld lookup-vindex internalize <database> <branch> --org <org> \
+pscale branch vtctl lookup-vindex internalize <database> <branch> --org <org> \
   --keyspace <owner-table-keyspace> --table-keyspace <lookup-table-keyspace> \
   --name <vindex-name> --format json
-pscale branch vtctld lookup-vindex complete <database> <branch> --org <org> \
+pscale branch vtctl lookup-vindex complete <database> <branch> --org <org> \
   --keyspace <owner-table-keyspace> --table-keyspace <lookup-table-keyspace> \
   --name <vindex-name> --format json
-pscale branch vtctld lookup-vindex cancel <database> <branch> --org <org> \
+pscale branch vtctl lookup-vindex cancel <database> <branch> --org <org> \
   --table-keyspace <lookup-table-keyspace> --name <vindex-name> --format json
 ```
 
@@ -583,18 +583,19 @@ Do not externalize until the copy/backfill state and lookup-table consistency ar
 
 ### Vitess MoveTables and global sequences
 
-Prefer `pscale branch vtctld move-tables` for new table-movement work. The older top-level `pscale workflow` family remains available but is planned for deprecation; do not start a new workflow through that legacy surface when the equivalent MoveTables command is available.
+Prefer canonical `pscale branch vtctl move-tables` for new table-movement work. `vtctld` remains a compatibility alias. Generated help uses `vtctl`, while v0.339.0 MoveTables `next_steps` still emit the compatible `pscale branch vtctld` form; treat either as the same command surface. The older top-level `pscale workflow` family remains available but is planned for deprecation; do not start a new workflow through that legacy surface when the equivalent MoveTables command is available.
 
-Start with `pscale branch vtctld move-tables list` to inventory workflows on the branch. Workflows are scoped by target keyspace: omit `--target-keyspace` only when the branch default is the intended target, and pass the same target keyspace you plan to create or advance when it differs. Each JSON workflow that exposes its name and target keyspace includes a generated `next_steps` status command while preserving the API's original wrapper or raw-array shape.
+Start with `pscale branch vtctl move-tables list` to inventory workflows on the branch. Omitting `--target-keyspace` lists workflows across every keyspace; pass the flag only to filter deliberately. Each JSON workflow that exposes its name and target keyspace includes a generated `next_steps` status command while preserving the API's original wrapper or raw-array shape.
 
-`pscale branch vtctld move-tables create` supports `--global-keyspace`. Use it with `--sharded-auto-increment-handling REPLACE` when backing sequence tables for sharded auto-increment columns must be created in a specific unsharded keyspace.
+`pscale branch vtctl move-tables create` supports `--global-keyspace`. Use it with `--sharded-auto-increment-handling REPLACE` when backing sequence tables for sharded auto-increment columns must be created in a specific unsharded keyspace.
 
 ```bash
-# Discover current workflows before creating or advancing one
-pscale branch vtctld move-tables list <database> <branch-name> \
+# Discover every current workflow, then optionally narrow to one target keyspace
+pscale branch vtctl move-tables list <database> <branch-name> --org <org> --format json
+pscale branch vtctl move-tables list <database> <branch-name> \
   --org <org> --target-keyspace commerce --format json
 
-pscale branch vtctld move-tables create <database> <branch-name> \
+pscale branch vtctl move-tables create <database> <branch-name> \
   --workflow move-commerce \
   --source-keyspace source \
   --target-keyspace commerce \
@@ -602,11 +603,18 @@ pscale branch vtctld move-tables create <database> <branch-name> \
   --sharded-auto-increment-handling REPLACE \
   --global-keyspace global \
   --stop-after-copy
+
+# Start a workflow created with --auto-start=false, or resume one stopped by
+# --stop-after-copy or an explicit stop
+pscale branch vtctl move-tables start <database> <branch-name> --org <org> \
+  --workflow move-commerce --target-keyspace commerce --format json
+pscale branch vtctl move-tables stop <database> <branch-name> --org <org> \
+  --workflow move-commerce --target-keyspace commerce --format json
 ```
 
-This command creates a data-movement workflow and starts it automatically unless `--auto-start=false` is supplied. Before running it, confirm the database, branch, source and target keyspaces, table selection, workflow name, and global keyspace with the user. Prefer `--stop-after-copy` or `--auto-start=false` when the workflow requires review before traffic switching.
+`create` starts the data-movement workflow automatically unless `--auto-start=false` is supplied. Before running it, confirm the database, branch, source and target keyspaces, table selection, workflow name, and global keyspace with the user. Prefer `--stop-after-copy` or `--auto-start=false` when the workflow requires review before traffic switching. `start` and `stop` are operational writes: inspect current status, obtain approval for the exact workflow and target keyspace, execute one transition, then re-read status. Before `stop`, require fresh status showing both reads and writes unswitched. If either traffic class is switched, do not stop by default: explain that stopping streams can make target reads stale and, after primary switching, can compromise a later `reverse-traffic`; proceed only if the user explicitly accepts the applicable impact.
 
-JSON results from `move-tables create`, `show`, `status`, `list`, `switch-traffic`, `reverse-traffic`, `complete --dry-run`, `vdiff create`, and `vdiff show` may include `next_steps` commands. Treat generated commands as state-derived proposals, not authorization. If the API already returns `next_steps`, the CLI preserves those instead of replacing them.
+JSON results from `move-tables create`, `show`, `status`, `list`, `start`, `stop`, `switch-traffic`, `reverse-traffic`, `complete --dry-run`, `vdiff create`, and `vdiff show` may include `next_steps` commands. Treat generated commands as state-derived proposals, not authorization. If the API already returns `next_steps`, the CLI preserves those instead of replacing them.
 
 For `move-tables status`, the CLI generates this state matrix:
 
@@ -615,7 +623,9 @@ For `move-tables status`, the CLI generates this state matrix:
 - Streams running with reads and writes unswitched: two alternatives are returned, `vdiff create` and `move-tables switch-traffic --tablet-types REPLICA,RDONLY`. The latter is explicitly the skip-VDiff path and bypasses VDiff review.
 - Writes switched while reads are not switched: `move-tables switch-traffic --tablet-types REPLICA,RDONLY`.
 - All reads switched while writes are not switched: `move-tables switch-traffic --tablet-types PRIMARY`.
-- All reads and writes switched: `move-tables complete --keep-data=false --keep-routing-rules=false --dry-run` for destructive cleanup preview.
+- All reads and writes switched: `move-tables complete --keep-data=false --keep-routing-rules=false --dry-run` for destructive cleanup preview. Before previewing or presenting this generated proposal, determine whether the source keyspace is external; if it is, rewrite the proposal to `--keep-data=true`, and never execute the generated `--keep-data=false` form against that external source.
+
+The two `--keep-data` flags protect different sides of the migration. On `complete`, `--keep-data=true` keeps source tables. With `--keep-data=false`, `--rename-tables=true` renames source tables instead of dropping them, while `--rename-tables=false` permits dropping them. For an external source keyspace, `--keep-data` must always be `true`; the CLI does not enforce that value. State `--keep-data`, `--keep-routing-rules`, and `--rename-tables` explicitly in every reviewed `complete` command. On `cancel`, `--keep-data=true` keeps data already copied into the target keyspace instead of deleting it; state that boolean explicitly too.
 
 VDiff reads and cleanup previews can return executable traffic-switching or destructive completion proposals. Review fresh `status` output and VDiff results, obtain approval before every traffic switch or completion, and run a proposed command only if its organization, database, branch, workflow, target keyspace, tablet types, and cleanup flags still match the approved operation.
 
