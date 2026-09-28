@@ -583,7 +583,7 @@ Do not externalize until the copy/backfill state and lookup-table consistency ar
 
 ### Vitess MoveTables and global sequences
 
-Prefer canonical `pscale branch vtctl move-tables` for new table-movement work. `vtctld` remains a compatibility alias, but generated help and new automation use `vtctl`. The older top-level `pscale workflow` family remains available but is planned for deprecation; do not start a new workflow through that legacy surface when the equivalent MoveTables command is available.
+Prefer canonical `pscale branch vtctl move-tables` for new table-movement work. `vtctld` remains a compatibility alias. Generated help uses `vtctl`, while v0.339.0 MoveTables `next_steps` still emit the compatible `pscale branch vtctld` form; treat either as the same command surface. The older top-level `pscale workflow` family remains available but is planned for deprecation; do not start a new workflow through that legacy surface when the equivalent MoveTables command is available.
 
 Start with `pscale branch vtctl move-tables list` to inventory workflows on the branch. Omitting `--target-keyspace` lists workflows across every keyspace; pass the flag only to filter deliberately. Each JSON workflow that exposes its name and target keyspace includes a generated `next_steps` status command while preserving the API's original wrapper or raw-array shape.
 
@@ -604,16 +604,17 @@ pscale branch vtctl move-tables create <database> <branch-name> \
   --global-keyspace global \
   --stop-after-copy
 
-# A workflow created with --auto-start=false can be started and paused explicitly
+# Start a workflow created with --auto-start=false, or resume one stopped by
+# --stop-after-copy or an explicit stop
 pscale branch vtctl move-tables start <database> <branch-name> --org <org> \
   --workflow move-commerce --target-keyspace commerce --format json
 pscale branch vtctl move-tables stop <database> <branch-name> --org <org> \
   --workflow move-commerce --target-keyspace commerce --format json
 ```
 
-`create` starts the data-movement workflow automatically unless `--auto-start=false` is supplied. Before running it, confirm the database, branch, source and target keyspaces, table selection, workflow name, and global keyspace with the user. Prefer `--stop-after-copy` or `--auto-start=false` when the workflow requires review before traffic switching. `start` and `stop` are operational writes: inspect current status, obtain approval for the exact workflow and target keyspace, execute one transition, then re-read status.
+`create` starts the data-movement workflow automatically unless `--auto-start=false` is supplied. Before running it, confirm the database, branch, source and target keyspaces, table selection, workflow name, and global keyspace with the user. Prefer `--stop-after-copy` or `--auto-start=false` when the workflow requires review before traffic switching. `start` and `stop` are operational writes: inspect current status, obtain approval for the exact workflow and target keyspace, execute one transition, then re-read status. Before `stop`, require fresh status showing both reads and writes unswitched. If either traffic class is switched, do not stop by default: explain that stopping streams can make target reads stale and, after primary switching, can compromise a later `reverse-traffic`; proceed only if the user explicitly accepts the applicable impact.
 
-JSON results from `move-tables create`, `show`, `status`, `list`, `switch-traffic`, `reverse-traffic`, `complete --dry-run`, `vdiff create`, and `vdiff show` may include `next_steps` commands. Treat generated commands as state-derived proposals, not authorization. If the API already returns `next_steps`, the CLI preserves those instead of replacing them.
+JSON results from `move-tables create`, `show`, `status`, `list`, `start`, `stop`, `switch-traffic`, `reverse-traffic`, `complete --dry-run`, `vdiff create`, and `vdiff show` may include `next_steps` commands. Treat generated commands as state-derived proposals, not authorization. If the API already returns `next_steps`, the CLI preserves those instead of replacing them.
 
 For `move-tables status`, the CLI generates this state matrix:
 
@@ -622,9 +623,9 @@ For `move-tables status`, the CLI generates this state matrix:
 - Streams running with reads and writes unswitched: two alternatives are returned, `vdiff create` and `move-tables switch-traffic --tablet-types REPLICA,RDONLY`. The latter is explicitly the skip-VDiff path and bypasses VDiff review.
 - Writes switched while reads are not switched: `move-tables switch-traffic --tablet-types REPLICA,RDONLY`.
 - All reads switched while writes are not switched: `move-tables switch-traffic --tablet-types PRIMARY`.
-- All reads and writes switched: `move-tables complete --keep-data=false --keep-routing-rules=false --dry-run` for destructive cleanup preview.
+- All reads and writes switched: `move-tables complete --keep-data=false --keep-routing-rules=false --dry-run` for destructive cleanup preview. Before previewing or presenting this generated proposal, determine whether the source keyspace is external; if it is, rewrite the proposal to `--keep-data=true`, and never execute the generated `--keep-data=false` form against that external source.
 
-The two `--keep-data` flags protect different sides of the migration. On `complete`, `--keep-data=true` keeps source tables instead of dropping them and is required for an external source keyspace. On `cancel`, `--keep-data=true` keeps data already copied into the target keyspace instead of deleting it. State both boolean values explicitly in reviewed commands.
+The two `--keep-data` flags protect different sides of the migration. On `complete`, `--keep-data=true` keeps source tables. With `--keep-data=false`, `--rename-tables=true` renames source tables instead of dropping them, while `--rename-tables=false` permits dropping them. For an external source keyspace, `--keep-data` must always be `true`; the CLI does not enforce that value. State `--keep-data`, `--keep-routing-rules`, and `--rename-tables` explicitly in every reviewed `complete` command. On `cancel`, `--keep-data=true` keeps data already copied into the target keyspace instead of deleting it; state that boolean explicitly too.
 
 VDiff reads and cleanup previews can return executable traffic-switching or destructive completion proposals. Review fresh `status` output and VDiff results, obtain approval before every traffic switch or completion, and run a proposed command only if its organization, database, branch, workflow, target keyspace, tablet types, and cleanup flags still match the approved operation.
 
