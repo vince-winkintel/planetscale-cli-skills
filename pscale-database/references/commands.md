@@ -592,16 +592,15 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale keyspace create-external
 
-The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary after normalizing only trailing whitespace.
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`.
 
 ```text
 Create an external keyspace by connecting a branch to an existing MySQL database.
 
-Connection flags follow pscale data-imports start. --source-database is the
-remote MySQL database name, not the PlanetScale database. --cluster-size is
-optional and selects the external tablet size; when omitted, PlanetScale
-chooses a size from the source storage. Managed organizations should pass a
-size from pscale size cluster list.
+--source-database is the remote MySQL database name, not the PlanetScale
+database. --cluster-size is optional and selects the external tablet size;
+when omitted, PlanetScale chooses a size from the source storage. Managed
+organizations should pass a size from pscale size cluster list.
 
 Usage:
   pscale keyspace create-external <database> <branch> <keyspace> [flags]
@@ -720,7 +719,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale keyspace settings
 
-The `pscale keyspace settings` and `pscale keyspace update-settings` help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`.
+The `pscale keyspace settings` and `pscale keyspace update-settings` help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`.
 
 ```text
 Show the settings for a keyspace
@@ -754,10 +753,13 @@ Usage:
   pscale keyspace update-settings <database> <branch> <keyspace> [flags]
 
 Flags:
+      --disk-scaling-strategy string                         The disk scaling strategy (grow, disable, shrink). 'grow' lets dedicated disks grow automatically up to --max-storage; 'disable' turns autoscaling off; 'shrink' recreates disks at --storage and then disables autoscaling. (default "grow")
   -h, --help                                                 help for update-settings
   -i, --interactive                                          Run the command in interactive mode
       --max-rollout int                                      Maximum number of shards to roll out changes to concurrently (1-32). (default 1)
+      --max-storage int                                      The maximum size in bytes that dedicated disks may autoscale to.
       --replication-durability-constraints-strategy string   By default, replication is configured to maximize safety and data integrity. This setting may be relaxed to favor increased performance and reduced replication lag. Options: maximum, dynamic, minimum (default "maximum")
+      --storage int                                          The disk size in bytes to recreate disks at. Must be a multiple of 1 GiB. Only accepted when the disk scaling strategy is shrink, either passed with --disk-scaling-strategy or already set on the keyspace.
       --throttler-enabled                                    Pause schema migrations and VReplication workflows when replication lag rises above the threshold. (default true)
       --throttler-threshold float                            Replication lag in seconds above which migrations and workflows are paused. (default 5)
       --vreplication-batch-replication-events                When enabled, sends fewer queries to MySQL to improve performance.

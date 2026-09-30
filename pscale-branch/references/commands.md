@@ -2,7 +2,7 @@ Unless noted otherwise, help fences below are exact output from the official, ch
 
 ## pscale branch
 
-Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
+Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`.
 
 ```text
 Create, delete, diff, and manage branches
@@ -29,8 +29,9 @@ Vitess/MySQL-specific:
   lint            Lint the schema of a MySQL branch
   query-patterns  List, show, delete, and download query pattern reports for a MySQL branch
   refresh-schema  Refresh the schema for a MySQL branch
-  routing-rules   Fetch or update keyspace routing rules for a MySQL branch
+  routing-rules   Fetch or update routing rules for a MySQL branch
   safe-migrations Enable or disable safe migrations on a MySQL branch
+  vtctl           Run vtctl commands against a branch
   vtgate          Manage VTGate size for a Vitess branch
 
 Postgres-specific:
@@ -1169,7 +1170,7 @@ Cancel is an operational write. Confirm the target and latest request state befo
 
 ## pscale branch vtctl
 
-All `vtctl` help fences below through `get-routing-rules` are exact output from the official, checksum-verified PlanetScale CLI v0.339.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `1e396701709cd49d1d1cccca252e2bd81f224b2830ca189a84a16983bde182e8`. The legacy `vtctld` alias was also executed and verified to render the same canonical `vtctl` parent surface.
+The `vtctl` parent fence below is exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`. The legacy `vtctld` alias was also executed and verified to render the same canonical `vtctl` parent surface. The v0.341.0 parent intentionally omits hidden advanced children (`list-tablets`, `lookup-vindex`, `materialize`, and `planned-reparent-shard`); their direct help remains callable. Subsequent child fences through `get-routing-rules` retain their previously recorded v0.339.0 provenance unless noted otherwise.
 
 ```text
 Run vtctl commands against a branch. This command is only supported for Vitess databases.
@@ -1186,12 +1187,8 @@ Available Commands:
   get-routing-rules            Get live routing rules for a branch
   get-shard                    Get a shard record for a branch
   list-keyspaces               List vtctld keyspaces for a branch
-  list-tablets                 List tablets for a branch, grouped by keyspace and shard
   list-workflows               List vtctld workflows for a branch
-  lookup-vindex                Manage Lookup Vindex operations
-  materialize                  Manage Materialize workflows
   move-tables                  Manage MoveTables workflows
-  planned-reparent-shard       Reparent a shard to a new primary
   refresh-state-by-shard       Reload tablet records for all tablets in a shard
   set-shard-tablet-control     Update shard tablet controls for a branch
   start-workflow               Start a workflow on a branch
@@ -1398,7 +1395,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch vtctl move-tables
 
-The MoveTables and VDiff help fences below were re-captured from the same checksum-verified v0.339.0 binary.
+The MoveTables parent, unchanged subcommands, and VDiff help fences below were re-captured from the same checksum-verified v0.339.0 binary. The changed `complete` and `cancel` fences were re-captured from the official, checksum-verified v0.341.0 macOS arm64 release binary after normalizing only trailing whitespace; that archive's SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`.
 
 ```text
 Manage MoveTables workflows
@@ -1688,6 +1685,7 @@ Usage:
 Flags:
       --dry-run                  Only show what would be done
   -h, --help                     help for complete
+      --ignore-source-keyspace   Complete without touching the source keyspace. Only use this when the source keyspace has been deleted or is unavailable
       --keep-data                Keep the source tables instead of dropping them. Use this when the source is an external keyspace (required)
       --keep-routing-rules       Keep the routing rules (required)
       --rename-tables            Rename source tables instead of dropping them
@@ -1718,6 +1716,7 @@ Usage:
 
 Flags:
   -h, --help                     help for cancel
+      --ignore-source-keyspace   Cancel without touching the source keyspace. Only use this when the source keyspace has been deleted or is unavailable
       --keep-data                Keep the data copied into the target keyspace instead of deleting it (required)
       --keep-routing-rules       Keep the routing rules (required)
       --target-keyspace string   Target keyspace (required)

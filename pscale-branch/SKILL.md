@@ -583,7 +583,9 @@ Do not externalize until the copy/backfill state and lookup-table consistency ar
 
 ### Vitess MoveTables and global sequences
 
-Prefer canonical `pscale branch vtctl move-tables` for new table-movement work. `vtctld` remains a compatibility alias. Generated help uses `vtctl`, while v0.339.0 MoveTables `next_steps` still emit the compatible `pscale branch vtctld` form; treat either as the same command surface. The older top-level `pscale workflow` family remains available but is planned for deprecation; do not start a new workflow through that legacy surface when the equivalent MoveTables command is available.
+Prefer canonical `pscale branch vtctl move-tables` for new table-movement work. `vtctld` remains a compatibility alias. Generated help uses `vtctl`, while MoveTables `next_steps` may emit the compatible `pscale branch vtctld` form; treat either as the same command surface. The top-level `pscale workflow` family is deprecated and emits a warning for the parent and its subcommands; do not start new work through that legacy surface. The top-level `pscale data-imports` family has been removed; use external keyspaces plus MoveTables instead.
+
+`branch vtctl` is now visible in `pscale branch --help`. Its `lookup-vindex`, `materialize`, `planned-reparent-shard`, and `list-tablets` children remain callable but are hidden from the vtctl parent listing. Do not infer that a documented hidden child was removed solely because it is absent from parent help; verify its direct help surface.
 
 Start with `pscale branch vtctl move-tables list` to inventory workflows on the branch. Omitting `--target-keyspace` lists workflows across every keyspace; pass the flag only to filter deliberately. Each JSON workflow that exposes its name and target keyspace includes a generated `next_steps` status command while preserving the API's original wrapper or raw-array shape.
 
@@ -626,6 +628,8 @@ For `move-tables status`, the CLI generates this state matrix:
 - All reads and writes switched: `move-tables complete --keep-data=false --keep-routing-rules=false --dry-run` for destructive cleanup preview. Before previewing or presenting this generated proposal, determine whether the source keyspace is external; if it is, rewrite the proposal to `--keep-data=true`, and never execute the generated `--keep-data=false` form against that external source.
 
 The two `--keep-data` flags protect different sides of the migration. On `complete`, `--keep-data=true` keeps source tables. With `--keep-data=false`, `--rename-tables=true` renames source tables instead of dropping them, while `--rename-tables=false` permits dropping them. For an external source keyspace, `--keep-data` must always be `true`; the CLI does not enforce that value. State `--keep-data`, `--keep-routing-rules`, and `--rename-tables` explicitly in every reviewed `complete` command. On `cancel`, `--keep-data=true` keeps data already copied into the target keyspace instead of deleting it; state that boolean explicitly too.
+
+Both `complete` and `cancel` accept `--ignore-source-keyspace`. It skips touching the source and is only for recovery when that source keyspace has already been deleted or is unavailable. Before using it, confirm the source condition from current inventory/error evidence, preserve that evidence, state the flag explicitly in both dry-run and approved final commands, and understand that the CLI cannot clean up or verify the ignored source. On `complete --dry-run`, the generated final `next_steps` command preserves `--ignore-source-keyspace` when supplied.
 
 VDiff reads and cleanup previews can return executable traffic-switching or destructive completion proposals. Review fresh `status` output and VDiff results, obtain approval before every traffic switch or completion, and run a proposed command only if its organization, database, branch, workflow, target keyspace, tablet types, and cleanup flags still match the approved operation.
 

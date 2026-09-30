@@ -1,7 +1,12 @@
-1.0.30
+1.0.31
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.341.0
+  - Reviewed the cumulative upstream releases and compare `v0.339.0...v0.341.0` on 2026-09-30.
+  - Restored guarded keyspace disk-storage management for `grow`, `disable`, and `shrink`, including raw-byte limits, 1 GiB-aligned shrink targets, API-side strategy validation, and read-back verification.
+  - Updated MoveTables guidance and help for `--ignore-source-keyspace`, the now-deprecated top-level `workflow` family, visible `branch vtctl` discovery, hidden advanced vtctl children, and removal of the top-level `data-imports` family.
+  - Re-captured every affected help surface from the checksum-verified v0.341.0 macOS arm64 release binary; archive SHA-256 verified as `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`.
 - PlanetScale CLI v0.339.0
   - Reviewed the upstream release and compare `v0.338.0...v0.339.0` on 2026-09-28.
   - Adopted canonical `pscale branch vtctl` commands while retaining the documented `vtctld` compatibility alias; added MoveTables `start`/`stop`, all-keyspace listing semantics, and distinct `--keep-data` cleanup guidance.
