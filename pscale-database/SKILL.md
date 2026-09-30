@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Manage PlanetScale databases and keyspaces, including lifecycle operations, external MySQL keyspaces, regions, settings, rollout concurrency, PostgreSQL IP restrictions, Vitess migration throttling, aggressive cutover, dumps, and shell access. Use for database or Neki database creation, external-keyspace dry runs and creation, keyspace deletion or settings, throttlers, max rollout, region discovery, CIDR allowlists, deploy defaults, cutover policy, read-only regions, dumps, or shells. Triggers on pscale database, pscale keyspace, create-external, external keyspace, keyspace settings, max rollout, read-only region, IP restriction, CIDR, database throttler, aggressive cutover, database dump, pscale shell.
+description: Manage PlanetScale databases and keyspaces, including lifecycle operations, external MySQL keyspaces, regions, settings, rollout concurrency, dedicated-disk autoscaling and shrink targets, PostgreSQL IP restrictions, Vitess migration throttling, aggressive cutover, dumps, and shell access. Use for database or Neki database creation, external-keyspace dry runs and creation, keyspace deletion or settings, throttlers, max rollout, disk scaling strategy, max storage, shrink storage, region discovery, CIDR allowlists, deploy defaults, cutover policy, read-only regions, dumps, or shells. Triggers on pscale database, pscale keyspace, create-external, external keyspace, keyspace settings, max rollout, disk scaling, max storage, read-only region, IP restriction, CIDR, database throttler, aggressive cutover, database dump, pscale shell.
 ---
 
 # pscale database
@@ -323,12 +323,12 @@ Certificate flags accept PEM text or a file path. When a path is intended, verif
 
 The dry run checks connectivity and returns schema lint findings without creating the keyspace, but lint findings do **not** make the CLI exit non-zero. Gate the workflow on structured JSON: require `can_connect: true`, an empty `error`, and an empty `lint_errors` array, then review `has_foreign_keys`, `server_version`, and `total_storage_bytes`. A normal create can still proceed over table-level lint errors even without `--skip-lint-errors`, so it is not a lint backstop. Do not use `--skip-lint-errors` unless the organization allows it, every lint error has been reviewed, and the user explicitly approves bypassing those exact findings. Omit `--cluster-size` only when allowing PlanetScale to select from source storage is intentional. Do not use internal-keyspace `--additional-replicas` for external keyspaces.
 
-### Vitess keyspace throttler settings
+### Vitess keyspace settings
 
-Inspect the keyspace settings first. The JSON result may include the keyspace throttler's `enabled` state and replication-lag `threshold`. This persisted database/keyspace settings API, `pscale keyspace update-settings --throttler-*`, is distinct from live vtctld tablet/keyspace throttler policy under `pscale branch vtctl throttler ... --keyspace`. It is also separate from the database default and per-deploy-request ratios.
+Inspect the keyspace settings first. The JSON result may include the keyspace throttler's `enabled` state and replication-lag `threshold`, rollout concurrency, and a `storage` object with `disk_scaling_strategy`, `storage_bytes`, and `max_storage_bytes`. This persisted database/keyspace settings API is distinct from live vtctld tablet/keyspace throttler policy under `pscale branch vtctl throttler ... --keyspace`. It is also separate from the database default and per-deploy-request ratios.
 
 ```bash
-# Read current replication and throttler settings
+# Read current replication, rollout, throttler, and storage settings
 pscale keyspace settings <database> <branch> <keyspace> \
   --org <org> --format json
 
@@ -348,6 +348,25 @@ pscale keyspace update-settings <database> <branch> <keyspace> \
 pscale keyspace update-settings <database> <branch> <keyspace> \
   --org <org> --max-rollout=2 --format json
 
+# Allow dedicated disks to grow automatically up to an explicit byte ceiling
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> --disk-scaling-strategy=grow \
+  --max-storage=<maximum-bytes> --format json
+
+# Disable autoscaling only after confirming current capacity and headroom
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> --disk-scaling-strategy=disable --format json
+
+# Read recent per-shard used bytes before choosing a shrink target
+pscale metrics show <database> <branch> --org <org> \
+  --metric shard_storage_usage --keyspace <keyspace> \
+  --period 1d --format json
+
+# Recreate disks at an approved 1 GiB-aligned byte size, then disable autoscaling
+pscale keyspace update-settings <database> <branch> <keyspace> \
+  --org <org> --disk-scaling-strategy=shrink \
+  --storage=<target-bytes> --format json
+
 # Verify the persisted state after any update
 pscale keyspace settings <database> <branch> <keyspace> \
   --org <org> --format json
@@ -357,17 +376,19 @@ pscale keyspace settings <database> <branch> <keyspace> \
 
 For a threshold-only update, the CLI sends only the `threshold` field and leaves `enabled` unset, so the API preserves the current enabled state without the CLI fetching or resending unrelated setting groups. Likewise, an enabled-only update omits the threshold. This focused-payload behavior is specific to the throttler group; verify the preserved sibling field from a fresh settings read after every update.
 
-`pscale keyspace settings --format json` prints the raw keyspace resource, so `throttler` can be `null` on an unconfigured keyspace and `max_rollout` can be absent. When `throttler` is present, `enabled` and `threshold` can still be absent; a present `threshold` is a JSON number. Human and CSV output are display-oriented: thresholds append `s`, and unset values may appear as `not set`. Use null-safe checks such as `jq '{max_rollout, throttler: (.throttler // {})}'` instead of assuming every key exists.
+`pscale keyspace settings --format json` prints the raw keyspace resource, so `throttler` or `storage` can be `null` and `max_rollout` can be absent. When `throttler` is present, `enabled` and `threshold` can still be absent; a present `threshold` is a JSON number. Storage byte fields are raw JSON integers. Inside a non-null `storage` object, `storage_bytes: 0`, `max_storage_bytes: 0`, and `disk_scaling_strategy: ""` mean unset or unknown, matching the human `not set` display; do not treat zero as actual capacity or compare a shrink target against it. Human and CSV output are display-oriented: thresholds append `s` and storage values use IEC units. Use null-safe checks such as `jq '{max_rollout, throttler: (.throttler // {}), storage: (.storage // {})}'` instead of assuming every key exists.
 
 `--max-rollout` accepts `1` through `32` and controls how many shards receive changes concurrently. Higher concurrency can increase rollout load and reduce the opportunity to stop between shards. Inspect current settings and shard count, propose the smallest sufficient value, obtain approval, update only that field, then re-read `max_rollout` from JSON.
 
+`--disk-scaling-strategy` accepts `grow`, `disable`, or `shrink`. `grow` allows dedicated disks to autoscale up to `--max-storage`; `disable` turns autoscaling off; `shrink` recreates disks at `--storage` and then disables autoscaling. `--max-storage` and `--storage` are positive byte counts, and `--storage` must be divisible by 1 GiB. A bare `--storage` is accepted when the persisted strategy is `shrink`, so it can unintentionally recreate disks again. Never rely on persisted strategy: every command containing `--storage` must also pass `--disk-scaling-strategy=shrink`, and every command containing `--max-storage` must also pass `--disk-scaling-strategy=grow`. After shrink, expect a fresh settings read to report `storage.disk_scaling_strategy == "shrink"` and `storage.storage_bytes == <target-bytes>`; `shrink` is the persisted autoscaling-off state, not a promise that the field will transition to `disable`.
+
+`storage_bytes` is provisioned capacity, not bytes used. Before shrinking, obtain recent Vitess usage evidence with `pscale metrics show ... --metric shard_storage_usage`, preserve its shard/tablet dimensions, and set the target above the highest relevant observed usage by an explicitly approved margin. If the metric is unavailable, stale, or cannot be mapped to every affected disk, do not shrink. Disk recreation can affect availability, and the CLI does not provide a shrink wait/completion workflow; confirm the operational window separately, show the exact before/after values, obtain explicit approval, avoid concurrent setting writes, and monitor operational state plus the complete `storage` object after the update. Explicitly decide whether to retain the `shrink` autoscaling-off state or return to `grow` with a reviewed maximum. Never infer safe shrink capacity from provisioned bytes or humanized display text.
+
 Changing throttler settings affects live migrations and replication workflows. Confirm the organization, database, branch, keyspace, current state, desired enabled state, and threshold; obtain explicit approval before any update; then re-read the settings instead of trusting only the update response.
 
-Avoid `pscale keyspace update-settings --interactive` unless you intentionally want to review and write the durability, VReplication, and throttler groups shown by the form. The interactive path returns before explicit flag handling, so do not combine it with flags. It can seed an absent throttler to `enabled=true` and `threshold=5` if defaults are accepted, and emits only a human success line even with `--format json`; do not rely on JSON output from the interactive write for verification. Re-run `pscale keyspace settings --format json` after any interactive update.
+Avoid `pscale keyspace update-settings --interactive` unless you intentionally want to review and write the durability, VReplication, and throttler groups shown by the form. The interactive path does not expose rollout or disk-storage settings and returns before explicit flag handling, so do not combine it with flags. It can seed an absent throttler to `enabled=true` and `threshold=5` if defaults are accepted, and emits only a human success line even with `--format json`; do not rely on JSON output from the interactive write for verification. Re-run `pscale keyspace settings --format json` after any interactive update.
 
-Non-interactive updates send only changed top-level groups, with one important exception inside VReplication: changing any `--vreplication-*` flag first fetches the current keyspace, copies all three VReplication flags, overrides the requested flag, and resends the complete group because the API replaces that group wholesale. A concurrent sibling-flag update can therefore be overwritten. Read fresh settings immediately before a VReplication change, avoid concurrent updates, and re-read all three VReplication flags afterward. Durability, throttler, and `--max-rollout` updates do not implicitly rewrite the other top-level groups.
-
-Do not use `--disk-scaling-strategy` or `--max-storage` with `pscale keyspace update-settings`; they are not supported there and have no CLI replacement. Inspect current help and use the PlanetScale UI/API only under its own documented and approved workflow.
+Non-interactive updates send only changed top-level groups, with one important exception inside VReplication: changing any `--vreplication-*` flag first fetches the current keyspace, copies all three VReplication flags, overrides the requested flag, and resends the complete group because the API replaces that group wholesale. A concurrent sibling-flag update can therefore be overwritten. Read fresh settings immediately before a VReplication change, avoid concurrent updates, and re-read all three VReplication flags afterward. Durability, throttler, rollout, and disk-storage updates do not implicitly rewrite the other top-level groups; omitted fields inside the storage update are left unset for the API to preserve.
 
 ## Troubleshooting
 

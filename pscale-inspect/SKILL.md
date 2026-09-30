@@ -69,7 +69,7 @@ Single checks support human, JSON, and CSV output. `inspect all` supports human 
 - **PostgreSQL:** checks query `pg_catalog` and `pg_stat` views for one PostgreSQL database selected by `--dbname`. `outliers` and `calls` require `pg_stat_statements`.
 - **Neki:** checks use the PostgreSQL query set against one connection target. List targets with `pscale branch shard list` and `pscale branch router list`; pass a shard **ID** to `--shard`, optionally combine `--router`, and add `--replica` only when replica evidence is appropriate. Neki's internal `__neki` schema is excluded from customer-facing table, index, scan, bloat, and vacuum results.
 - `--shard` and `--router` are rejected for non-Neki databases. Do not pass a Vitess `keyspace/shard` value to Neki `--shard`.
-- Checks unavailable for the detected engine return a skipped explanation and, when available, a copy-pasteable `pscale insights` next step.
+- Checks unavailable for the detected engine return a skipped explanation and, when available, a next-step hint. The MySQL/Vitess `outliers` and `calls` hints point to `pscale insights`. The `subscriptions` and `replication-slots` hints point to MoveTables listing: `subscriptions` emits canonical `pscale branch vtctl move-tables list`, while `replication-slots` emits the compatible `pscale branch vtctld move-tables list` alias. Neither hint is a complete invocation; supply `<database> <branch> --org <org>` before running it. The top-level `pscale data-imports` family is unavailable.
 - Each check is bounded and has a 30-second query timeout. In `inspect all`, one failed check is recorded as skipped instead of aborting the remaining report.
 
 ## Investigation workflow

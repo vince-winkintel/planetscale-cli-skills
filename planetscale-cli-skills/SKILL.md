@@ -1,6 +1,6 @@
 ---
 name: planetscale-cli-skills
-description: PlanetScale CLI command reference and workflows. Use for authentication; org, SSO, teams, and billing; databases, branches, Neki, internal or external keyspaces, logs, maintenance, extensions, metrics, insights, inspect, and SQL; deploy requests, schema migrations, MoveTables, throttlers, rollout concurrency, and Traffic Control; PgBouncers, read-only replicas, roles, passwords, backups, webhooks, audit logs, service tokens, D1 imports, and automation. Routes to focused pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, database, branch, Neki, keyspace, create-external, external keyspace, deploy request, move-tables, vtctl, vtctld, max rollout, throttler, traffic-control, metrics, insights, inspect, SQL, role, password, pgbouncer, read-only replica, backup, webhook, audit-log, billing, org, SSO, service token, import d1.
+description: PlanetScale CLI command reference and workflows. Use for authentication; org, SSO, teams, and billing; databases, branches, Neki, internal or external keyspaces, logs, maintenance, extensions, metrics, insights, inspect, and SQL; deploy requests, schema migrations, MoveTables, throttlers, rollout concurrency, disk-storage settings, and Traffic Control; PgBouncers, read-only replicas, roles, passwords, backups, webhooks, audit logs, service tokens, D1 imports, and automation. Routes to focused pscale sub-skills. Triggers on PlanetScale CLI, pscale, pscale --skill, database, branch, Neki, keyspace, create-external, external keyspace, deploy request, move-tables, vtctl, vtctld, max rollout, disk scaling, max storage, throttler, traffic-control, metrics, insights, inspect, SQL, role, password, pgbouncer, read-only replica, backup, webhook, audit-log, billing, org, SSO, service token, import d1.
 requirements:
   binaries:
     - pscale
@@ -65,6 +65,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Validate automated bootstrap output starts with `---\nname: pscale-cli`; `pscale --skill <extra-arg>` prints root help and exits zero instead of emitting the skill.
 - The binary-native guide is useful for first-party command discovery, but it does not replace this repository's specialized safety workflows, focused references, and helper scripts.
 - When a command name is assembled dynamically, validate the expected JSON/resource shape as well as the exit code. A bare unrecognized root token currently prints root help and exits zero, so zero alone does not prove that a resource operation ran.
+- The top-level `pscale data-imports` family is unavailable. Use `pscale keyspace create-external` to attach an external MySQL source and `pscale branch vtctl move-tables` for table-movement workflows; because an unrecognized root token can print help and exit zero, validate the expected output rather than treating that result as a successful import operation.
 
 ## Sub-Skills
 
@@ -73,7 +74,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **auth** | `pscale-auth` | Login, logout, service tokens, authentication management |
 | **branch/logs** | `pscale-branch` | Create, restore to a PostgreSQL recovery point, rename, protect, delete, promote, diff, list, and switchover branches; query PostgreSQL/Neki branch logs; inspect branch infra, manage Postgres size/replicas/parameters/maintenance/extensions, run Postgres/Neki branch maintenance, resize Vitess VTGates, manage live keyspace routing rules, Lookup Vindexes, and tablet throttling, manage query pattern reports, manage Vitess MoveTables workflows |
 | **deploy-request** | `pscale-deploy-request` | Create, review, inspect queues/operations, check storage, throttle, deploy, update auto-apply/auto-delete settings, unblock failed deploy/revert queues, force cutover, and revert schema changes |
-| **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level and keyspace-level Vitess throttlers, rollout concurrency, internal/external keyspaces, aggressive-cutover defaults, PostgreSQL IP restrictions, and read-only regions |
+| **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level and keyspace-level Vitess throttlers, rollout concurrency, disk-storage settings, internal/external keyspaces, aggressive-cutover defaults, PostgreSQL IP restrictions, and read-only regions |
 | **neki** | `pscale-neki` | Manage Neki data topology, shards, branch-wide change requests, config profiles and extension sets, routers, sidecars, admin config, profile maintenance, restore sizing overrides, target-specific inspection, and router/shard role access |
 | **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise maintenance schedules, pending versions, deadlines, and historical windows |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
