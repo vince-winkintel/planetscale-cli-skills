@@ -65,7 +65,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Validate automated bootstrap output starts with `---\nname: pscale-cli`; `pscale --skill <extra-arg>` prints root help and exits zero instead of emitting the skill.
 - The binary-native guide is useful for first-party command discovery, but it does not replace this repository's specialized safety workflows, focused references, and helper scripts.
 - When a command name is assembled dynamically, validate the expected JSON/resource shape as well as the exit code. A bare unrecognized root token currently prints root help and exits zero, so zero alone does not prove that a resource operation ran.
-- The top-level `pscale data-imports` family has been removed. Use `pscale keyspace create-external` to attach an external MySQL source and `pscale branch vtctl move-tables` for table-movement workflows; do not treat root help plus exit zero from the removed token as a successful import operation.
+- The top-level `pscale data-imports` family is unavailable. Use `pscale keyspace create-external` to attach an external MySQL source and `pscale branch vtctl move-tables` for table-movement workflows; because an unrecognized root token can print help and exit zero, validate the expected output rather than treating that result as a successful import operation.
 
 ## Sub-Skills
 
