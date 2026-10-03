@@ -304,6 +304,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale role get
 
+The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`.
+
 ```text
 Retrieve information about a specific role
 
@@ -311,12 +313,12 @@ Usage:
   pscale role get <database> <branch> <role-id> [flags]
 
 Flags:
-      --bouncer string             Return connection details for a PgBouncer (name). Postgres only.
-  -h, --help                       help for get
-      --read-only-replica string   Return connection details for a read-only replica (name). Postgres only.
-      --replica                    Return connection details for a branch replica. On Neki this sets libpq options, not a username suffix.
-      --router string              Return connection details for a Neki router group (name). List routers with: pscale branch router list <database> <branch>.
-      --shard string               Return connection details that pin a Neki shard (name from pscale branch shard list).
+      --bouncer string                  Return connection details for a PgBouncer (name). Postgres only.
+      --dedicated-read-replica string   Return connection details for a dedicated read replica (name). Postgres only.
+  -h, --help                            help for get
+      --replica                         Return connection details for a branch replica. On Neki this sets libpq options, not a username suffix.
+      --router string                   Return connection details for a Neki router group (name). List routers with: pscale branch router list <database> <branch>.
+      --shard string                    Return connection details that pin a Neki shard (name from pscale branch shard list).
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
