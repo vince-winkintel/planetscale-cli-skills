@@ -1,7 +1,13 @@
-1.0.31
+1.0.32
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.342.0 and v0.343.0
+  - Reviewed both upstream releases and the cumulative compare `v0.341.0...v0.343.0` on 2026-10-03.
+  - Added guarded VTTablet/MySQL keyspace-parameter inventory, set/reset, rollout inspection, and pending-change cancellation guidance.
+  - Switched dedicated PostgreSQL read-replica workflows and role targeting to the canonical `dedicated-read-replica` / `--dedicated-read-replica` names while documenting the hidden deprecated compatibility command.
+  - Updated unknown-command behavior and routing-rule warning guidance.
+  - Re-captured every affected help surface from the checksum-verified v0.343.0 macOS arm64 release binary; archive SHA-256 verified as `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`.
 - PlanetScale CLI v0.341.0
   - Reviewed the upstream release and compare `v0.340.0...v0.341.0` on 2026-09-30.
   - Added guarded MoveTables guidance for `--ignore-source-keyspace`, recorded removal of the top-level `data-imports` family, and updated the MySQL/Vitess `subscriptions` skip-hint guidance.

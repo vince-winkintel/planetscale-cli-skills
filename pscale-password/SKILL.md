@@ -1,6 +1,6 @@
 ---
 name: pscale-password
-description: Create, list, show, update, renew, and delete branch connection passwords, and manage Postgres/Neki roles and their connection targets. Use when creating connection strings, managing database credentials, routing Vitess reads, creating Neki viewer/operator roles, retrieving role details for Neki shard/router/replica paths or Postgres replicas/PgBouncers, rotating credentials, updating password metadata, or filtering credentials. Triggers on password, connection string, database credentials, create password, show password, update password, CIDR, read-only region password, password status, Postgres role, Neki role, inherited roles, role create, role get, role status, role expiration, default Postgres role, Neki router, Neki shard, read-only replica, replica name, PgBouncer connection.
+description: Create, list, show, update, renew, and delete branch connection passwords, and manage Postgres/Neki roles and their connection targets. Use when creating connection strings, managing database credentials, routing Vitess reads, creating Neki viewer/operator roles, retrieving role details for Neki shard/router/replica paths or Postgres dedicated read replicas/PgBouncers, rotating credentials, updating password metadata, or filtering credentials. Triggers on password, connection string, database credentials, create password, show password, update password, CIDR, read-only region password, password status, Postgres role, Neki role, inherited roles, role create, role get, role status, role expiration, default Postgres role, Neki router, Neki shard, dedicated read replica, read-only replica, replica name, PgBouncer connection.
 ---
 
 # pscale password
@@ -148,7 +148,7 @@ pscale role create <database> <branch> operator --org <org> --format json \
 
 # Postgres alternate connection targets
 pscale role get <database> <branch> <role-id> --org <org> --format json --replica
-pscale role get <database> <branch> <role-id> --org <org> --format json --read-only-replica <replica-name>
+pscale role get <database> <branch> <role-id> --org <org> --format json --dedicated-read-replica <replica-name>
 pscale role get <database> <branch> <role-id> --org <org> --format json --bouncer <bouncer-name>
 
 # Neki target selectors can be combined
@@ -158,7 +158,7 @@ pscale role get <database> <branch> <role-id> --org <org> --format json \
 
 Neki `--inherited-roles` supports `neki_viewer` only with `pg_read_all_data`, and `neki_operator` only with `postgres`; the API rejects an incomplete pairing. Role creation returns a credential, so obtain approval for the exact role name and privilege set, then capture the secret directly into an approved secret manager.
 
-`--replica`, `--read-only-replica`, and `--bouncer` are mutually exclusive. Named `--read-only-replica` and `--bouncer` targets are Postgres-only and cannot combine with Neki `--router` or `--shard`. `--read-only-replica` takes the replica **name** returned by branch infrastructure or `pscale read-only-replica list`, not a read-only-region slug. A targeted response can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`.
+`--replica`, `--dedicated-read-replica`, and `--bouncer` are mutually exclusive. Named `--dedicated-read-replica` and `--bouncer` targets are Postgres-only and cannot combine with Neki `--router` or `--shard`. `--dedicated-read-replica` takes the replica **name** returned by branch infrastructure or `pscale dedicated-read-replica list`, not a read-only-region slug. The hidden deprecated `--read-only-replica` flag remains a compatibility alias, but new automation should use the canonical flag. A targeted response can change `username`, `access_host_url`, and `database_url`; PgBouncer URLs use port `6432`.
 
 On Neki, `--replica`, `--router`, and `--shard` can be combined: router selection rewrites the username, while replica and shard selection produce libpq `options` and an options-bearing `database_url`. Use the shard **name** from `pscale branch shard list`, not its API ID; `pscale inspect --shard` is different and takes the ID.
 

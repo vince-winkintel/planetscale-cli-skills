@@ -1,6 +1,6 @@
 ---
 name: pscale-database
-description: Manage PlanetScale databases and keyspaces, including lifecycle operations, external MySQL keyspaces, regions, settings, rollout concurrency, dedicated-disk autoscaling and shrink targets, PostgreSQL IP restrictions, Vitess migration throttling, aggressive cutover, dumps, and shell access. Use for database or Neki database creation, external-keyspace dry runs and creation, keyspace deletion or settings, throttlers, max rollout, disk scaling strategy, max storage, shrink storage, region discovery, CIDR allowlists, deploy defaults, cutover policy, read-only regions, dumps, or shells. Triggers on pscale database, pscale keyspace, create-external, external keyspace, keyspace settings, max rollout, disk scaling, max storage, read-only region, IP restriction, CIDR, database throttler, aggressive cutover, database dump, pscale shell.
+description: Manage PlanetScale databases and keyspaces, including lifecycle operations, external MySQL keyspaces, regions, settings, VTTablet/MySQL parameters and rollout changes, rollout concurrency, dedicated-disk autoscaling and shrink targets, PostgreSQL IP restrictions, Vitess migration throttling, aggressive cutover, dumps, and shell access. Use for database or Neki database creation, external-keyspace dry runs and creation, keyspace deletion or settings, keyspace parameter list/set/reset/change tracking, throttlers, max rollout, disk scaling strategy, max storage, shrink storage, region discovery, CIDR allowlists, deploy defaults, cutover policy, read-only regions, dumps, or shells. Triggers on pscale database, pscale keyspace, keyspace parameters, parameter changes, vttablet, mysqld, create-external, external keyspace, keyspace settings, max rollout, disk scaling, max storage, read-only region, IP restriction, CIDR, database throttler, aggressive cutover, database dump, pscale shell.
 ---
 
 # pscale database
@@ -44,6 +44,9 @@ pscale keyspace delete <database> <branch> <keyspace>
 
 # Inspect a Vitess keyspace's throttler, durability, and VReplication settings
 pscale keyspace settings <database> <branch> <keyspace> --format json
+
+# Inspect current/default VTTablet and MySQL parameters
+pscale keyspace parameters list <database> <branch> <keyspace> --format json
 
 # Compatibility-check an existing MySQL source before creating an external keyspace
 # SOURCE_PASSWORD must be injected into this same trusted shell invocation.
@@ -389,6 +392,56 @@ Changing throttler settings affects live migrations and replication workflows. C
 Avoid `pscale keyspace update-settings --interactive` unless you intentionally want to review and write the durability, VReplication, and throttler groups shown by the form. The interactive path does not expose rollout or disk-storage settings and returns before explicit flag handling, so do not combine it with flags. It can seed an absent throttler to `enabled=true` and `threshold=5` if defaults are accepted, and emits only a human success line even with `--format json`; do not rely on JSON output from the interactive write for verification. Re-run `pscale keyspace settings --format json` after any interactive update.
 
 Non-interactive updates send only changed top-level groups, with one important exception inside VReplication: changing any `--vreplication-*` flag first fetches the current keyspace, copies all three VReplication flags, overrides the requested flag, and resends the complete group because the API replaces that group wholesale. A concurrent sibling-flag update can therefore be overwritten. Read fresh settings immediately before a VReplication change, avoid concurrent updates, and re-read all three VReplication flags afterward. Durability, throttler, rollout, and disk-storage updates do not implicitly rewrite the other top-level groups; omitted fields inside the storage update are left unset for the API to preserve.
+
+### Vitess keyspace VTTablet and MySQL parameters
+
+Keyspace parameters are a separate rollout workflow from `keyspace settings`. Inventory current and default values first. Every changed or reset parameter must include its `vttablet.` or `mysqld.` namespace; use the exact names returned by `parameters list` rather than guessing.
+
+```bash
+# Read both namespaces, or filter one namespace
+pscale keyspace parameters list <database> <branch> <keyspace> \
+  --org <org> --format json
+pscale keyspace parameters list <database> <branch> <keyspace> \
+  --org <org> --namespace vttablet --format json
+
+# Check existing rollout/change state before proposing a write
+pscale keyspace parameters changes list <database> <branch> <keyspace> \
+  --org <org> --format json
+
+# After reviewing exact current/default values and obtaining approval, submit
+# one or more changes. Both namespaces may be included in one invocation.
+pscale keyspace parameters set <database> <branch> <keyspace> \
+  --org <org> --format json \
+  --parameters vttablet.vreplication-parallel-insert-workers=4 \
+  --parameters vttablet.vreplication_max_time_to_retry_on_error=720h
+
+# Reset one parameter to its server-defined default after approval
+pscale keyspace parameters set <database> <branch> <keyspace> \
+  --org <org> --format json \
+  --reset vttablet.vreplication-parallel-insert-workers
+
+# Poll each returned change ID and verify final parameter values
+pscale keyspace parameters changes show <database> <branch> <keyspace> <change-id> \
+  --org <org> --format json
+pscale keyspace parameters list <database> <branch> <keyspace> \
+  --org <org> --format json
+```
+
+`parameters set` submits the namespace-specific changes together for rollout. Only one unfinished change per namespace can exist on a keyspace, so do not race another operator or retry blindly; inspect `changes list` and the returned IDs first. The CLI rejects missing/unknown namespaces and duplicate parameter names. An unchanged value is skipped rather than creating needless work.
+
+Cancel only a still-pending change, after confirming the exact ID, namespace, proposed values, and impact of stopping it:
+
+```bash
+pscale keyspace parameters changes show <database> <branch> <keyspace> <change-id> \
+  --org <org> --format json
+# After explicit approval
+pscale keyspace parameters changes cancel <database> <branch> <keyspace> <change-id> \
+  --org <org> --format json
+pscale keyspace parameters changes list <database> <branch> <keyspace> \
+  --org <org> --format json
+```
+
+Use JSON for automation and preserve the complete returned object; do not infer completion from command success alone. Poll `changes show` until the API reports a terminal state, then re-list parameters and compare the exact intended values/default resets. If a change fails or cannot be canceled, stop and surface the returned state instead of submitting a replacement concurrently.
 
 ## Troubleshooting
 
