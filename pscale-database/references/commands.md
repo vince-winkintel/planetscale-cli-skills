@@ -548,7 +548,7 @@ These commands are Vitess-only. `add` uses a slug from `pscale region list`; upd
 
 ## pscale keyspace
 
-The keyspace parent help block below is exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`. The list, show, and delete help blocks remain exact v0.324.0 captures and were re-verified line-for-line unchanged with the v0.337.0 binary.
+The keyspace parent help block below is exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`. The list, show, and delete help blocks remain exact v0.324.0 captures and were re-verified line-for-line unchanged with that v0.343.0 binary.
 
 ```text
 List, show, and manage keyspaces.
@@ -563,6 +563,7 @@ Available Commands:
   create-external   Create an external keyspace on a branch
   delete            Delete a keyspace from a branch
   list              List all keyspaces within a branch
+  parameters        List and change the VTTablet and MySQL parameters of a keyspace
   read-only-regions List read-only regions for a keyspace
   resize            Resize a keyspace within a branch
   rollout-status    Show keyspace rollout status per shard
@@ -586,6 +587,227 @@ Global Flags:
       --service-token-id string   The Service Token ID for authenticating.
 
 Use "pscale keyspace [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace parameters
+
+All keyspace-parameter help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`.
+
+```text
+List the VTTablet and MySQL parameters of a keyspace, including their current and default values.
+
+To change parameters, use 'pscale keyspace parameters set <database> <branch> <keyspace> --parameters namespace.name=value'.
+
+Usage:
+  pscale keyspace parameters <database> <branch> <keyspace> [flags]
+  pscale keyspace parameters [command]
+
+Aliases:
+  parameters, params
+
+Available Commands:
+  changes     Manage parameter changes to a keyspace
+  list        List the VTTablet and MySQL parameters of a keyspace
+  set         Change the VTTablet and MySQL parameters of a keyspace
+
+Flags:
+  -h, --help               help for parameters
+      --namespace string   Only show parameters in this namespace: vttablet or mysqld.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale keyspace parameters [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace parameters list
+
+```text
+List the VTTablet and MySQL parameters of a keyspace, including their current and default values.
+
+To change parameters, use 'pscale keyspace parameters set <database> <branch> <keyspace> --parameters namespace.name=value'.
+
+Usage:
+  pscale keyspace parameters list <database> <branch> <keyspace> [flags]
+
+Flags:
+  -h, --help               help for list
+      --namespace string   Only show parameters in this namespace: vttablet or mysqld.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace parameters set
+
+```text
+Change VTTablet or MySQL parameters on a keyspace. Pass each parameter as namespace.name=value, where namespace is vttablet or mysqld, and pass --reset namespace.name to set a parameter back to its default.
+
+All changes are submitted together and rolled out to the keyspace. Use 'pscale keyspace parameters changes list' to follow the rollout.
+
+Usage:
+  pscale keyspace parameters set <database> <branch> <keyspace> [flags]
+
+Examples:
+  pscale keyspace parameters set <database> <branch> <keyspace> \
+    --parameters vttablet.vreplication-parallel-insert-workers=4 \
+    --parameters vttablet.vreplication_max_time_to_retry_on_error=720h
+
+  pscale keyspace parameters set <database> <branch> <keyspace> \
+    --reset vttablet.vreplication-parallel-insert-workers
+
+Flags:
+  -h, --help                     help for set
+      --parameters stringArray   Set a parameter as namespace.name=value, where namespace is vttablet or mysqld (e.g. vttablet.vreplication-parallel-insert-workers=4). Repeatable. Use 'pscale keyspace parameters list' to see available parameters.
+      --reset stringArray        Set a parameter back to its default, as namespace.name (e.g. vttablet.vreplication-parallel-insert-workers). Repeatable.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace parameters changes
+
+```text
+Manage parameter changes to a keyspace
+
+Usage:
+  pscale keyspace parameters changes [command]
+
+Available Commands:
+  cancel      Cancel a pending parameter change to a keyspace
+  list        List parameter changes to a keyspace
+  show        Show a parameter change to a keyspace
+
+Flags:
+  -h, --help   help for changes
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Use "pscale keyspace parameters changes [command] --help" for more information about a command.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace parameters changes list
+
+```text
+List parameter changes to a keyspace
+
+Usage:
+  pscale keyspace parameters changes list <database> <branch> <keyspace> [flags]
+
+Aliases:
+  list, ls
+
+Flags:
+  -h, --help           help for list
+      --page int       Page number to fetch
+      --per-page int   Number of results per page (default 25)
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace parameters changes show
+
+```text
+Show a parameter change to a keyspace
+
+Usage:
+  pscale keyspace parameters changes show <database> <branch> <keyspace> <change-id> [flags]
+
+Aliases:
+  show, get
+
+Flags:
+  -h, --help   help for show
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale keyspace parameters changes cancel
+
+```text
+Cancel a pending parameter change to a keyspace
+
+Usage:
+  pscale keyspace parameters changes cancel <database> <branch> <keyspace> <change-id> [flags]
+
+Flags:
+  -h, --help   help for cancel
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
