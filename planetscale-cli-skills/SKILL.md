@@ -64,7 +64,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Both forms still emit the raw Markdown skill when `--format json` is present; redirect the output to an approved skills directory when a standalone binary-native guide is wanted.
 - Validate automated bootstrap output starts with `---\nname: pscale-cli`; do not infer a valid skill document from exit status alone.
 - The binary-native guide is useful for first-party command discovery, but it does not replace this repository's specialized safety workflows, focused references, and helper scripts.
-- Unrecognized root and command-group subcommands fail with exit status 2 instead of printing help and exiting zero. Automation should still validate the expected JSON/resource shape as well as the exit code.
+- Unrecognized root tokens and subcommands of non-runnable command groups fail with exit status 2 instead of printing help and exiting zero. Runnable groups such as `keyspace parameters` can interpret an unrecognized token as a positional argument and execute their default action, so automation must validate the expected JSON/resource shape as well as the exit code.
 - The top-level `pscale data-imports` family is unavailable. Use `pscale keyspace create-external` to attach an external MySQL source and `pscale branch vtctl move-tables` for table-movement workflows; treat an unknown-command error as a failed operation.
 
 ## Sub-Skills

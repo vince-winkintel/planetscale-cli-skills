@@ -548,7 +548,7 @@ These commands are Vitess-only. `add` uses a slug from `pscale region list`; upd
 
 ## pscale keyspace
 
-The keyspace parent help block below is exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`.
+The keyspace parent help block below is exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`. The list, show, and delete help blocks remain exact v0.324.0 captures and were re-verified line-for-line unchanged with that v0.343.0 binary.
 
 ```text
 List, show, and manage keyspaces.

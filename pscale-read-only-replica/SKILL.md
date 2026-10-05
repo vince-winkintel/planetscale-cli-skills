@@ -30,7 +30,7 @@ pscale sql <database> <branch> --org <org> --format json \
   --replica --query "SELECT 1"
 ```
 
-`pscale sql --replica` and `pscale shell --replica` route reads across the branch's primary replicas and all read-only regions; they cannot pin a query to one named read-only replica. Validate a specific named/region target through the same application connection path or region-aware endpoint that production will use.
+`pscale sql --replica` and `pscale shell --replica` route reads across the branch's primary replicas and all read-only regions; they cannot pin a query to one named dedicated read replica. Validate a specific named/region target through the same application connection path or region-aware endpoint that production will use.
 
 ## Create
 

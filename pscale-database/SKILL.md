@@ -404,9 +404,10 @@ pscale keyspace parameters list <database> <branch> <keyspace> \
 pscale keyspace parameters list <database> <branch> <keyspace> \
   --org <org> --namespace vttablet --format json
 
-# Check existing rollout/change state before proposing a write
+# Check every rollout/change page before proposing a write; increment --page
+# until a page returns no results.
 pscale keyspace parameters changes list <database> <branch> <keyspace> \
-  --org <org> --format json
+  --org <org> --page 1 --per-page 25 --format json
 
 # After reviewing exact current/default values and obtaining approval, submit
 # one or more changes. Both namespaces may be included in one invocation.
@@ -427,7 +428,7 @@ pscale keyspace parameters list <database> <branch> <keyspace> \
   --org <org> --format json
 ```
 
-`parameters set` submits the namespace-specific changes together for rollout. Only one unfinished change per namespace can exist on a keyspace, so do not race another operator or retry blindly; inspect `changes list` and the returned IDs first. The CLI rejects missing/unknown namespaces and duplicate parameter names. An unchanged value is skipped rather than creating needless work.
+`parameters set` submits the namespace-specific changes together for rollout. Only one unfinished change per namespace can exist on a keyspace, so do not race another operator or retry blindly. Before writing, enumerate `changes list` with `--page 1`, `--page 2`, and so on until an empty page is returned; the command returns only one page, defaults to 25 results, exposes no next-page metadata, and does not document its sort order. Inspect `state` and `completed_at` on every result, account for every draft, pending, or otherwise uncompleted change, and inspect the returned IDs first. The CLI rejects missing/unknown namespaces and duplicate parameter names. It does not compare requested values with current values: it submits every requested value, while human/CSV change summaries merely omit entries whose displayed before and after values match. Compare against a fresh `parameters list` response and omit no-op values yourself.
 
 Cancel only a still-pending change, after confirming the exact ID, namespace, proposed values, and impact of stopping it:
 
@@ -441,7 +442,9 @@ pscale keyspace parameters changes list <database> <branch> <keyspace> \
   --org <org> --format json
 ```
 
-Use JSON for automation and preserve the complete returned object; do not infer completion from command success alone. Poll `changes show` until the API reports a terminal state, then re-list parameters and compare the exact intended values/default resets. If a change fails or cannot be canceled, stop and surface the returned state instead of submitting a replacement concurrently.
+Use JSON for automation and preserve the complete returned object; do not infer completion from command success alone. The raw object includes `state`, `queued_until`, `started_at`, `completed_at`, and `error_message`. Poll a fresh `changes show` response, stop and surface any non-empty `error_message`, and require `completed_at` before treating a rollout as complete; because the CLI model does not define a state enum, probe representative JSON before hard-coding state values and treat unknown state/timestamp combinations conservatively. Then re-list parameters and compare the exact intended values/default resets.
+
+After any failed `parameters set`, enumerate `changes list` again and look for drafts or pending changes from that attempt. Cleanup is best-effort and can leave drafts behind; confirm their exact IDs and namespaces, and cancel them only with explicit approval before retrying. Even after a successful submission, treat the objects printed by `set` as provisional: if its post-submit refresh fails, the CLI prints the pre-submit draft object. Verify every returned ID with `changes show`. If a change fails or cannot be canceled, stop and surface the returned state instead of submitting a replacement concurrently.
 
 ## Troubleshooting
 
