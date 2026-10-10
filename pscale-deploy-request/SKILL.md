@@ -1,6 +1,6 @@
 ---
 name: pscale-deploy-request
-description: Create, review, inspect, deploy, update, throttle, unblock, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, changing auto-apply or auto-delete-branch settings, managing per-deploy throttling, unblocking a queue after a failed deploy or revert, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, unblock deploy queue, failed deploy, failed revert, deploy operations, storage check, deploy request update, auto apply, auto delete branch, force cutover, deploy throttler, review deployment, revert deployment, production migration.
+description: Create, review, inspect, deploy, update, throttle, retry failed operations, unblock, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, changing auto-apply or auto-delete-branch settings, managing per-deploy throttling, retrying failed operations after diagnosis, unblocking a queue after a failed deploy or revert, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, unblock deploy queue, retry failed operations, failed deploy, failed revert, deploy operations, storage check, deploy request update, auto apply, auto delete branch, force cutover, deploy throttler, review deployment, revert deployment, production migration.
 ---
 
 # pscale deploy-request
@@ -157,6 +157,28 @@ pscale deploy-request queue <database> --org <org> --format json
 ```
 
 Unblocking does not repair the failed migration, retry it, apply a gated cutover, or resolve failed deploy checks. It marks the failed deploy/revert complete so later queue work can proceed; the API determines whether the failed action was a deploy or revert. Treat it as a production operational write and preserve the failure evidence before running it.
+
+### Retry failed operations without unblocking the queue
+
+`pscale deploy-request retry` requests a retry of failed operations on an in-progress Vitess deployment. It is distinct from `unblock`, which marks a failed deploy/revert complete so later queue work can proceed, and from `revert`. Retry is a production operational write with no confirmation prompt or wait flag; a successful response means the retry was requested, not completed.
+
+```bash
+# Diagnose and preserve the failure evidence before retrying
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request operations <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+
+# After fixing the cause and receiving explicit approval for this exact request
+pscale deploy-request retry <database> <number> --org <org> --format json
+
+# Verify operation and deployment state; continue read-only monitoring
+pscale deploy-request operations <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+```
+
+The CLI delegates eligibility to the API rather than validating a deployment-state allowlist locally. Stop on API rejection, repeated failure, or ambiguous state; inspect fresh operation/deployment evidence rather than automatically retrying, unblocking, forcing cutover, or reverting.
 
 ### Manage per-deploy throttling
 
@@ -382,4 +404,4 @@ pnpm drizzle-kit introspect
 
 ## References
 
-See `references/commands.md` for complete `pscale deploy-request` command reference.
+See `references/commands.md` for the `pscale deploy-request` command reference and `references/retry-command.md` for the complete failed-operation retry help surface.

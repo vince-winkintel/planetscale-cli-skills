@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs and query patterns; and managing Postgres/Neki maintenance, Postgres extensions, parameters and sizing, Vitess VTGate capacity, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, deletion protection, primary switchovers, maintenance, extensions, diffs, resize, VTGate, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
+description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs and query patterns; and managing Postgres/Neki maintenance, Postgres extension toggles, parameters and sizing, Vitess VTGate capacity and parameter rollouts, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, deletion protection, primary switchovers, maintenance, extension enable/disable, diffs, resize, VTGate parameters/update/changes, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -254,7 +254,27 @@ Use either `--period` or paired `--from`/`--to`, not both. `--level`, `--server`
 pscale branch extensions list <database> <branch> --org <org> --format json
 ```
 
-There is no CLI command to enable an extension. Use `pscale sql` for reviewed SQL such as `CREATE EXTENSION`, and use `pscale branch resize --parameters` only for preload-library configuration when the parameter catalog shows that a parameter is available.
+The catalog includes `can_enable`, `requirements` (including `postgres_image_version` when provided), and `enabled`, which can be absent when its state is unavailable. Do not depend on removed `available`, `unavailable_reason`, or `loader` fields; use null-safe JSON inspection and review the current requirements. Toggle only an exact catalog name with `can_enable: true` and a known enabled state. Enabling or disabling queues an asynchronous branch change request and may restart the database; it is not the SQL `CREATE EXTENSION` / `DROP EXTENSION` installed state inside each logical database. Neki extensions belong to configuration profiles (`pscale-neki`), not this branch-level toggle.
+
+```bash
+# Inspect the complete selection, topology, and current branch change request
+pscale branch extensions list <database> <branch> --org <org> --format json
+pscale branch infra <database> <branch> --org <org> --format json
+pscale branch resize status <database> <branch> --org <org> --format json
+
+# After explicit approval for the exact extension and restart impact
+pscale branch extensions enable <database> <branch> <extension> --org <org> \
+  --wait --wait-timeout 20m --format json
+# Alternative: disable only the specifically approved extension
+pscale branch extensions disable <database> <branch> <extension> --org <org> \
+  --wait --wait-timeout 20m --format json
+
+# Verify completion and the full resulting extension selection
+pscale branch resize status <database> <branch> --org <org> --format json
+pscale branch extensions list <database> <branch> --org <org> --format json
+```
+
+The CLI preserves the other enabled extensions by reading and resending the complete selection. Avoid concurrent extension changes: a stale selection can overwrite another operator's change. An already-matching selection returns `result: "no_change"` in JSON. A timeout or failed request does not prove nothing changed; inspect `resize status`, the complete catalog selection, and branch health before any retry. Review application dependencies and per-database installed-extension state before disabling; do not automatically drop SQL extensions or infer that enabling installed them.
 
 ### Rename or protect a branch
 
@@ -397,8 +417,8 @@ The command group requires Query Insights to be enabled for the database. A not-
 
 ```bash
 # Inspect the parameter catalog first. The bare `parameters` form is equivalent.
-pscale branch parameters list <database> <branch-name> --org <org> --format json
-pscale branch parameters list <database> <branch-name> --org <org> --namespace pgconf --format json
+pscale branch parameters list <database> <branch-name> --org <org> --internal=false --format json
+pscale branch parameters list <database> <branch-name> --org <org> --internal=false --namespace pgconf --format json
 
 # List valid Postgres cluster sizes
 pscale size cluster list --engine postgresql --org <org>
@@ -417,7 +437,9 @@ pscale branch resize status <database> <branch-name> --org <org> --format json
 pscale branch resize cancel <database> <branch-name> --org <org> --format json
 ```
 
-Review the parameter catalog's `restart` and `immutable` fields before proposing a change. Surface restart impact and capacity/cost impact to the user, then obtain approval before running `resize`. Request states include `queued`, `pending`, `resizing`, `completed`, and `canceled`; only the last two are terminal. A JSON no-op returns `{"result":"no_change","branch":"<branch>"}` rather than a change request. After completion, verify with both `resize status` and `branch show`.
+Use `parameters list --internal=false` to discover changeable parameters and review `restart`, current, and default values before proposing a change. Do not depend on removed `immutable` or `extension` JSON fields: the API filters internal/extension parameters via `--internal=true|false` and `--extension=true|false`; omitting either filter leaves that category unfiltered. Resize preflight fetches the catalog with `internal=false` and rejects names absent from it. Parameter values can reflect a queued request, not only applied state. Surface restart impact and capacity/cost impact to the user, then obtain approval before running `resize`. Request states include `queued`, `pending`, `resizing`, `completed`, and `canceled`; only the last two are terminal. A JSON no-op returns `{"result":"no_change","branch":"<branch>"}` rather than a change request. After completion, verify with `resize status`, `branch show`, and a fresh parameter catalog.
+
+Resize preflight is best-effort: if its parameter-catalog fetch fails, the CLI proceeds without local catalog/restart validation and leaves enforcement to the API. Do not treat that fallback as proof a parameter is safe; obtain a successful fresh catalog read and review restart/availability impact before an approved resize.
 
 ### Resize Vitess VTGates
 
@@ -447,6 +469,36 @@ pscale branch vtgate resize cancel <database> <branch> --org <org> --format json
 ```
 
 At least one resize flag is required. Omitted flags preserve their current values; pass `--vtgate-autoscaling=false` explicitly to disable autoscaling. `--vtgate-count` is the per-availability-zone fixed count, or the minimum when autoscaling is enabled. After the request completes, verify both `resize status` and `vtgate show`; do not treat the requested values as applied while status is non-terminal.
+
+### Vitess VTGate parameter rollouts
+
+Parameter changes are separate from VTGate capacity resizing and from keyspace VTTablet/MySQL parameters. Read the current/default catalog with `pscale branch vtgate parameters` (`params` is an alias), then use exact `vtgate.<name>` identifiers. There is no `parameters list` child here.
+
+```bash
+# Read the catalog and enumerate every change page before proposing a write
+pscale branch vtgate parameters <database> <branch> --org <org> --format json
+pscale branch vtgate changes list <database> <branch> --org <org> \
+  --page 1 --per-page 25 --format json
+
+# After approval for the exact value and operational impact
+pscale branch vtgate update <database> <branch> --org <org> \
+  --parameters vtgate.query-timeout=30000 --format json
+# Alternative: restore one approved server default
+pscale branch vtgate update <database> <branch> --org <org> \
+  --reset vtgate.query-timeout --format json
+
+# Verify each returned change ID and final catalog values
+pscale branch vtgate changes show <database> <branch> <change-id> --org <org> --format json
+pscale branch vtgate parameters <database> <branch> --org <org> --format json
+
+# Cancel only an inspected pending change after separate explicit approval
+pscale branch vtgate changes cancel <database> <branch> <change-id> --org <org> --format json
+pscale branch vtgate changes show <database> <branch> <change-id> --org <org> --format json
+```
+
+`update` requires at least one repeatable `--parameters vtgate.name=value` or `--reset vtgate.name`; duplicate names and other namespaces are rejected. Compare fresh current/default values yourself and omit no-ops. Query `changes list` with increasing `--page` values until an empty page; it returns one page (25 by default), not a complete history. Preserve raw JSON (`state`, `completed_at`, `error_message`, `previous_options`, `new_options`); do not infer completion from a successful command or human change summary. Require a completed, non-error result and a fresh catalog matching every intended value/default reset, treating unknown states conservatively.
+
+The CLI creates a draft, submits it, and then fetches the change; if the final fetch fails, it prints the pre-submit draft. Submission failure triggers only best-effort cancellation, so inspect the full change inventory after any failed or ambiguous write before retrying. Avoid concurrent rollouts; do not cancel an unidentified draft merely to clear the queue. `changes show` / `cancel` use the branch-wide config-change endpoint: confirm the returned `change_type` is `vtgate` and the ID belongs to the approved VTGate change. Capacity remains managed by `vtgate resize` and its own status/cancel commands, not `vtgate update`.
 
 ### Routing rules
 
@@ -733,7 +785,7 @@ pscale branch list <database> | grep main
 
 ## References
 
-See `references/commands.md` for the general `pscale branch` command reference. See `references/lookup-vindex-commands.md` for the complete Lookup Vindex parent and lifecycle help surfaces.
+See `references/commands.md` for the general `pscale branch` command reference, `references/branch-configuration-commands.md` for complete extension toggle, parameter-list, and VTGate rollout help, and `references/lookup-vindex-commands.md` for the complete Lookup Vindex parent and lifecycle help surfaces.
 
 ## Branch Lifecycle
 

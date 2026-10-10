@@ -1,8 +1,10 @@
+Current help captures in this file (`pscale branch`, `branch extensions`, `branch extensions list`, `branch parameters`, and `branch vtgate`) come from the official, checksum-verified PlanetScale CLI v0.344.0 macOS arm64 binary with `NO_COLOR=1`, normalizing only trailing whitespace. Archive SHA-256: `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`. Complete new toggle, parameter-list, and VTGate rollout help surfaces are in [branch-configuration-commands.md](branch-configuration-commands.md). Other sections retain their stated earlier provenance.
+
 Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch create` surface was recaptured from the checksum-verified v0.325.0 binary. The `pscale branch` parent and maintenance surfaces are noted with their own provenance.
 
 ## pscale branch
 
-Help fence in this section is exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`.
+Current capture; see the verified-binary provenance above.
 
 ```text
 Create, delete, diff, and manage branches
@@ -32,7 +34,7 @@ Vitess/MySQL-specific:
   routing-rules   Fetch or update routing rules for a MySQL branch
   safe-migrations Enable or disable safe migrations on a MySQL branch
   vtctl           Run vtctl commands against a branch
-  vtgate          Manage VTGate size for a Vitess branch
+  vtgate          Manage VTGate size and parameters for a Vitess branch
 
 Postgres-specific:
   extensions      List extensions available on a Postgres branch
@@ -318,14 +320,17 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 List extensions available on a Postgres branch's cluster image.
 
 This is the catalog of extensions the image can load, not the result of
-CREATE EXTENSION. There is no CLI command to enable an extension; preload
-libraries are configured with 'pscale branch resize --parameters'.
+CREATE EXTENSION. Enable and disable queue an asynchronous branch change
+request; only extensions marked "can enable" can be toggled. Toggling an
+extension may restart the database.
 
 Usage:
   pscale branch extensions <database> <branch> [flags]
   pscale branch extensions [command]
 
 Available Commands:
+  disable     Disable an extension on a Postgres branch
+  enable      Enable an extension on a Postgres branch
   list        List extensions available on a Postgres branch
 
 Flags:
@@ -355,8 +360,9 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 List extensions available on a Postgres branch's cluster image.
 
 This is the catalog of extensions the image can load, not the result of
-CREATE EXTENSION. There is no CLI command to enable an extension; preload
-libraries are configured with 'pscale branch resize --parameters'.
+CREATE EXTENSION. Enable and disable queue an asynchronous branch change
+request; only extensions marked "can enable" can be toggled. Toggling an
+extension may restart the database.
 
 Usage:
   pscale branch extensions list <database> <branch> [flags]
@@ -449,7 +455,7 @@ Available Commands:
 Flags:
       --extension          Only show parameters that configure an extension (--extension=false hides them).
   -h, --help               help for parameters
-      --internal           Only show internal (immutable) parameters (--internal=false hides them).
+      --internal           Only show internal parameters, which cannot be changed (--internal=false hides them).
       --namespace string   Only show parameters in this namespace (e.g. pgconf, pgbouncer, patroni).
 
 Global Flags:
@@ -468,7 +474,7 @@ Use "pscale branch parameters [command] --help" for more information about a com
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-`pscale branch parameters list <database> <branch>` accepts the same flags. The bare `parameters <database> <branch>` form is an alias for `parameters list`. Prefer `--format json` before a change so `restart`, `immutable`, current, and default values remain explicit.
+`pscale branch parameters list <database> <branch>` accepts the same flags. The bare `parameters <database> <branch>` form is an alias for `parameters list`. Prefer `--format json` before a change so `restart`, current, and default values remain explicit. Use `--internal=false` to inventory changeable parameters; do not depend on the removed `immutable` or `extension` fields.
 
 ## pscale branch resize
 
@@ -515,7 +521,7 @@ Use "pscale branch resize [command] --help" for more information about a command
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
-At least one change flag is required. Parameter changes are validated against the catalog; unknown and immutable parameters fail. Values marked `restart` restart the database when applied. Without `--wait`, poll `resize status`; `queued`, `pending`, and `resizing` are non-terminal, while `completed` and `canceled` are terminal.
+At least one change flag is required. When the best-effort catalog fetch succeeds, parameter preflight rejects names absent from the `internal=false` catalog and checks restart impact; a failed fetch skips that local validation, so obtain a successful fresh catalog read before an approved write. Values marked `restart` restart the database when applied. Without `--wait`, poll `resize status`; `queued`, `pending`, and `resizing` are non-terminal, while `completed` and `canceled` are terminal.
 
 ## pscale branch resize status
 
@@ -1009,14 +1015,17 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ## pscale branch vtgate
 
 ```text
-Manage VTGate size for a Vitess branch
+Manage VTGate size and parameters for a Vitess branch
 
 Usage:
   pscale branch vtgate [command]
 
 Available Commands:
+  changes     Manage VTGate parameter changes for a Vitess branch
+  parameters  List the VTGate parameters of a Vitess branch
   resize      Resize VTGates for a Vitess production branch
   show        Show the current VTGate configuration for a Vitess branch
+  update      Change the VTGate parameters of a Vitess branch
 
 Flags:
   -h, --help   help for vtgate
