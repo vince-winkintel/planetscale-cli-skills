@@ -1,6 +1,8 @@
+Current help captures (`pscale deploy-request` below and `deploy-request retry` in [retry-command.md](retry-command.md)) come from the official, checksum-verified PlanetScale CLI v0.344.0 macOS arm64 binary with `NO_COLOR=1`, normalizing only trailing whitespace. Archive SHA-256: `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`.
+
 Create, review, diff, inspect, throttle, revert, and manage deploy requests.
 
-All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+Unless marked current, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ## pscale deploy-request
 
@@ -27,6 +29,7 @@ Available Commands:
   list          List all deploy requests for a database
   operations    List deploy operations for a deploy request
   queue         Show the deploy queue for a database
+  retry         Retry failed operations on a deploy request
   revert        Revert a deployed deploy request
   review        Review a deploy request (approve, comment, etc...)
   reviews       List reviews for a deploy request

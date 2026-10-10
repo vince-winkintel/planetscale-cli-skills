@@ -351,10 +351,10 @@ pscale keyspace update-settings <database> <branch> <keyspace> \
 pscale keyspace update-settings <database> <branch> <keyspace> \
   --org <org> --max-rollout=2 --format json
 
-# Allow dedicated disks to grow automatically up to an explicit byte ceiling
+# Allow dedicated disks to grow automatically up to an explicitly approved ceiling
 pscale keyspace update-settings <database> <branch> <keyspace> \
   --org <org> --disk-scaling-strategy=grow \
-  --max-storage=<maximum-bytes> --format json
+  --max-storage=<maximum-size> --format json
 
 # Disable autoscaling only after confirming current capacity and headroom
 pscale keyspace update-settings <database> <branch> <keyspace> \
@@ -365,10 +365,10 @@ pscale metrics show <database> <branch> --org <org> \
   --metric shard_storage_usage --keyspace <keyspace> \
   --period 1d --format json
 
-# Recreate disks at an approved 1 GiB-aligned byte size, then disable autoscaling
+# Recreate disks at an approved 1 GiB-aligned size, then disable autoscaling
 pscale keyspace update-settings <database> <branch> <keyspace> \
   --org <org> --disk-scaling-strategy=shrink \
-  --storage=<target-bytes> --format json
+  --storage=<target-size> --format json
 
 # Verify the persisted state after any update
 pscale keyspace settings <database> <branch> <keyspace> \
@@ -383,7 +383,11 @@ For a threshold-only update, the CLI sends only the `threshold` field and leaves
 
 `--max-rollout` accepts `1` through `32` and controls how many shards receive changes concurrently. Higher concurrency can increase rollout load and reduce the opportunity to stop between shards. Inspect current settings and shard count, propose the smallest sufficient value, obtain approval, update only that field, then re-read `max_rollout` from JSON.
 
-`--disk-scaling-strategy` accepts `grow`, `disable`, or `shrink`. `grow` allows dedicated disks to autoscale up to `--max-storage`; `disable` turns autoscaling off; `shrink` recreates disks at `--storage` and then disables autoscaling. `--max-storage` and `--storage` are positive byte counts, and `--storage` must be divisible by 1 GiB. A bare `--storage` is accepted when the persisted strategy is `shrink`, so it can unintentionally recreate disks again. Never rely on persisted strategy: every command containing `--storage` must also pass `--disk-scaling-strategy=shrink`, and every command containing `--max-storage` must also pass `--disk-scaling-strategy=grow`. After shrink, expect a fresh settings read to report `storage.disk_scaling_strategy == "shrink"` and `storage.storage_bytes == <target-bytes>`; `shrink` is the persisted autoscaling-off state, not a promise that the field will transition to `disable`.
+`--disk-scaling-strategy` accepts `grow`, `disable`, or `shrink`. `grow` allows dedicated disks to autoscale up to `--max-storage`; `disable` turns autoscaling off; `shrink` recreates disks at `--storage` and then disables autoscaling. Both size flags accept exact integer byte counts or human-readable units such as `200GiB`, `1TiB`, or quoted `"1.5 TiB"`. Values must be positive, and `--storage` must resolve to a multiple of 1 GiB; decimal `GB` units are not generally GiB-aligned. Review the parsed byte target against raw JSON capacity/usage, never rounded human output.
+
+`--max-storage` must be at least 12 GiB and no smaller than the current disk size. The documented organization-default ceiling is 4 TiB, or 16 TiB for managed tenancy. Inspect `storage.max_storage_bytes_managed_by_staff`: when true, the staff-raised limit is read-only through this flag, so stop and coordinate with PlanetScale rather than trying to overwrite it. These server-side policy constraints are not all checked locally; API rejection is a stop condition, not permission to weaken the proposed values.
+
+A bare `--storage` is accepted when the persisted strategy is `shrink`, so it can unintentionally recreate disks again. Never rely on persisted strategy: every command containing `--storage` must also pass `--disk-scaling-strategy=shrink`, and every command containing `--max-storage` must also pass `--disk-scaling-strategy=grow`. After shrink, expect a fresh settings read to report `storage.disk_scaling_strategy == "shrink"` and `storage.storage_bytes == <parsed-target-bytes>`; `shrink` is the persisted autoscaling-off state, not a promise that the field will transition to `disable`. Human/CSV settings display marks staff-managed maximum storage; automation must use the boolean JSON field instead of matching that label.
 
 `storage_bytes` is provisioned capacity, not bytes used. Before shrinking, obtain recent Vitess usage evidence with `pscale metrics show ... --metric shard_storage_usage`, preserve its shard/tablet dimensions, and set the target above the highest relevant observed usage by an explicitly approved margin. If the metric is unavailable, stale, or cannot be mapped to every affected disk, do not shrink. Disk recreation can affect availability, and the CLI does not provide a shrink wait/completion workflow; confirm the operational window separately, show the exact before/after values, obtain explicit approval, avoid concurrent setting writes, and monitor operational state plus the complete `storage` object after the update. Explicitly decide whether to retain the `shrink` autoscaling-off state or return to `grow` with a reviewed maximum. Never infer safe shrink capacity from provisioned bytes or humanized display text.
 
