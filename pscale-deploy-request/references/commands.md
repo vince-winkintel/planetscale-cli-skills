@@ -1,8 +1,8 @@
-Current help captures (`pscale deploy-request` below and `deploy-request retry` in [retry-command.md](retry-command.md)) come from the official, checksum-verified PlanetScale CLI v0.344.0 macOS arm64 binary with `NO_COLOR=1`, normalizing only trailing whitespace. Archive SHA-256: `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`.
+The v0.344.0 help captures (`pscale deploy-request` below and `deploy-request retry` in [retry-command.md](retry-command.md)) come from the official, checksum-verified PlanetScale CLI v0.344.0 macOS arm64 binary with `NO_COLOR=1`, normalizing only trailing whitespace. Archive SHA-256: `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`.
 
 Create, review, diff, inspect, throttle, revert, and manage deploy requests.
 
-Unless marked current, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+Except for the v0.344.0 captures identified above and sections with their own provenance, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ## pscale deploy-request
 
@@ -59,15 +59,51 @@ Use "pscale deploy-request [command] --help" for more information about a comman
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
+## pscale deploy-request create
+
+Complete help capture from the official, checksum-verified PlanetScale CLI v0.345.0 macOS arm64 binary, executed with `env -i`, an empty credential-free `HOME`, minimal `PATH`, and `NO_COLOR=1`. Only trailing whitespace was normalized. Archive SHA-256: `d774eb31cd764dee4c01a1671f3ea17e1d3cb9b8aefe829e82cce2c3358fe028`.
+
+```text
+Create a deploy request from a branch
+
+Usage:
+  pscale deploy-request create <database> <branch> [flags]
+
+Flags:
+      --aggressive-cutover   Cut this deploy request over aggressively: Vitess kills blocking queries and transactions on the first cutover attempt instead of retrying for up to an hour. Does not change the database setting. Other deploy requests are unaffected.
+      --auto-delete-branch   Delete the branch after the deploy request completes.
+      --disable-auto-apply   Disable auto-apply. The deploy request will wait for your confirmation before swapping to the new schema. Use 'deploy-request apply' to apply the changes manually.
+      --enable-auto-apply    Enable auto-apply. The deploy request will automatically swap over to the new schema once ready.
+  -h, --help                 help for create
+      --into string          Branch to deploy into. By default, it's the parent branch (if present) or the database's default branch.
+      --notes string         Notes to include with the deploy request.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
 ## pscale deploy-request update
+
+Complete help capture from the official, checksum-verified PlanetScale CLI v0.345.0 macOS arm64 binary, executed with `env -i`, an empty credential-free `HOME`, minimal `PATH`, and `NO_COLOR=1`. Only trailing whitespace was normalized. Archive SHA-256: `d774eb31cd764dee4c01a1671f3ea17e1d3cb9b8aefe829e82cce2c3358fe028`.
 
 ```text
 Update settings on a deploy request.
 
-Use --enable-auto-apply / --disable-auto-apply to control gated cutover, and
+Use --enable-auto-apply / --disable-auto-apply to control gated cutover,
 --auto-delete-branch to control whether the source branch is deleted after a
-successful deploy (same flag as 'deploy-request create'). At least one setting
-must be passed; unset flags are not sent.
+successful deploy (same flag as 'deploy-request create'), and
+--aggressive-cutover to opt this deploy request into aggressive cutover.
+At least one setting must be passed; unset flags are not sent.
 
 Usage:
   pscale deploy-request update <database> <number> [flags]
@@ -76,6 +112,7 @@ Aliases:
   update, edit
 
 Flags:
+      --aggressive-cutover   Cut this deploy request over aggressively: Vitess kills blocking queries and transactions on the first cutover attempt instead of retrying for up to an hour. Does not change the database setting. Other deploy requests are unaffected. Pass --aggressive-cutover=false to clear the opt-in.
       --auto-delete-branch   Delete the branch after the deploy request completes. Pass --auto-delete-branch=false to keep it.
       --disable-auto-apply   Disable auto-apply. The deploy request will wait for your confirmation before swapping to the new schema. Use 'deploy-request apply' to apply the changes manually.
       --enable-auto-apply    Enable auto-apply. The deploy request will automatically swap over to the new schema once ready.
@@ -177,6 +214,34 @@ Usage:
 Flags:
       --force   Skip the confirmation prompt and force cutover now.
   -h, --help    help for force-cutover
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale deploy-request show
+
+Complete help capture from the official, checksum-verified PlanetScale CLI v0.345.0 macOS arm64 binary, executed with `env -i`, an empty credential-free `HOME`, minimal `PATH`, and `NO_COLOR=1`. Only trailing whitespace was normalized. Archive SHA-256: `d774eb31cd764dee4c01a1671f3ea17e1d3cb9b8aefe829e82cce2c3358fe028`.
+
+```text
+Show a specific deploy request
+
+Usage:
+  pscale deploy-request show <database> <number|branch> [flags]
+
+Flags:
+  -h, --help   help for show
+      --web    Open in your web browser
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

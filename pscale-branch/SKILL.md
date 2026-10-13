@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs and query patterns; and managing Postgres/Neki maintenance, Postgres extension toggles, parameters and sizing, Vitess VTGate capacity and parameter rollouts, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, deletion protection, primary switchovers, maintenance, extension enable/disable, diffs, resize, VTGate parameters/update/changes, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
+description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs and query patterns; and managing Postgres/Neki maintenance, Postgres extension toggles, parameters and sizing, Vitess VTGate capacity and parameter rollouts, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, deletion protection, primary switchovers, maintenance, extension enable/disable, schema snapshot refresh/readiness, diffs, resize, VTGate parameters/update/changes, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, refresh-schema, schema_ready, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -499,6 +499,26 @@ pscale branch vtgate changes show <database> <branch> <change-id> --org <org> --
 `update` requires at least one repeatable `--parameters vtgate.name=value` or `--reset vtgate.name`; duplicate names and other namespaces are rejected. Compare fresh current/default values yourself and omit no-ops. Query `changes list` with increasing `--page` values until an empty page; it returns one page (25 by default), not a complete history. Preserve raw JSON (`state`, `completed_at`, `error_message`, `previous_options`, `new_options`); do not infer completion from a successful command or human change summary. Require a completed, non-error result and a fresh catalog matching every intended value/default reset, treating unknown states conservatively.
 
 The CLI creates a draft, submits it, and then fetches the change; if the final fetch fails, it prints the pre-submit draft. Submission failure triggers only best-effort cancellation, so inspect the full change inventory after any failed or ambiguous write before retrying. Avoid concurrent rollouts; do not cancel an unidentified draft merely to clear the queue. `changes show` / `cancel` use the branch-wide config-change endpoint: confirm the returned `change_type` is `vtgate` and the ID belongs to the approved VTGate change. Capacity remains managed by `vtgate resize` and its own status/cancel commands, not `vtgate update`.
+
+### Refresh a MySQL/Vitess schema snapshot
+
+`pscale branch refresh-schema` requests a new schema snapshot and waits for the branch's `schema_ready` field to become true before reporting success. It performs an immediate branch lookup, then polls every 2 seconds with a 2-minute bound on the readiness wait. There is no configurable wait/timeout flag. This refresh is a write: confirm the exact organization, database, and branch and obtain explicit approval before requesting it.
+
+```bash
+# Inspect the target and readiness first
+pscale branch show <database> <branch> --org <org> --format json
+
+# After approval, refresh and wait for the snapshot
+pscale branch refresh-schema <database> <branch> --org <org> --format json
+
+# Verify readiness and re-read snapshot consumers before planning any write
+pscale branch show <database> <branch> --org <org> --format json
+pscale branch routing-rules get <database> <branch> --org <org> --format json
+```
+
+Success JSON is `{ "result": "schema refreshed" }`. If the wait expires while the snapshot is still unready, the command fails with `status: "action_required"`, `issues[0].code: "schema_snapshot_not_ready"`, and one `next_steps` instruction to wait for readiness, then retry. The refresh may already have been accepted. Use bounded read-only checks of `.schema_ready`; once true, retry the follow-up reader instead of repeatedly issuing refresh writes. If readiness stays false, stop and investigate.
+
+Polling failures are not automatically snapshot timeouts: branch-not-found returns immediately; other lookup errors are retried during the wait and the outstanding poll error is returned at the deadline. A successful lookup clears the saved error. Preserve the actual error/code and diagnose it before retrying; do not turn network/API failures into a generic readiness loop. For routing-rule changes, re-read snapshot and live routing and rebuild the full proposed replacement after readiness, then obtain the write approval described below.
 
 ### Routing rules
 

@@ -928,6 +928,33 @@ Global Flags:
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
 
+## pscale branch refresh-schema
+
+Complete help capture from the official, checksum-verified PlanetScale CLI v0.345.0 macOS arm64 binary, executed with `env -i`, an empty credential-free `HOME`, minimal `PATH`, and `NO_COLOR=1`. Only trailing whitespace was normalized. Archive SHA-256: `d774eb31cd764dee4c01a1671f3ea17e1d3cb9b8aefe829e82cce2c3358fe028`.
+
+```text
+Refresh the schema for a MySQL branch. Waits until the updated schema snapshot is ready so later commands, such as routing-rules, see it.
+
+Usage:
+  pscale branch refresh-schema <database> <branch> [flags]
+
+Flags:
+  -h, --help   help for refresh-schema
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
 ## pscale branch routing-rules
 
 This parent and its `get`/`update` help fences are exact output from the official, checksum-verified PlanetScale CLI v0.339.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `1e396701709cd49d1d1cccca252e2bd81f224b2830ca189a84a16983bde182e8`.

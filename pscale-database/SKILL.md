@@ -169,7 +169,7 @@ Pass exactly one update mode: `--ratio` or one or more `--configuration keyspace
 
 ### Database-level Vitess aggressive cutover
 
-Aggressive cutover is a Vitess database setting for **future** deploy requests. When enabled, those deploy requests cut over more aggressively while waiting on table locks. It is not the same action as `pscale deploy-request force-cutover`, which affects one already-running deployment.
+Aggressive cutover is a Vitess database setting for **future** deploy requests. When enabled, those deploy requests cut over more aggressively while waiting on table locks. For a single request, use the separately approved `deploy-request create/update --aggressive-cutover` workflow in [pscale-deploy-request](../pscale-deploy-request/SKILL.md#per-request-aggressive-cutover-vitess). That opt-in leaves the database policy and other requests unchanged; create with `--aggressive-cutover=false` omits the field and cannot override this policy. `pscale deploy-request force-cutover` is a separate emergency action for one already-blocked deployment.
 
 ```bash
 # Read current state
