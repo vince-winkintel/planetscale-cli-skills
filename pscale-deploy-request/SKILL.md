@@ -1,11 +1,11 @@
 ---
 name: pscale-deploy-request
-description: Create, review, inspect, deploy, update, throttle, unblock, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, changing auto-apply or auto-delete-branch settings, managing per-deploy throttling, unblocking a queue after a failed deploy or revert, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, unblock deploy queue, failed deploy, failed revert, deploy operations, storage check, deploy request update, auto apply, auto delete branch, force cutover, deploy throttler, review deployment, revert deployment, production migration.
+description: Create, review, inspect, deploy, update, throttle, retry failed operations, unblock, and revert schema changes via deploy requests. Use when deploying schema migrations to production, inspecting deployment queues or operations, checking reviews or storage readiness, changing auto-apply, auto-delete-branch, or per-request aggressive-cutover settings, managing per-deploy throttling, retrying failed operations after diagnosis, unblocking a queue after a failed deploy or revert, forcing a blocked cutover, or reverting deployed changes. Essential for safe production schema deployments. Triggers on deploy request, schema deployment, deploy queue, unblock deploy queue, retry failed operations, failed deploy, failed revert, deploy operations, storage check, deploy request update, auto apply, auto delete branch, aggressive cutover, force cutover, deploy throttler, review deployment, revert deployment, production migration.
 ---
 
 # pscale deploy-request
 
-Create, review, diff, revert, and manage deploy requests for schema changes.
+Create, review, diff, revert, and manage deploy requests for schema changes. `pscale dr` is an alias of `pscale deploy-request`.
 
 ## Common Commands
 
@@ -34,12 +34,19 @@ pscale deploy-request queue <database> --format json
 # Unblock only after a failed deploy/revert is diagnosed and approved
 pscale deploy-request unblock <database> <number> --format json
 
+# Retry only after diagnosis, fixing the cause, and approval for this exact request
+pscale deploy-request retry <database> <number> --org <org> --format json
+
 # Deploy (apply changes)
 pscale deploy-request deploy <database> <number>
 
-# Update deploy request settings (edit is an alias)
+# Update deploy request settings
 pscale deploy-request update <database> <number> --enable-auto-apply --format json
 pscale deploy-request update <database> <number> --auto-delete-branch=false --format json
+
+# Enable aggressive cutover only after inspecting blockers/transaction impact and exact-target approval
+pscale deploy-request update <database> <number> --org <org> --aggressive-cutover --format json
+# A successful retry/settings write is not completion; verify deployment and operations read-back
 
 # Explicit strategy (parallel requires database support and approval)
 pscale deploy-request deploy <database> <number> --strategy parallel --wait
@@ -119,7 +126,7 @@ Treat `enough_storage: false`, a paused queue, a non-deployable deployment, or a
 
 ### Update deploy request settings
 
-Use canonical `pscale deploy-request update`; `edit` remains an alias. This is an operational write because auto-apply changes cutover behavior and auto-delete controls whether the source branch is deleted after a successful deploy. At least one setting flag is required, and omitted flags are not sent.
+Use canonical `pscale deploy-request update`. For backwards compatibility, `edit` remains an alias; do not use it for operational examples. This is an operational write because auto-apply changes cutover behavior, auto-delete controls whether the source branch is deleted after a successful deploy, and aggressive cutover can terminate blocking queries and transactions. At least one setting flag is required, and omitted flags are not sent.
 
 ```bash
 # Inspect first
@@ -137,6 +144,54 @@ pscale deploy-request show <database> <number> --org <org> --format json
 ```
 
 Never pass `--enable-auto-apply` and `--disable-auto-apply` together; `--auto-delete-branch` can be updated on its own. Use `--auto-delete-branch=false` to preserve the branch; `--auto-delete-branch` enables deletion after completion. Do not use the `edit` alias in prose or scripts except when explaining backwards compatibility.
+
+Updates are not atomic across settings: the CLI calls auto-apply, then auto-delete-branch, then aggressive-cutover endpoints when those flags are present. If a later call fails, earlier writes can remain applied. Re-read all requested settings after any failure or ambiguous response before deciding what still needs an approved change; do not replay the whole command blindly.
+
+### Per-request aggressive cutover (Vitess)
+
+`create --aggressive-cutover` and `update --aggressive-cutover` opt one deploy request into killing blocking queries and transactions on the **first cutover attempt**, instead of retrying for up to an hour. This does not change the database-level `pscale database aggressive-cutover` setting or other requests. It is separate from `force-cutover`, the emergency action for an already-blocked cutover, and from auto-apply, which controls the gated schema swap.
+
+Before enabling it, inspect the database policy, target branch/request, diff, deployment state, and operations as applicable. Explain the potential application errors and transaction interruption, and obtain explicit approval for the exact target and setting. There is no interactive confirmation for these flags. Do not enable aggressive cutover automatically to fix a slow migration.
+
+```bash
+# Inspect database policy before creating or updating the request
+pscale database aggressive-cutover show <database> --org <org> --format json
+
+# Create only after approval for this branch and cutover behavior
+pscale deploy-request create <database> <branch> --org <org> \
+  --aggressive-cutover --format json
+
+# For an existing request, inspect before changing it
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request operations <database> <number> --org <org> --format json
+
+# After approval: enable this request's opt-in
+pscale deploy-request update <database> <number> --org <org> \
+  --aggressive-cutover --format json
+# Alternative approved change: clear this request's opt-in
+pscale deploy-request update <database> <number> --org <org> \
+  --aggressive-cutover=false --format json
+
+# Use the number returned by create; verify state and the persisted setting
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+```
+
+Create sends `aggressive_cutover: true` only when enabled. Omission and `create --aggressive-cutover=false` both omit the field, so false at creation cannot override an enabled database policy. Update sends `{ "enable": true }` or `{ "enable": false }` to the request's aggressive-cutover endpoint only when the flag is supplied. Clearing the opt-in does not disable the database policy; inspect both settings rather than assuming false guarantees non-aggressive behavior.
+
+Upstream API guidance allows changing the opt-in while the deployment state is `pending`, `ready`, `error`, `no_changes`, or `queued`, and says the API rejects changes after submission. This is an API/documentation restriction, not a client-enforced state allowlist. Check current deployment state before the write and stop on rejection rather than forcing a different lifecycle action.
+
+Read-back paths differ by command:
+
+| JSON command | Cutover field | Deployment state |
+| --- | --- | --- |
+| `show` (also create/update responses) | `.deployment.aggressive_cutover` | `.deployment.state` |
+| `deployment` | `.aggressive_cutover` | `.state` |
+| `queue` | `.[].aggressive_cutover` | `.[].state` |
+
+For queue read-back, select the entry with the matching `deploy_request_number`; an absent entry is not proof the setting is false. Missing/null deployment data is also not false. Human `show`, `deployment`, and `queue` tables expose an `aggressive_cutover` column. Confirm the returned setting and current state after each write; a successful setting update does not mean deployment or cutover has completed.
 
 ### Unblock after a failed deploy or revert
 
@@ -157,6 +212,28 @@ pscale deploy-request queue <database> --org <org> --format json
 ```
 
 Unblocking does not repair the failed migration, retry it, apply a gated cutover, or resolve failed deploy checks. It marks the failed deploy/revert complete so later queue work can proceed; the API determines whether the failed action was a deploy or revert. Treat it as a production operational write and preserve the failure evidence before running it.
+
+### Retry failed operations without unblocking the queue
+
+`pscale deploy-request retry` requests a retry of failed operations on an in-progress Vitess deployment. It is distinct from `unblock`, which marks a failed deploy/revert complete so later queue work can proceed, and from `revert`. Retry is a production operational write with no confirmation prompt or wait flag; a successful response means the retry was requested, not completed.
+
+```bash
+# Diagnose and preserve the failure evidence before retrying
+pscale deploy-request show <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request operations <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+
+# After fixing the cause and receiving explicit approval for this exact request
+pscale deploy-request retry <database> <number> --org <org> --format json
+
+# Verify operation and deployment state; continue read-only monitoring
+pscale deploy-request operations <database> <number> --org <org> --format json
+pscale deploy-request deployment <database> <number> --org <org> --format json
+pscale deploy-request queue <database> --org <org> --format json
+```
+
+The CLI delegates eligibility to the API rather than validating a deployment-state allowlist locally. Stop on API rejection, repeated failure, or ambiguous state; inspect fresh operation/deployment evidence rather than automatically retrying, unblocking, forcing cutover, or reverting.
 
 ### Manage per-deploy throttling
 
@@ -382,4 +459,4 @@ pnpm drizzle-kit introspect
 
 ## References
 
-See `references/commands.md` for complete `pscale deploy-request` command reference.
+See `references/commands.md` for the `pscale deploy-request` command reference and `references/retry-command.md` for the complete failed-operation retry help surface.

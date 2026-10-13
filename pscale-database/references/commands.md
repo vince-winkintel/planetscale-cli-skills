@@ -1,3 +1,5 @@
+The `pscale keyspace update-settings` help fence is a complete current capture from the official, checksum-verified PlanetScale CLI v0.344.0 macOS arm64 binary with `NO_COLOR=1`, normalizing only trailing whitespace. Archive SHA-256: `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`. Other sections retain their stated earlier provenance.
+
 > Help fences in this file have mixed provenance. Each section states the release binary used for its exact capture or verification. v0.333.0 captures use the official macOS arm64 release archive SHA-256 `6544cc6fa5d82dc78744579cc3a54204c1cfde352bf13ceae340bd7df5799771`, after normalizing only trailing whitespace.
 
 ## pscale database
@@ -941,7 +943,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale keyspace settings
 
-The `pscale keyspace settings` and `pscale keyspace update-settings` help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`.
+The `pscale keyspace settings` help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`.
 
 ```text
 Show the settings for a keyspace
@@ -979,9 +981,9 @@ Flags:
   -h, --help                                                 help for update-settings
   -i, --interactive                                          Run the command in interactive mode
       --max-rollout int                                      Maximum number of shards to roll out changes to concurrently (1-32). (default 1)
-      --max-storage int                                      The maximum size in bytes that dedicated disks may autoscale to.
+      --max-storage string                                   The maximum size that dedicated disks may autoscale to, in bytes or with a unit such as 200GiB or 1TiB. Must be at least 12 GiB and no smaller than the current disk size. Cannot be raised above the organization default (4 TiB, or 16 TiB for managed tenancy). Read-only while PlanetScale staff have raised it above that default.
       --replication-durability-constraints-strategy string   By default, replication is configured to maximize safety and data integrity. This setting may be relaxed to favor increased performance and reduced replication lag. Options: maximum, dynamic, minimum (default "maximum")
-      --storage int                                          The disk size in bytes to recreate disks at. Must be a multiple of 1 GiB. Only accepted when the disk scaling strategy is shrink, either passed with --disk-scaling-strategy or already set on the keyspace.
+      --storage string                                       The disk size to recreate disks at, in bytes or with a unit such as 200GiB or 1TiB. Must be a multiple of 1 GiB. Only accepted when the disk scaling strategy is shrink, either passed with --disk-scaling-strategy or already set on the keyspace.
       --throttler-enabled                                    Pause schema migrations and VReplication workflows when replication lag rises above the threshold. (default true)
       --throttler-threshold float                            Replication lag in seconds above which migrations and workflows are paused. (default 5)
       --vreplication-batch-replication-events                When enabled, sends fewer queries to MySQL to improve performance.

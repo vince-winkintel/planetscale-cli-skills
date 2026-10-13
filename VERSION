@@ -1,7 +1,19 @@
-1.0.32
+1.0.33
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.345.0
+  - Reviewed the official release and full compare `v0.344.0...v0.345.0` on 2026-10-13; upstream tag commit `2e74e6ee283dc5c709a274c178fabef0beddf467`.
+  - Added guarded per-deploy-request aggressive cutover for create/update (edit alias), create omission versus explicit update payloads, API-side state restrictions, partial multi-setting failure handling, and command-specific read-back paths.
+  - Added MySQL/Vitess schema-refresh readiness guidance: immediate lookup, 2-second polling, a 2-minute readiness bound, actionable snapshot timeout JSON, and preserved polling failures.
+  - Captured complete affected help plus related parents, aliases, deployment inspection, database policy, and schema-snapshot context from the official macOS arm64 binary in a credential-free environment; verified published archive SHA-256 `d774eb31cd764dee4c01a1671f3ea17e1d3cb9b8aefe829e82cce2c3358fe028` and binary/archive equality. Unchanged fences retain their earlier provenance.
+  - Review remediation: require a known boolean enabled state for every Postgres extension catalog entry before toggling, and accurately describe omission of unknown non-target state. The CLI's schema-readiness wait timeout means the refresh was accepted; an API-supplied code alone does not. Recovery uses at most 30 read-only checks, 4-second spacing, and a 2-minute overall bound. Operational examples use canonical update, quick-reference retry/aggressive-cutover writes carry diagnosis/approval gates, and branch-parent capture provenance is explicit. Exact help and compatibility-alias audit coverage remain unchanged.
+  - Package version remains 1.0.33 pending and unpublished; the v0.344.0 refresh below is preserved.
+- PlanetScale CLI v0.344.0
+  - Reviewed the official release and cumulative compare `v0.343.0...v0.344.0` on 2026-10-10; upstream tag commit `102ccd0c1b9dae901acc03c5e5218c4eb6d79b36`.
+  - Added guarded Postgres branch extension toggles and Vitess VTGate parameter rollouts, with asynchronous verification, pagination, concurrent-write warnings, and draft cleanup boundaries.
+  - Added approved failed-operation retry guidance distinct from unblocking a deploy queue; updated Postgres parameter filters, keyspace size-unit and staff-managed-limit handling, and device-login/keyring diagnostics.
+  - Re-captured complete affected help surfaces and re-ran related parents, subcommands, and aliases from the official macOS arm64 archive; verified published SHA-256 `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`.
 - PlanetScale CLI v0.342.0 and v0.343.0
   - Reviewed both upstream releases and the cumulative compare `v0.341.0...v0.343.0` on 2026-10-03.
   - Added guarded VTTablet/MySQL keyspace-parameter inventory, set/reset, rollout inspection, and pending-change cancellation guidance.

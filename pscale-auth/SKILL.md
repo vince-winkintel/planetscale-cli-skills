@@ -41,7 +41,9 @@ For agentic or scripted onboarding, prefer JSON output so required user actions 
 pscale auth login --format json
 ```
 
-If JSON output indicates user action is required, relay only the required action/URL to the user and do not print or store credentials.
+JSON login emits its initial pending authorization envelope to stderr and its final result to stdout; inspect both without capturing credentials. If output indicates user action is required, relay only the required action/URL to the user and do not print or store credentials. Device authorization expiry or denial requires a deliberate new login attempt, not repeated polling of the same code.
+
+In human mode, **Access approved. Saving credentials to your system keyring** means browser approval finished and credential persistence may be waiting on a keyring unlock; it is not still waiting for browser approval. Do not enter a password or operate a keyring dialog on the user's behalf. Treat token-save failure as an unconfirmed login, distinguish it from organization-setup failure after credentials were saved, and verify access with read-only `pscale auth check --format json` before switching organizations or using the session. For unattended jobs, use an existing approved service-token configuration rather than starting interactive login.
 
 The CLI resolves its built-in OAuth client values at runtime and omits their values from `pscale auth login --help`. Do not scrape, record, or reproduce OAuth credentials from help output. Treat `--client-id` and `--client-secret` as advanced overrides: use them only when the user explicitly supplies a trusted custom OAuth client, and pass the secret through a secret-safe mechanism rather than shell history or logs.
 
