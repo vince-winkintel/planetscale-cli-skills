@@ -34,12 +34,19 @@ pscale deploy-request queue <database> --format json
 # Unblock only after a failed deploy/revert is diagnosed and approved
 pscale deploy-request unblock <database> <number> --format json
 
+# Retry only after diagnosis, fixing the cause, and approval for this exact request
+pscale deploy-request retry <database> <number> --org <org> --format json
+
 # Deploy (apply changes)
 pscale deploy-request deploy <database> <number>
 
-# Update deploy request settings (edit is an alias)
+# Update deploy request settings
 pscale deploy-request update <database> <number> --enable-auto-apply --format json
 pscale deploy-request update <database> <number> --auto-delete-branch=false --format json
+
+# Enable aggressive cutover only after inspecting blockers/transaction impact and exact-target approval
+pscale deploy-request update <database> <number> --org <org> --aggressive-cutover --format json
+# A successful retry/settings write is not completion; verify deployment and operations read-back
 
 # Explicit strategy (parallel requires database support and approval)
 pscale deploy-request deploy <database> <number> --strategy parallel --wait
@@ -119,7 +126,7 @@ Treat `enough_storage: false`, a paused queue, a non-deployable deployment, or a
 
 ### Update deploy request settings
 
-Use canonical `pscale deploy-request update`; `edit` remains an alias. This is an operational write because auto-apply changes cutover behavior, auto-delete controls whether the source branch is deleted after a successful deploy, and aggressive cutover can terminate blocking queries and transactions. At least one setting flag is required, and omitted flags are not sent.
+Use canonical `pscale deploy-request update`. For backwards compatibility, `edit` remains an alias; do not use it for operational examples. This is an operational write because auto-apply changes cutover behavior, auto-delete controls whether the source branch is deleted after a successful deploy, and aggressive cutover can terminate blocking queries and transactions. At least one setting flag is required, and omitted flags are not sent.
 
 ```bash
 # Inspect first
@@ -172,7 +179,7 @@ pscale deploy-request deployment <database> <number> --org <org> --format json
 pscale deploy-request queue <database> --org <org> --format json
 ```
 
-Create sends `aggressive_cutover: true` only when enabled. Omission and `create --aggressive-cutover=false` both omit the field, so false at creation cannot override an enabled database policy. Update (`edit` alias) sends `{ "enable": true }` or `{ "enable": false }` to the request's aggressive-cutover endpoint only when the flag is supplied. Clearing the opt-in does not disable the database policy; inspect both settings rather than assuming false guarantees non-aggressive behavior.
+Create sends `aggressive_cutover: true` only when enabled. Omission and `create --aggressive-cutover=false` both omit the field, so false at creation cannot override an enabled database policy. Update sends `{ "enable": true }` or `{ "enable": false }` to the request's aggressive-cutover endpoint only when the flag is supplied. Clearing the opt-in does not disable the database policy; inspect both settings rather than assuming false guarantees non-aggressive behavior.
 
 Upstream API guidance allows changing the opt-in while the deployment state is `pending`, `ready`, `error`, `no_changes`, or `queued`, and says the API rejects changes after submission. This is an API/documentation restriction, not a client-enforced state allowlist. Check current deployment state before the write and stop on rejection rather than forcing a different lifecycle action.
 

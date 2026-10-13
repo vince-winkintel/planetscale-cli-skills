@@ -254,11 +254,18 @@ Use either `--period` or paired `--from`/`--to`, not both. `--level`, `--server`
 pscale branch extensions list <database> <branch> --org <org> --format json
 ```
 
-The catalog includes `can_enable`, `requirements` (including `postgres_image_version` when provided), and `enabled`, which can be absent when its state is unavailable. Do not depend on removed `available`, `unavailable_reason`, or `loader` fields; use null-safe JSON inspection and review the current requirements. Toggle only an exact catalog name with `can_enable: true` and a known enabled state. Enabling or disabling queues an asynchronous branch change request and may restart the database; it is not the SQL `CREATE EXTENSION` / `DROP EXTENSION` installed state inside each logical database. Neki extensions belong to configuration profiles (`pscale-neki`), not this branch-level toggle.
+The catalog includes `can_enable`, `requirements` (including `postgres_image_version` when provided), and `enabled`, which can be absent when its state is unavailable. Do not depend on removed `available`, `unavailable_reason`, or `loader` fields; use null-safe JSON inspection and review the current requirements. Before any toggle, require a known boolean `enabled` value for **every** entry in the complete catalog, not just the target. If any entry has missing/null `enabled`, stop and investigate; do not assume it is disabled or reconstruct the selection by guessing. Toggle only an exact catalog name with `can_enable: true` and a known enabled state. Enabling or disabling queues an asynchronous branch change request and may restart the database; it is not the SQL `CREATE EXTENSION` / `DROP EXTENSION` installed state inside each logical database. Neki extensions belong to configuration profiles (`pscale-neki`), not this branch-level toggle.
 
 ```bash
 # Inspect the complete selection, topology, and current branch change request
 pscale branch extensions list <database> <branch> --org <org> --format json
+
+# Fail closed unless every catalog entry has a known boolean enabled state
+set -o pipefail
+pscale branch extensions list <database> <branch> --org <org> --format json |
+  jq -e -s 'length == 1 and (.[0] | type == "array" and length > 0 and all(.[]; (.enabled | type) == "boolean"))' \
+  > /dev/null || { printf '%s\n' 'Stop: extension selection is unavailable or incomplete.' >&2; exit 1; }
+
 pscale branch infra <database> <branch> --org <org> --format json
 pscale branch resize status <database> <branch> --org <org> --format json
 
@@ -274,7 +281,7 @@ pscale branch resize status <database> <branch> --org <org> --format json
 pscale branch extensions list <database> <branch> --org <org> --format json
 ```
 
-The CLI preserves the other enabled extensions by reading and resending the complete selection. Avoid concurrent extension changes: a stale selection can overwrite another operator's change. An already-matching selection returns `result: "no_change"` in JSON. A timeout or failed request does not prove nothing changed; inspect `resize status`, the complete catalog selection, and branch health before any retry. Review application dependencies and per-database installed-extension state before disabling; do not automatically drop SQL extensions or infer that enabling installed them.
+The CLI reads the catalog and resends a replacement selection containing only other entries with `enabled: true`, plus the target when enabling it. It checks unavailable state only for the target; other entries with missing/null `enabled` are omitted and could be unintentionally disabled. The all-entry preflight above is an operator safety requirement, not a guarantee enforced by the toggle command. Re-read the complete catalog immediately before the approved toggle and stop if any enabled state is unknown. Avoid concurrent extension changes: a stale selection can overwrite another operator's change. An already-matching selection returns `result: "no_change"` in JSON. A timeout or failed request does not prove nothing changed; inspect `resize status`, the complete catalog selection, and branch health before any retry. Review application dependencies and per-database installed-extension state before disabling; do not automatically drop SQL extensions or infer that enabling installed them.
 
 ### Rename or protect a branch
 
@@ -516,7 +523,7 @@ pscale branch show <database> <branch> --org <org> --format json
 pscale branch routing-rules get <database> <branch> --org <org> --format json
 ```
 
-Success JSON is `{ "result": "schema refreshed" }`. If the wait expires while the snapshot is still unready, the command fails with `status: "action_required"`, `issues[0].code: "schema_snapshot_not_ready"`, and one `next_steps` instruction to wait for readiness, then retry. The refresh may already have been accepted. Use bounded read-only checks of `.schema_ready`; once true, retry the follow-up reader instead of repeatedly issuing refresh writes. If readiness stays false, stop and investigate.
+Success JSON is `{ "result": "schema refreshed" }`. If the wait expires while the snapshot is still unready, the command fails with `status: "action_required"`, `issues[0].code: "schema_snapshot_not_ready"`, and one `next_steps` instruction to wait for readiness, then retry. When the CLI's readiness-wait timeout occurs, the refresh request was already accepted; do not re-issue it. The code `schema_snapshot_not_ready` alone is not proof of acceptance: API-supplied errors can preserve the same code, and an initial refresh-request failure returns before the wait starts. Distinguish the timeout stage from a request/polling error using the command outcome and error details; never automatically repeat a refresh write on a timeout or ambiguous outcome. For recovery, perform at most 30 read-only `branch show --format json` checks of `.schema_ready`, with 4 seconds between checks and an overall 2-minute deadline, stopping at whichever limit is reached first. Stop on an API/command failure or missing/null readiness instead of treating it as false. Once readiness is true, retry only the follow-up reader, not the refresh write. If readiness stays false at the bound, stop and investigate; do not restart the loop automatically.
 
 Polling failures are not automatically snapshot timeouts: branch-not-found returns immediately; other lookup errors are retried during the wait and the outstanding poll error is returned at the deadline. A successful lookup clears the saved error. Preserve the actual error/code and diagnose it before retrying; do not turn network/API failures into a generic readiness loop. For routing-rule changes, re-read snapshot and live routing and rebuild the full proposed replacement after readiness, then obtain the write approval described below.
 
