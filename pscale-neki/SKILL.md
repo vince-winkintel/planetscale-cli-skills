@@ -57,6 +57,16 @@ pscale branch router sizes <database> <branch> --org <org> --format json
 pscale branch admin sizes <database> <branch> --org <org> --format json
 ```
 
+## Parameter Update Requirements
+
+Read the exact target's parameter catalog before proposing parameter writes, using the existing reads in [Configuration Profiles](#configuration-profiles) and [Sidecars And Admin](#sidecars-and-admin).
+
+These inventories add a human `REQUIRES UPDATE` column; Neki admin and sidecar `show` views also render those catalogs. `Yes` means the decoded `requires_update` pointer was non-null; `No` means it was null, whether the API sent an explicit null or omitted the field. It is distinct from `RESTART` and the configuration-profile catalog's `REQUIRED` column. Do not parse table column positions to decide whether a parameter is safe to change.
+
+With `--format json`, each catalog entry retains `requires_update` as a string or `null`, not the display boolean. Preserve the exact string (for example, `configuration_profile` or `cluster`) and unknown future values; even an empty string is non-null and therefore displays `Yes`. Admin and sidecar `show` JSON embeds the same entries in `parameters`. A supported CLI always serializes the `requires_update` key for each entry, without omitting nulls: API omission and explicit null both become `requires_update: null`. A missing key therefore indicates an older CLI or incompatible output, not an API-reported absence of a requirement; stop, verify compatibility, upgrade if needed, and re-read the catalog. Neither `null` nor table `No` is positive evidence that no resource update is required.
+
+For a non-null requirement, stop the proposed parameter write and investigate the indicated resource update. Do not guess a maintenance command, introduce an unsupported flag, or automatically apply an update. Obtain separate exact-target approval for any operational update, follow the applicable asynchronous change queue to completion, and re-read the catalog before considering the parameter change. The CLI does not check `requires_update` before `config-profile`, `sidecar`, or `admin update --parameters`; this agent-side stop is the local update-requirement gate, and any server enforcement is left to the API. A null requirement is not approval and does not imply `restart: false`; retain the existing restart, cost, concurrency, and read-back gates.
+
 ## Creation And Access
 
 Create Neki databases through `pscale-database`; that skill owns the complete command and operational workflow. Before handing off, confirm region, cluster size, replica count, storage bounds, and cost impact. The help documents `0` for single-node Postgres, not Neki, so confirm the supported Neki replica count and use `2` or more for high availability. Treat a timeout or interruption as an unconfirmed provisioning outcome and inspect `database show` before retrying.
@@ -133,7 +143,7 @@ pscale branch shard delete <database> <branch> <shard-id> --org <org> \
 
 ## Configuration Profiles
 
-Profiles define infrastructure shared by groups of Neki shards. Inspect the current profile, default, parameter catalog, and extension catalog before changing capacity or behavior.
+Profiles define infrastructure shared by groups of Neki shards. Inspect the current profile, default, parameter catalog, and extension catalog before changing capacity or behavior. Before `update --parameters`, apply the [`requires_update` preflight](#parameter-update-requirements) to the exact profile catalog below; stop on non-null requirements, and never treat `null` / `No` as proof that no update is needed.
 
 ```bash
 pscale branch config-profile list <database> <branch> --org <org> --format json
@@ -193,7 +203,7 @@ SKU names such as `NKR-5` also accept underscores. Router changes are asynchrono
 
 ## Sidecars And Admin
 
-Each configuration profile has one connection-pool sidecar. Identify it by sidecar ID or profile name. Sidecars cannot be created or deleted independently.
+Each configuration profile has one connection-pool sidecar. Identify it by sidecar ID or profile name. Sidecars cannot be created or deleted independently. Before `sidecar update --parameters`, read that sidecar's catalog below and apply the [`requires_update` preflight](#parameter-update-requirements); stop on non-null requirements, and never treat `null` / `No` as proof that no update is needed.
 
 ```bash
 pscale branch sidecar list <database> <branch> --org <org> --format json
@@ -203,7 +213,7 @@ pscale branch sidecar update <database> <branch> <sidecar> --org <org> \
   --parameters pgbouncer.default_pool_size=20 --format json
 ```
 
-Each Neki cluster also has one failover/recovery admin. It cannot be listed, created, or deleted independently.
+Each Neki cluster also has one failover/recovery admin. It cannot be listed, created, or deleted independently. Before `admin update --parameters`, read that admin's catalog below and apply the [`requires_update` preflight](#parameter-update-requirements); stop on non-null requirements, and never treat `null` / `No` as proof that no update is needed.
 
 ```bash
 pscale branch admin show <database> <branch> --org <org> --format json
