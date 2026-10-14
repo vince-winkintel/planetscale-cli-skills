@@ -1,7 +1,13 @@
-1.0.33
+1.0.34
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.346.0
+  - Reviewed the official release and full compare `v0.345.0...v0.346.0` on 2026-10-14; upstream tag commit `41b7bcf2b34f853154388a49aaab96653aa1eb11`.
+  - Documented the REQUIRES UPDATE column for Postgres branch and Neki configuration-profile, sidecar, and admin parameter inventories, including detail views that embed those catalogs.
+  - Preserved the JSON contract: `requires_update` is a nullable string, not the table's boolean; distinguish update requirements from `restart` and `required`, preserve unknown values, and gate parameter writes on a fresh supported catalog instead of treating a missing field or column position as authorization.
+  - Re-executed 21 credential-free help/version commands and compared 17 complete stored fences line-for-line after normalizing only trailing whitespace, plus three `params` aliases. All help surfaces were unchanged; no hand-edited capture excerpts or invented production output.
+  - Verified the official macOS arm64 archive against its published SHA-256 `6e8a3f064f45ad29f187ba3dda24ad3a45328bd11a200b89c200d06bdc5c3a6b`. Pending package 1.0.34; no release or registry publication by this refresh.
 - PlanetScale CLI v0.345.0
   - Reviewed the official release and full compare `v0.344.0...v0.345.0` on 2026-10-13; upstream tag commit `2e74e6ee283dc5c709a274c178fabef0beddf467`.
   - Added guarded per-deploy-request aggressive cutover for create/update (edit alias), create omission versus explicit update payloads, API-side state restrictions, partial multi-setting failure handling, and command-specific read-back paths.

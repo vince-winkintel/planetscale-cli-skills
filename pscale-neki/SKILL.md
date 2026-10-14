@@ -57,6 +57,22 @@ pscale branch router sizes <database> <branch> --org <org> --format json
 pscale branch admin sizes <database> <branch> --org <org> --format json
 ```
 
+## Parameter Update Requirements
+
+Read the exact target's parameter catalog before proposing profile, sidecar, or admin parameter writes:
+
+```bash
+pscale branch config-profile parameters <database> <branch> <profile> --org <org> --format json
+pscale branch sidecar parameters <database> <branch> <sidecar> --org <org> --format json
+pscale branch admin parameters <database> <branch> --org <org> --format json
+```
+
+These inventories add a human `REQUIRES UPDATE` column; detail views that render the same parameter catalogs also show it. `Yes` means `requires_update` was non-null, and `No` means it was null. It is distinct from `RESTART` and the configuration-profile catalog's `REQUIRED` column. Do not parse table column positions to decide whether a parameter is safe to change.
+
+With `--format json`, each catalog entry retains `requires_update` as a string or `null`, not the display boolean. Preserve the exact string (for example, `configuration_profile` or `cluster`) and unknown future values; even an empty string is non-null and therefore displays `Yes`. Admin and sidecar `show` JSON embeds the same entries in `parameters`. If the field is missing, verify CLI compatibility and re-read a supported catalog rather than interpreting absence as no update requirement.
+
+For a non-null requirement, stop the proposed parameter write and investigate the indicated resource update. Do not guess a maintenance command, introduce an unsupported flag, or automatically apply an update. Obtain separate exact-target approval for any operational update, follow the applicable asynchronous change queue to completion, and re-read the catalog before considering the parameter change. A null requirement is not approval and does not imply `restart: false`; retain the existing restart, cost, concurrency, and read-back gates.
+
 ## Creation And Access
 
 Create Neki databases through `pscale-database`; that skill owns the complete command and operational workflow. Before handing off, confirm region, cluster size, replica count, storage bounds, and cost impact. The help documents `0` for single-node Postgres, not Neki, so confirm the supported Neki replica count and use `2` or more for high availability. Treat a timeout or interruption as an unconfirmed provisioning outcome and inspect `database show` before retrying.

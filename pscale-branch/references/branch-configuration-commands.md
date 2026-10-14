@@ -1,5 +1,7 @@
 # Branch extension and parameter commands
 
+The complete `pscale branch parameters list` fence was re-executed and verified line-for-line unchanged against the official macOS arm64 release binary for the parameter-output refresh. Published archive SHA-256: `6e8a3f064f45ad29f187ba3dda24ad3a45328bd11a200b89c200d06bdc5c3a6b`; only trailing whitespace was normalized. Related branch/parameters parents and resize/status help were also unchanged. The new `REQUIRES UPDATE` table column and nullable-string JSON contract are output behavior, not new help flags; see the parameter workflow in [../SKILL.md](../SKILL.md). Release history is in `VERSION`.
+
 All help fences below are complete output from the official, checksum-verified PlanetScale CLI v0.344.0 macOS arm64 binary with `NO_COLOR=1`, normalizing only trailing whitespace. Archive SHA-256: `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`. Other branch parent and capacity help surfaces are in [commands.md](commands.md).
 
 ## pscale branch extensions enable

@@ -1,5 +1,7 @@
 Exact help output below was captured from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1` (archive SHA-256 `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`) after normalizing only trailing whitespace. The branch-wide change-request surfaces are separately identified as v0.334.0 captures.
 
+For the parameter-output refresh, the complete `config-profile`, `sidecar`, and `admin` parent, `parameters`, `show`, and `update` fences below were re-executed and verified line-for-line unchanged against the official macOS arm64 release binary. All three `params` aliases were independently executed and matched their canonical parameter help. Published archive SHA-256: `6e8a3f064f45ad29f187ba3dda24ad3a45328bd11a200b89c200d06bdc5c3a6b`; only trailing whitespace was normalized. The new `REQUIRES UPDATE` column and nullable-string JSON field are output behavior, not new help flags; see [../SKILL.md](../SKILL.md). Other fences retain their earlier provenance; release history is in `VERSION`.
+
 ## pscale branch changes
 
 The four branch-wide change-request help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
