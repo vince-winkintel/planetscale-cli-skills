@@ -7,6 +7,8 @@ description: Manage dedicated PostgreSQL read replicas with PlanetScale CLI. Use
 
 Manage dedicated read capacity for a PlanetScale PostgreSQL branch. These named resources are separate from the primary branch cluster's replicas and from Vitess/MySQL read-only regions.
 
+For **Neki read-only replicas**, use `pscale-neki`: per-shard capacity is configured with `branch config-profile create/update --read-only-replicas`, not dedicated PostgreSQL replica resources. Confirm the engine before choosing a capacity workflow.
+
 Use the canonical `pscale dedicated-read-replica` command. The hidden `pscale read-only-replica` compatibility command remains available but prints a deprecation warning on stderr; do not introduce it into new automation.
 
 ## Read before writing
