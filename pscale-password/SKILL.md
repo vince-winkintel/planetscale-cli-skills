@@ -131,6 +131,8 @@ Postgres and Neki databases use roles instead of Vitess branch passwords. `pscal
 
 This workflow intentionally lives here because no dedicated `pscale-role` skill exists, and both command groups manage branch credentials.
 
+If `role default` receives `NOT_FOUND` and a separate branch lookup succeeds, the CLI distinguishes **default credentials not yet created** from a missing database or branch. With `--format json`, it emits `status: "action_required"`, an `issues` entry with `code: "NOT_FOUND"`, and proposed `next_steps`, then exits with status 1. Treat those next steps as a proposal, not authorization: inspect the exact org/database/branch and ask for explicit approval to create default credentials before using `role reset-default`. If credentials already exist, resetting rotates them and can break existing connections. Never automatically run the suggested `--force` command, and never expose the returned password or connection URL. If branch lookup also fails, investigate the original not-found/permissions condition rather than assuming credentials need creation.
+
 ```bash
 pscale role list <database> <branch> \
   --name production \

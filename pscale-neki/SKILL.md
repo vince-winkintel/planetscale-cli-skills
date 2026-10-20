@@ -158,6 +158,12 @@ pscale branch config-profile create <database> <branch> <profile> --org <org> \
 pscale branch config-profile update <database> <branch> <profile> --org <org> \
   --parameters pgconf.max_connections=200 --format json
 
+# Independently approved read-only capacity changes, not voting-replica changes
+pscale branch config-profile create <database> <branch> <profile> --org <org> \
+  --read-only-replicas 2 --format json
+pscale branch config-profile update <database> <branch> <profile> --org <org> \
+  --read-only-replicas 0 --format json
+
 # Change the branch default profile (separate approval)
 pscale branch config-profile set-default <database> <branch> <profile> --org <org> --format json
 
@@ -173,6 +179,10 @@ pscale branch config-profile update <database> <branch> <profile> --org <org> \
 ```
 
 Create/update sends only explicitly supplied flags. Storage flags use bytes for `--min-storage` and `--max-storage`, MiB/s for `--storage-throughput`, and explicit booleans for `--storage-autoscaling`. Repeat `--parameters namespace.name=value` for multiple settings.
+
+`--read-only-replicas` sets the total read-only replicas **per shard** in this profile (supported range 0–8), excluding the primary and independently of `--replicas`. Creation defaults to zero. On update, omit the flag to preserve the current count; an explicit `--read-only-replicas 0` requests removal. The CLI sends an explicitly provided count, including zero, without a local range check, so reject out-of-range input before proposing the write. This is Neki profile capacity, not the dedicated PostgreSQL read-replica command family.
+
+Before changing the count, inspect the profile and shards using it, calculate the capacity/cost and availability impact, and obtain exact-target approval. Follow the asynchronous change-ID procedure below and verify the persisted count with `config-profile show`. Profile and change JSON expose `read_only_replicas`; change JSON also preserves `previous_read_only_replicas`, while human/CSV output adds a read-only-replica column. Do not parse fixed column positions or confuse these counts with voting replicas.
 
 Every profile write can be asynchronous. Before a write, page through unfiltered `pscale branch changes list <database> <branch> --org <org> --target-type config-profile --page <n> --per-page 100 --format json` results until a page is empty; block the write if any entry has `completed_at: null`, and snapshot all existing change IDs. After the write, page through the same list again and diff the IDs. If the write is asynchronous, require exactly one new entry matching the intended profile; do not guess when no unique request can be identified. Poll it with `pscale branch changes show <database> <branch> <change-id> --org <org> --format json` until `completed_at` is non-null, then read the affected profile or default back. Cancel only under the branch-wide `state: "pending"` plus `can_delete: true` rule above and only after approval for that exact change ID.
 

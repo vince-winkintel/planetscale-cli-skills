@@ -2,6 +2,8 @@ Exact help output below was captured from the official, checksum-verified Planet
 
 For the parameter-output refresh, the complete `config-profile`, `sidecar`, and `admin` parent, `parameters`, `show`, and `update` fences below were re-executed and verified line-for-line unchanged against the official PlanetScale CLI v0.346.0 macOS arm64 release binary. All three `params` aliases were independently executed and matched their canonical parameter help. Published archive SHA-256: `6e8a3f064f45ad29f187ba3dda24ad3a45328bd11a200b89c200d06bdc5c3a6b`; only trailing whitespace was normalized. The new `REQUIRES UPDATE` column and nullable-string JSON field are output behavior, not new help flags; see [../SKILL.md](../SKILL.md). Other fences retain their earlier provenance; release history is in `VERSION`.
 
+Current read-only-replica refresh: the `config-profile create` and `update` fences have new capture provenance stated directly above each block, superseding the older update verification mentioned in the file introduction. The profile parent, list, show, default, set-default, parameters (including `params` alias), changes parent/list/show/cancel, and role parent/default/reset-default/list/get were re-executed from the same verified binary; their stored fences are unchanged. Only the two complete affected fences were replaced.
+
 ## pscale branch changes
 
 The four branch-wide change-request help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
@@ -552,6 +554,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch config-profile create
 
+The complete help fence below is captured from the official, checksum-verified PlanetScale CLI v0.347.0 macOS arm64 binary. Archive SHA-256: `7f4dc8dbda90b5a7591c9ec07c0914e7eac378b0f352d7c661c71b2154edec5d`. Only trailing whitespace was normalized.
+
 ```text
 Create a Neki configuration profile
 
@@ -565,6 +569,7 @@ Flags:
       --min-storage int                 Minimum storage size in bytes
       --postgres-major-version string   PostgreSQL major version
       --postgres-minor-version string   PostgreSQL minor version
+      --read-only-replicas int          Number of read-only replicas per shard (0-8; defaults to 0)
       --replicas int                    Number of replicas for shards in the profile
       --storage-autoscaling             Enable storage autoscaling
       --storage-iops int                Storage IOPS
@@ -586,7 +591,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch config-profile update
 
-The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.337.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `4660b4606d0232076b7e54166d15e68e3030d59c2ae22b8b1c47677e506521d7`.
+The complete help fence below is captured from the official, checksum-verified PlanetScale CLI v0.347.0 macOS arm64 binary. Archive SHA-256: `7f4dc8dbda90b5a7591c9ec07c0914e7eac378b0f352d7c661c71b2154edec5d`. Only trailing whitespace was normalized.
 
 ```text
 Update a Neki configuration profile
@@ -604,6 +609,7 @@ Flags:
       --parameters stringArray          Set a parameter as namespace.name=value; repeatable
       --postgres-major-version string   PostgreSQL major version
       --postgres-minor-version string   PostgreSQL minor version
+      --read-only-replicas int          New number of read-only replicas per shard (0-8; 0 removes them)
       --replicas int                    New number of replicas for shards in the profile
       --storage-autoscaling             Enable storage autoscaling
       --storage-iops int                Storage IOPS
