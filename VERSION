@@ -1,6 +1,15 @@
-1.0.34
+1.0.35
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- PlanetScale CLI v0.347.0
+  - Reviewed the official release and full compare `v0.346.0...v0.347.0` on 2026-10-20; upstream tag commit `56d0f2d307395009f395e447d23c6c653bdb3005`.
+  - Added Neki configuration-profile `--read-only-replicas` create/update guidance, per-shard 0–8 semantics, omission versus explicit-zero removal, independent voting replicas, capacity approval, asynchronous verification, and profile/change output contracts.
+  - Documented missing default-role credentials as an action-required JSON response and nonzero exit, preserving explicit approval before credential creation/reset and rejecting automatic execution of suggested force commands.
+  - Verified the official macOS arm64 archive against published SHA-256 `7f4dc8dbda90b5a7591c9ec07c0914e7eac378b0f352d7c661c71b2154edec5d`. Captured 20 credential-free help/version invocations and compared 17 complete stored fences, including the params alias. Replaced both affected complete create/update help blocks, normalizing only trailing whitespace; remaining checked fences are unchanged.
+  - Review remediation: distinguish typed profile-change replica deltas from branch-wide raw JSON; require non-zero pre-write and successful-change corroboration before claiming zero-count removal, and distinguish completion from success. Cover human and JSON default-role proposals, stdout parsing with action-required exit 1 distinct from generic fatal exit 2, and explicit-org approval gates. Align Neki replica routing in focused skills, umbrella guidance, and README.
+  - Re-verification: compared 21 complete stored help fences against the same checksum-verified v0.347.0 binary, plus the parameters/params alias; explicit per-file provenance retains original unchanged captures and distinguishes branch-wide from profile changes. All 22 skill frontmatters, 9 shell syntax checks, mirrored scripts, and whitespace checks passed.
+  - Pending package 1.0.35. No live PlanetScale operation, release, or registry publication by this refresh.
 
 - PlanetScale CLI v0.346.0
   - Reviewed the official release and full compare `v0.345.0...v0.346.0` on 2026-10-14; upstream tag commit `41b7bcf2b34f853154388a49aaab96653aa1eb11`.
