@@ -6,6 +6,8 @@ Read-only-replica refresh verification used the official PlanetScale CLI v0.347.
 
 ## pscale branch changes
 
+Current verification: all 61 complete Neki help fences in this file were re-executed against the official, checksum-verified v0.348.0 macOS arm64 binary (archive SHA-256 `528bb8951d4d93f7ca869850787163f5d49ba405acc58d4146b9b3427e83b7e7`); stdout is unchanged after trailing-whitespace normalization. The `config-profile`, legacy `sidecar`, and `admin` `params` aliases were also executed. `branch sidecar` is now deprecated and absent from branch-parent help, although its explicit help remains available. These fences are stdout help, not a claim that operational deprecation warnings or resource output are unchanged. Prefer `config-profile update --parameters sidecar.<name>=<value>` for new sidecar-setting workflows; see [../SKILL.md](../SKILL.md). Original unchanged fence provenance is retained below.
+
 The four branch-wide change-request help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
 
 ```text

@@ -124,6 +124,8 @@ pscale branch create my-database feature-branch --from main
 
 ## 🛠️ Automation Scripts
 
+Current Neki operations: `branch connections show/top` lists read-only router sessions; preserve incomplete-result warnings and do not use kill actions or Postgres/Vitess-only filters. `branch sidecar` is deprecated: manage sidecar parameters through `branch config-profile update --parameters sidecar.<name>=<value>` after catalog inspection and exact-target approval. Parameter inventories expose internal-setting metadata; internal settings are not manual-write candidates. See `pscale-branch` and `pscale-neki` for the complete safety workflows.
+
 All scripts in `scripts/` directory execute without loading into context (~90% token savings).
 
 ### create-branch-for-mr.sh
