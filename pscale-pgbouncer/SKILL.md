@@ -49,6 +49,8 @@ pscale pgbouncer resize <database> <branch> <name> \
   --format json
 ```
 
+Parameter objects in PgBouncer JSON also expose an `internal` boolean. Treat internal settings as managed/read-only; false alone does not establish mutability or approval, since API omission also decodes to false. Do not assume this model-field addition introduces a dedicated parameter-list command or an `INTERNAL` table column here.
+
 Inspect `show` first and surface capacity, cost, routing, restart, and connection impact. Pass only intended changes. Without `--wait`, poll the latest request:
 
 ```bash

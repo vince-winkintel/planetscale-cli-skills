@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs and query patterns; and managing Postgres/Neki maintenance, Postgres extension toggles, parameters and sizing, Vitess VTGate capacity and parameter rollouts, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, deletion protection, primary switchovers, maintenance, extension enable/disable, schema snapshot refresh/readiness, diffs, resize, VTGate parameters/update/changes, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, refresh-schema, schema_ready, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
+description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs, live connections, and query patterns; and managing Postgres/Neki maintenance, Postgres extension toggles, parameters and sizing, Vitess VTGate capacity and parameter rollouts, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, Postgres/Vitess connections and read-only Neki live sessions, deletion protection, primary switchovers, maintenance, extension enable/disable, schema snapshot refresh/readiness, diffs, resize, VTGate parameters/update/changes, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, branch connections, connections show, connections top, live connections, live sessions, kill-transaction, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, refresh-schema, schema_ready, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -85,9 +85,9 @@ pscale branch vtgate resize <database> <branch-name> \
   --format json
 pscale branch vtgate resize status <database> <branch-name> --format json
 
-# Inspect live branch connections (Postgres and Vitess)
+# Inspect live branch connections once (Postgres, Vitess, and read-only Neki)
+# For bounded headless top capture and trace safety, see Connection inspection below.
 pscale branch connections show <database> <branch-name> --format json
-pscale branch connections top <database> <branch-name>
 
 # Download a branch query patterns CSV report
 pscale branch query-patterns download <database> <branch-name> --output query-patterns.csv
@@ -358,7 +358,6 @@ pscale branch infra <database> <branch> --org <org> --format json
 # Track Neki async progress with Neki-owned reads
 pscale branch config-profile list <database> <branch> --org <org> --format json
 pscale branch router list <database> <branch> --org <org> --format json
-pscale branch sidecar list <database> <branch> --org <org> --format json
 pscale branch admin show <database> <branch> --org <org> --format json
 ```
 
@@ -366,14 +365,18 @@ Maintenance cannot start while a change request is in progress. For PostgreSQL, 
 
 ### Connection inspection and safe termination
 
-`pscale branch connections` replaced the older MySQL-only process view with a shared Postgres/Vitess connection view. Prefer JSON output for agent workflows so action IDs are explicit and not truncated.
+`pscale branch connections` supports Postgres/Vitess connections and read-only Neki client sessions across the branch's routers. Prefer JSON output for agent workflows so identifiers are explicit and not truncated. Neki supports `show` and `top`, not `kill` or `kill-transaction`; do not interpret router session PIDs or backend details as permission to terminate them.
+
+For Neki, omit Vitess `--keyspace`/`--shard` targets and Postgres `--instance`/`--role` filters: the CLI rejects these engine-specific flags. JSON connection rows can include `router_name`, `router_cell`, `router_uid`, `availability_zone`, `backend_start`, and `sidecar_backends`; the last contains shard/backend details, not independently actionable kill IDs. Preserve the top-level `warnings` array: unreachable-router warnings mean incomplete results even when the command succeeds or returns no sessions. Do not claim an empty result proves the branch has no connections. `top` is read-only for Neki, including replay; its router view has no cancellation/termination actions.
+
+On a connections-endpoint 404, the CLI automatically looks up the database and branch to distinguish a missing target from live connections not being enabled. Treat its specific missing-database, missing-branch, or disabled-live-connections message as the diagnosis. Only if the ambiguous fallback ("does not exist ... or live connections are not enabled") remains because those lookups failed, run read-only `pscale database show <database> --org <org> --format json` and `pscale branch show <database> <branch> --org <org> --format json` to investigate. Do not create or change resources to bypass the error.
 
 ```bash
 # Inspect current connections once
 pscale branch connections show <database> <branch-name> --format json
 
-# Watch live connection activity
-pscale branch connections top <database> <branch-name>
+# Capture a bounded live-activity trace in a headless agent shell
+pscale branch connections top <database> <branch-name> --org <org> --capture <trace-file> --duration 30s
 
 # Cancel a query only after confirming the query_id with the user
 pscale branch connections kill <database> <branch-name> <query-id> --query
@@ -385,7 +388,9 @@ pscale branch connections kill <database> <branch-name> <connection-id>
 pscale branch connections kill-transaction <database> <branch-name> <transaction-id>
 ```
 
-Treat `kill` and `kill-transaction` as destructive operational actions: show the selected row, explain the effect, get confirmation, run exactly one action, then verify with `connections show`.
+Prefer one-shot JSON `show` for agents. Headless `top` requires `--capture`; `--duration` bounds execution in both headless and TUI modes. Use an approved private trace path because captures can contain sensitive session/query data; do not log or commit them. In a TTY, `top` opens an interactive TUI instead.
+
+The termination examples above apply only to supported Postgres/Vitess targets, never Neki. Treat `kill` and `kill-transaction` as destructive operational actions: show the selected row, explain the effect, get confirmation, run exactly one action, then verify with `connections show`.
 
 ### Query pattern reports
 
@@ -446,7 +451,7 @@ pscale branch resize cancel <database> <branch-name> --org <org> --format json
 
 Use `parameters list --internal=false` to discover candidate parameters and review `restart`, `requires_update`, current, and default values before proposing a change. The human table adds a `REQUIRES UPDATE` column: `Yes` means the decoded `requires_update` pointer was non-null; `No` means it was null, whether the API sent an explicit null or omitted the field. This is separate from the `RESTART` column. JSON preserves `requires_update` as a string or `null`, not a boolean; retain the exact string (for example, `cluster`) rather than parsing table positions or assuming a fixed vocabulary. A non-null value, including an empty or unfamiliar string, is a reason to stop and investigate the indicated resource update before proposing a parameter write. Do not automatically run maintenance, resize capacity, or infer a new CLI flag from the indicator. A supported CLI always serializes the `requires_update` key for each entry, without omitting nulls: API omission and explicit null both become `requires_update: null`. A missing key therefore indicates an older CLI or incompatible output; stop, verify compatibility, upgrade if needed, and obtain a fresh catalog. Neither `null` nor table `No` is positive evidence that no resource update is required; neither authorizes a write or establishes that no restart is required.
 
-Do not depend on removed `immutable` or `extension` JSON fields: the API filters internal/extension parameters via `--internal=true|false` and `--extension=true|false`; omitting either filter leaves that category unfiltered. Resize preflight fetches the catalog with `internal=false` and rejects names absent from it, but does not check `requires_update` before submitting the change. The agent-side stop above is the local update-requirement gate; any server enforcement is left to the API. Parameter values can reflect a queued request, not only applied state. Surface restart impact, update requirements, and capacity/cost impact to the user, then obtain approval before running `resize`. Request states include `queued`, `pending`, `resizing`, `completed`, and `canceled`; only the last two are terminal. A JSON no-op returns `{"result":"no_change","branch":"<branch>"}` rather than a change request. After completion, verify with `resize status`, `branch show`, and a fresh parameter catalog.
+The human parameter table includes an `INTERNAL` boolean column and JSON entries expose `internal`. Internal parameters are not change candidates; retain the `--internal=false` discovery gate. A decoded `internal: false` alone is not authorization: the typed boolean cannot distinguish API omission from explicit false. Do not depend on removed `immutable` or `extension` JSON fields: the API filters internal/extension parameters via `--internal=true|false` and `--extension=true|false`; omitting either filter leaves that category unfiltered. Resize preflight fetches the catalog with `internal=false` and rejects names absent from it, but does not check `requires_update` before submitting the change. The agent-side stop above is the local update-requirement gate; any server enforcement is left to the API. Parameter values can reflect a queued request, not only applied state. Surface restart impact, update requirements, and capacity/cost impact to the user, then obtain approval before running `resize`. Request states include `queued`, `pending`, `resizing`, `completed`, and `canceled`; only the last two are terminal. A JSON no-op returns `{"result":"no_change","branch":"<branch>"}` rather than a change request. After completion, verify with `resize status`, `branch show`, and a fresh parameter catalog.
 
 Resize preflight is best-effort: if its parameter-catalog fetch fails, the CLI proceeds without local catalog/restart validation and leaves enforcement to the API. Do not treat that fallback as proof a parameter is safe; obtain a successful fresh catalog read and review restart/availability impact before an approved resize.
 
@@ -525,7 +530,7 @@ pscale branch show <database> <branch> --org <org> --format json
 pscale branch routing-rules get <database> <branch> --org <org> --format json
 ```
 
-Success JSON is `{ "result": "schema refreshed" }`. If the wait expires while the snapshot is still unready, the command fails with `status: "action_required"`, `issues[0].code: "schema_snapshot_not_ready"`, and one `next_steps` instruction to wait for readiness, then retry. When the CLI's readiness-wait timeout occurs, the refresh request was already accepted; do not re-issue it. The code `schema_snapshot_not_ready` alone is not proof of acceptance: API-supplied errors can preserve the same code, and an initial refresh-request failure returns before the wait starts. Distinguish the timeout stage from a request/polling error using the command outcome and error details; never automatically repeat a refresh write on a timeout or ambiguous outcome. For recovery, perform at most 30 read-only `branch show --format json` checks of `.schema_ready`, with 4 seconds between checks and an overall 2-minute deadline, stopping at whichever limit is reached first. Stop on an API/command failure or missing/null readiness instead of treating it as false. Once readiness is true, retry only the follow-up reader, not the refresh write. If readiness stays false at the bound, stop and investigate; do not restart the loop automatically.
+Success JSON is `{ "result": "schema refreshed" }`. If the wait expires while the snapshot is still unready, the command fails with `status: "action_required"`, `issues[0].code: "schema_refreshing"`, and one `next_steps` instruction to wait for readiness, then retry. API-supplied `schema_refreshing` and `schema_snapshot_not_ready` codes are both preserved and classified as retryable readiness waits. When the CLI's readiness-wait timeout occurs, the refresh request was already accepted; do not re-issue it. Either code alone is not proof of acceptance: API-supplied errors can preserve the same code, and an initial refresh-request failure returns before the wait starts. Distinguish the timeout stage from a request/polling error using the command outcome and error details; never automatically repeat a refresh write on a timeout or ambiguous outcome. For recovery, perform at most 30 read-only `branch show --format json` checks of `.schema_ready`, with 4 seconds between checks and an overall 2-minute deadline, stopping at whichever limit is reached first. Stop on an API/command failure or missing/null readiness instead of treating it as false. Once readiness is true, retry only the follow-up reader, not the refresh write. If readiness stays false at the bound, stop and investigate; do not restart the loop automatically.
 
 Polling failures are not automatically snapshot timeouts: branch-not-found returns immediately; other lookup errors are retried during the wait and the outstanding poll error is returned at the deadline. A successful lookup clears the saved error. Preserve the actual error/code and diagnose it before retrying; do not turn network/API failures into a generic readiness loop. For routing-rule changes, re-read snapshot and live routing and rebuild the full proposed replacement after readiness, then obtain the write approval described below.
 

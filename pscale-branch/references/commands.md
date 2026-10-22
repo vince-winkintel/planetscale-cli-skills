@@ -1,10 +1,10 @@
-Current help captures in this file (`pscale branch`, `branch extensions`, `branch extensions list`, `branch parameters`, and `branch vtgate`) come from the official, checksum-verified PlanetScale CLI v0.344.0 macOS arm64 binary with `NO_COLOR=1`, normalizing only trailing whitespace. Archive SHA-256: `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`. Complete new toggle, parameter-list, and VTGate rollout help surfaces are in [branch-configuration-commands.md](branch-configuration-commands.md). Other sections retain their stated earlier provenance.
+Current `pscale branch`, `branch connections`, and `branch connections top` help captures come from the official, checksum-verified PlanetScale CLI v0.348.0 macOS arm64 binary with `NO_COLOR=1`, an empty credential-free home, and only trailing-whitespace normalization. Archive SHA-256: `528bb8951d4d93f7ca869850787163f5d49ba405acc58d4146b9b3427e83b7e7`. The `branch extensions`, `branch extensions list`, `branch parameters`, and `branch vtgate` captures retain their v0.344.0 provenance (archive SHA-256 `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`), with the same color and whitespace settings. Complete toggle, parameter-list, and VTGate rollout help surfaces are in [branch-configuration-commands.md](branch-configuration-commands.md). Other sections retain their stated earlier provenance.
 
 Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch create` surface was recaptured from the checksum-verified v0.325.0 binary. The file header identifies the newer parent/extension/parameter/VTGate captures; maintenance and other recaptured sections identify their own provenance.
 
 ## pscale branch
 
-Complete parent help captured from the official, checksum-verified PlanetScale CLI v0.344.0 macOS arm64 binary with `NO_COLOR=1`, normalizing only trailing whitespace. Archive SHA-256: `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`.
+Complete parent help has the v0.348.0 capture provenance identified in the introduction. The upstream parent still labels connections under “MySQL and Postgres”; the connections help and operational skill explicitly cover read-only Neki sessions.
 
 ```text
 Create, delete, diff, and manage branches
@@ -24,7 +24,7 @@ MySQL, Postgres, and Neki branch commands:
   update          Update a branch's name or deletion protection
 
 MySQL and Postgres:
-  connections     Show and kill MySQL or Postgres branch connections
+  connections     Show and kill branch connections
 
 Vitess/MySQL-specific:
   diff            Show the schema diff of a MySQL branch
@@ -52,7 +52,6 @@ Neki-specific:
   data-topology   Fetch or update the data topology of a Neki branch
   router          Manage routers for a Neki database branch
   shard           Manage shards for a Neki database branch
-  sidecar         Manage sidecars for a Neki database branch
 
 Flags:
   -h, --help         help for branch
@@ -577,8 +576,20 @@ Cancel is an operational write. Confirm the target and latest request state befo
 
 ## pscale branch connections
 
+This complete parent fence and the complete `connections top` fence below were captured from the checksum-verified v0.348.0 binary identified above; only trailing whitespace was normalized. `connections show`, `kill`, and `kill-transaction` help was re-executed and is unchanged. Their action examples are not applicable to Neki.
+
 ```text
-Show and kill branch connections.
+Show and kill MySQL or Postgres branch connections, and show Neki branch connections.
+
+MySQL (Vitess):
+  show/kill/top with --keyspace and --shard.
+
+Postgres:
+  show/top with --instance or --role.
+  kill-transaction terminates a transaction_id from show.
+
+Neki:
+  show/top list client sessions across the branch's routers. Read-only.
 
 Agent workflow:
   1. Run: pscale branch connections show <database> <branch> --format json
@@ -660,6 +671,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch connections top
 
+Complete v0.348.0 binary capture; same archive checksum and normalization as the connections parent above.
+
 ```text
 Show live branch connection activity.
 
@@ -670,7 +683,8 @@ previously captured trace in the TUI — actions are rejected in replay mode.
 
 For Postgres, connections top shows session activity across instances. For
 Vitess, pass --keyspace and --shard or run interactively to select them when
-the server reports available targets.
+the server reports available targets. For Neki, connections top shows read-only
+client sessions across the branch's routers.
 
 Usage:
   pscale branch connections top [database] [branch] [flags]

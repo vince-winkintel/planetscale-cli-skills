@@ -13,10 +13,11 @@ For exact command surfaces, read [references/commands.md](references/commands.md
 
 - Creating Neki databases, branches, shards, config profiles, routers, and capacity changes can incur cost.
 - Treat data-topology replacement, shard assignment, shard deletion, default-profile changes, admin/router/profile/sidecar updates, maintenance, and cancellation of pending changes as writes that require explicit user approval for the exact org, database, branch, and target.
-- Use `--format json` for reads and writes, then poll or re-read the resource. Async profile/router/sidecar/admin changes must be checked through their `changes` commands until terminal.
+- Use `--format json` for reads and writes, then poll or re-read the resource. Check async profile/router/admin changes through their `changes` commands until terminal; sidecar settings updated through a profile use `config-profile changes`. Legacy sidecar requests remain inspectable through `sidecar changes`.
 - Never log or commit secrets, connection strings, role passwords, or SQL that contains sensitive data.
 - JSON input for `branch data-topology update` must be a JSON object. `--format json` only controls output; it does not make stdin JSON.
-- Sidecars and admins are managed as branch-owned components; use the CLI's show/list/update surfaces and do not assume they can be created or deleted independently.
+- Sidecars belong to configuration profiles; inspect the owning profile and use its update/change-tracking workflow for sidecar settings. Admins remain branch-owned components with their own `show`/`update` surfaces. Neither can be created or deleted independently.
+- `branch sidecar` is deprecated and omitted from branch-parent help. Prefer configuration-profile reads and `branch config-profile update --parameters sidecar.<name>=<value>` for sidecar settings; legacy sidecar commands remain compatibility surfaces, not the preferred workflow.
 
 ## Branch-wide change requests
 
@@ -61,7 +62,9 @@ pscale branch admin sizes <database> <branch> --org <org> --format json
 
 Read the exact target's parameter catalog before proposing parameter writes, using the existing reads in [Configuration Profiles](#configuration-profiles) and [Sidecars And Admin](#sidecars-and-admin).
 
-These inventories add a human `REQUIRES UPDATE` column; Neki admin and sidecar `show` views also render those catalogs. `Yes` means the decoded `requires_update` pointer was non-null; `No` means it was null, whether the API sent an explicit null or omitted the field. It is distinct from `RESTART` and the configuration-profile catalog's `REQUIRED` column. Do not parse table column positions to decide whether a parameter is safe to change.
+Configuration-profile, router, admin, and legacy sidecar parameter tables include an `INTERNAL` boolean column; JSON parameter entries expose `internal`. Router `show` embeds its catalog (there is no `router parameters` command). Treat internal entries as managed/read-only, not candidates for manual writes. Preserve existing `requires_update`, restart, and approval gates for non-internal entries; a plain typed `internal: false` can also result from API omission and is not affirmative permission to change a setting.
+
+Configuration-profile, admin, and legacy sidecar inventories also have a human `REQUIRES UPDATE` column; admin and legacy sidecar `show` views render those catalogs. The router display adds `INTERNAL`, not a `REQUIRES UPDATE` column. `Yes` means the decoded `requires_update` pointer was non-null; `No` means it was null, whether the API sent an explicit null or omitted the field. It is distinct from `RESTART` and the configuration-profile catalog's `REQUIRED` column. Do not parse table column positions to decide whether a parameter is safe to change.
 
 With `--format json`, each catalog entry retains `requires_update` as a string or `null`, not the display boolean. Preserve the exact string (for example, `configuration_profile` or `cluster`) and unknown future values; even an empty string is non-null and therefore displays `Yes`. Admin and sidecar `show` JSON embeds the same entries in `parameters`. A supported CLI always serializes the `requires_update` key for each entry, without omitting nulls: API omission and explicit null both become `requires_update: null`. A missing key therefore indicates an older CLI or incompatible output, not an API-reported absence of a requirement; stop, verify compatibility, upgrade if needed, and re-read the catalog. Neither `null` nor table `No` is positive evidence that no resource update is required.
 
@@ -104,6 +107,16 @@ Unlike `role get`, `pscale inspect --shard` accepts the shard **ID**. `--shard` 
 
 `pscale logs` is owned by `pscale-branch` for both PostgreSQL and Neki branches. Use that skill for the exact help and safety guidance; Neki-specific filters include `--shard` and pod/server selection.
 
+## Live Router Connections
+
+Use `pscale-branch` for `branch connections show/top`. For Neki these are read-only client-session views across branch routers; `kill` and `kill-transaction` are rejected. Do not supply Vitess `--keyspace`/`--shard` or Postgres `--instance`/`--role` flags. Preserve `warnings` in JSON: an unreachable router makes the result incomplete, even if the command succeeds with no rows. This branch-wide session inventory differs from `pscale inspect`, which targets one shard/connection path.
+
+```bash
+pscale branch connections show <database> <branch> --org <org> --format json
+pscale branch connections top <database> <branch> --org <org> --capture <trace-file> --duration 30s
+```
+
+Prefer the one-shot JSON `show` for agents. The bounded `top` example requires `--capture` in a headless shell; a TTY instead opens a TUI. Captured traces can contain sensitive session/query data: use an approved private output path and do not log or commit them.
 
 ## Data Topology And Shards
 
@@ -215,14 +228,17 @@ SKU names such as `NKR-5` also accept underscores. Router changes are asynchrono
 
 ## Sidecars And Admin
 
-Each configuration profile has one connection-pool sidecar. Identify it by sidecar ID or profile name. Sidecars cannot be created or deleted independently. Before `sidecar update --parameters`, read that sidecar's catalog below and apply the [`requires_update` preflight](#parameter-update-requirements); stop on non-null requirements, and never treat `null` / `No` as proof that no update is needed.
+Each configuration profile has one connection-pool sidecar. Sidecars cannot be created or deleted independently. The deprecated `branch sidecar` family is retained for compatibility, but new parameter changes use the owning profile and the `sidecar` namespace. Read the profile catalog first; the CLI passes through API catalog entries and does not guarantee that it contains `sidecar.*` keys. If the intended key is absent, use the legacy read-only `sidecar parameters` fallback below for that same profile. Match the returned `namespace` and `name` to the exact intended `sidecar.<name>` key. Do not mechanically rename a `pgbouncer` entry to `sidecar`: a legacy name alone does not establish the new write key. If neither catalog verifies that exact key, the catalogs disagree, or required safety metadata is missing, stop and investigate compatibility; do not propose a write or fall back to deprecated `sidecar update`. Apply the [`requires_update` preflight](#parameter-update-requirements) to the matched entry, reject internal entries, and obtain approval for the exact profile, parameter, restart impact, and proposed value before the write.
 
 ```bash
-pscale branch sidecar list <database> <branch> --org <org> --format json
-pscale branch sidecar show <database> <branch> <sidecar> --org <org> --format json
-pscale branch sidecar parameters <database> <branch> <sidecar> --org <org> --format json
-pscale branch sidecar update <database> <branch> <sidecar> --org <org> \
-  --parameters pgbouncer.default_pool_size=20 --format json
+pscale branch config-profile show <database> <branch> <profile> --org <org> --format json
+pscale branch config-profile parameters <database> <branch> <profile> --org <org> --format json
+# Read-only compatibility fallback when the profile catalog lacks the intended key.
+# The legacy sidecar selector accepts the owning configuration profile name.
+pscale branch sidecar parameters <database> <branch> <profile> --org <org> --format json
+# Only after an exact namespace/name match, all preflights, and exact-target approval
+pscale branch config-profile update <database> <branch> <profile> --org <org> \
+  --parameters sidecar.<name>=<value> --format json
 ```
 
 Each Neki cluster also has one failover/recovery admin. It cannot be listed, created, or deleted independently. Before `admin update --parameters`, read that admin's catalog below and apply the [`requires_update` preflight](#parameter-update-requirements); stop on non-null requirements, and never treat `null` / `No` as proof that no update is needed.
@@ -235,7 +251,7 @@ pscale branch admin update <database> <branch> --org <org> \
   --size <NKA-size> --format json
 ```
 
-Sidecar update requires one or more `--parameters`; admin update requires `--size` and/or repeatable `--parameters`. Both create asynchronous changes. Use the matching `changes list/show` command, obtain approval before canceling a request, and read back the component after terminal state.
+For sidecar settings changed through a profile, use the configuration-profile asynchronous change-ID procedure above, then re-read the profile and parameter catalog. Legacy `sidecar update` still requires one or more `--parameters`; existing sidecar requests can be inspected via legacy `sidecar changes list/show`. Admin update requires `--size` and/or repeatable `--parameters` and creates asynchronous changes; use `admin changes list/show`. Obtain separate approval before cancellation and verify the outcome plus persisted target state, not merely a terminal timestamp.
 
 ## Maintenance
 
@@ -248,7 +264,7 @@ pscale branch changes list <database> <branch> --org <org> \
   --page 2 --per-page 100 --format json
 ```
 
-After `pscale-branch` starts branch-wide maintenance, verify completion with Neki-owned reads such as `config-profile list/show`, `router list/show`, `sidecar list/show`, and `admin show`; do not rely on `pscale branch infra` for Neki unless an exact help fence proves support.
+After `pscale-branch` starts branch-wide maintenance, verify completion with Neki-owned reads such as `config-profile list/show` and its parameter catalog, `router list/show`, and `admin show`; do not rely on `pscale branch infra` for Neki unless an exact help fence proves support.
 
 ## Backup Restore
 
