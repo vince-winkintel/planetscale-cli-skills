@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs and query patterns; and managing Postgres/Neki maintenance, Postgres extension toggles, parameters and sizing, Vitess VTGate capacity and parameter rollouts, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, deletion protection, primary switchovers, maintenance, extension enable/disable, schema snapshot refresh/readiness, diffs, resize, VTGate parameters/update/changes, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, refresh-schema, schema_ready, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
+description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs, live connections, and query patterns; and managing Postgres/Neki maintenance, Postgres extension toggles, parameters and sizing, Vitess VTGate capacity and parameter rollouts, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, Postgres/Vitess connections and read-only Neki live sessions, deletion protection, primary switchovers, maintenance, extension enable/disable, schema snapshot refresh/readiness, diffs, resize, VTGate parameters/update/changes, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, branch connections, connections show, connections top, live connections, live sessions, kill-transaction, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, refresh-schema, schema_ready, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -85,9 +85,9 @@ pscale branch vtgate resize <database> <branch-name> \
   --format json
 pscale branch vtgate resize status <database> <branch-name> --format json
 
-# Inspect live branch connections (Postgres, Vitess, and read-only Neki)
+# Inspect live branch connections once (Postgres, Vitess, and read-only Neki)
+# For bounded headless top capture and trace safety, see Connection inspection below.
 pscale branch connections show <database> <branch-name> --format json
-pscale branch connections top <database> <branch-name>
 
 # Download a branch query patterns CSV report
 pscale branch query-patterns download <database> <branch-name> --output query-patterns.csv
@@ -367,14 +367,16 @@ Maintenance cannot start while a change request is in progress. For PostgreSQL, 
 
 `pscale branch connections` supports Postgres/Vitess connections and read-only Neki client sessions across the branch's routers. Prefer JSON output for agent workflows so identifiers are explicit and not truncated. Neki supports `show` and `top`, not `kill` or `kill-transaction`; do not interpret router session PIDs or backend details as permission to terminate them.
 
-For Neki, omit Vitess `--keyspace`/`--shard` targets and Postgres `--instance`/`--role` filters: the CLI rejects these engine-specific flags. JSON connection rows can include `router_name`, `router_cell`, `router_uid`, `availability_zone`, `backend_start`, and `sidecar_backends`; the last contains shard/backend details, not independently actionable kill IDs. Preserve the top-level `warnings` array: unreachable-router warnings mean incomplete results even when the command succeeds or returns no sessions. Do not claim an empty result proves the branch has no connections. `top` is read-only for Neki, including replay; its router view has no cancellation/termination actions. A connections-endpoint 404 is investigated with database/branch lookups to distinguish a missing target from live connections not being enabled; do not create or change resources to bypass it.
+For Neki, omit Vitess `--keyspace`/`--shard` targets and Postgres `--instance`/`--role` filters: the CLI rejects these engine-specific flags. JSON connection rows can include `router_name`, `router_cell`, `router_uid`, `availability_zone`, `backend_start`, and `sidecar_backends`; the last contains shard/backend details, not independently actionable kill IDs. Preserve the top-level `warnings` array: unreachable-router warnings mean incomplete results even when the command succeeds or returns no sessions. Do not claim an empty result proves the branch has no connections. `top` is read-only for Neki, including replay; its router view has no cancellation/termination actions.
+
+On a connections-endpoint 404, the CLI automatically looks up the database and branch to distinguish a missing target from live connections not being enabled. Treat its specific missing-database, missing-branch, or disabled-live-connections message as the diagnosis. Only if the ambiguous fallback ("does not exist ... or live connections are not enabled") remains because those lookups failed, run read-only `pscale database show <database> --org <org> --format json` and `pscale branch show <database> <branch> --org <org> --format json` to investigate. Do not create or change resources to bypass the error.
 
 ```bash
 # Inspect current connections once
 pscale branch connections show <database> <branch-name> --format json
 
-# Watch live connection activity
-pscale branch connections top <database> <branch-name>
+# Capture a bounded live-activity trace in a headless agent shell
+pscale branch connections top <database> <branch-name> --org <org> --capture <trace-file> --duration 30s
 
 # Cancel a query only after confirming the query_id with the user
 pscale branch connections kill <database> <branch-name> <query-id> --query
@@ -385,6 +387,8 @@ pscale branch connections kill <database> <branch-name> <connection-id>
 # Postgres only: terminate a transaction after explicit user approval
 pscale branch connections kill-transaction <database> <branch-name> <transaction-id>
 ```
+
+Prefer one-shot JSON `show` for agents. Headless `top` requires `--capture`; `--duration` bounds execution in both headless and TUI modes. Use an approved private trace path because captures can contain sensitive session/query data; do not log or commit them. In a TTY, `top` opens an interactive TUI instead.
 
 The termination examples above apply only to supported Postgres/Vitess targets, never Neki. Treat `kill` and `kill-transaction` as destructive operational actions: show the selected row, explain the effect, get confirmation, run exactly one action, then verify with `connections show`.
 

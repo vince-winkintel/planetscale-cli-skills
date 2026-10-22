@@ -4,9 +4,9 @@ For the parameter-output refresh, the complete `config-profile`, `sidecar`, and 
 
 Read-only-replica refresh verification used the official PlanetScale CLI v0.347.0 macOS arm64 release binary (published archive SHA-256 `7f4dc8dbda90b5a7591c9ec07c0914e7eac378b0f352d7c661c71b2154edec5d`), normalizing only trailing whitespace. The `pscale branch config-profile create` and `update` fences have new capture provenance directly above each block, superseding the older update verification in the introduction. The complete `pscale branch config-profile` parent, list, show, default, set-default, parameters (including the `params` alias), and `pscale branch config-profile changes` parent/list/show/cancel fences were re-executed and are unchanged. The separate `pscale branch changes` parent/list/show/cancel fences were also re-executed and are unchanged; they retain the original v0.334.0 capture provenance below. Only the two affected complete fences were replaced. Role re-verification is recorded beside the stored fences in [../../pscale-password/references/commands.md](../../pscale-password/references/commands.md).
 
-## pscale branch changes
-
 Current verification: all 61 complete Neki help fences in this file were re-executed against the official, checksum-verified v0.348.0 macOS arm64 binary (archive SHA-256 `528bb8951d4d93f7ca869850787163f5d49ba405acc58d4146b9b3427e83b7e7`); stdout is unchanged after trailing-whitespace normalization. The `config-profile`, legacy `sidecar`, and `admin` `params` aliases were also executed. `branch sidecar` is now deprecated and absent from branch-parent help, although its explicit help remains available. These fences are stdout help, not a claim that operational deprecation warnings or resource output are unchanged. Prefer `config-profile update --parameters sidecar.<name>=<value>` for new sidecar-setting workflows; see [../SKILL.md](../SKILL.md). Original unchanged fence provenance is retained below.
+
+## pscale branch changes
 
 The four branch-wide change-request help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.334.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `16b156fa969edb36ec6ebde28b40165cbeb928ae07ba97110d3359fb588245bd`.
 

@@ -9,7 +9,7 @@ Release/version change metadata for this skill set lives here, not in individual
   - Documented human INTERNAL columns and JSON `internal` for Postgres/Neki parameter inventories, including embedded router catalogs and PgBouncer JSON model metadata; false alone is not proof of mutability or approval.
   - Corrected readiness-wait timeout classification to `schema_refreshing`; both that and API `schema_snapshot_not_ready` are retryable action-required states. Preserve bounded read-only readiness recovery and never automatically repeat the refresh write.
   - Verified the official macOS arm64 archive against published SHA-256 `528bb8951d4d93f7ca869850787163f5d49ba405acc58d4146b9b3427e83b7e7`. Replaced complete branch-parent, connections-parent, and connections-top help fences from the binary; only trailing whitespace normalized. Other checked fences retain original unchanged provenance.
-  - Pending package 1.0.36 for Vince review; no live PlanetScale operation, merge, release, or registry publication by this refresh.
+  - Pending package 1.0.36. No live PlanetScale operation, release, or registry publication by this refresh.
 
 - PlanetScale CLI v0.347.0
   - Reviewed the official release and full compare `v0.346.0...v0.347.0` on 2026-10-20; upstream tag commit `56d0f2d307395009f395e447d23c6c653bdb3005`.

@@ -13,10 +13,10 @@ For exact command surfaces, read [references/commands.md](references/commands.md
 
 - Creating Neki databases, branches, shards, config profiles, routers, and capacity changes can incur cost.
 - Treat data-topology replacement, shard assignment, shard deletion, default-profile changes, admin/router/profile/sidecar updates, maintenance, and cancellation of pending changes as writes that require explicit user approval for the exact org, database, branch, and target.
-- Use `--format json` for reads and writes, then poll or re-read the resource. Async profile/router/sidecar/admin changes must be checked through their `changes` commands until terminal.
+- Use `--format json` for reads and writes, then poll or re-read the resource. Check async profile/router/admin changes through their `changes` commands until terminal; sidecar settings updated through a profile use `config-profile changes`. Legacy sidecar requests remain inspectable through `sidecar changes`.
 - Never log or commit secrets, connection strings, role passwords, or SQL that contains sensitive data.
 - JSON input for `branch data-topology update` must be a JSON object. `--format json` only controls output; it does not make stdin JSON.
-- Sidecars and admins are managed as branch-owned components; use the CLI's show/list/update surfaces and do not assume they can be created or deleted independently.
+- Sidecars belong to configuration profiles; inspect the owning profile and use its update/change-tracking workflow for sidecar settings. Admins remain branch-owned components with their own `show`/`update` surfaces. Neither can be created or deleted independently.
 - `branch sidecar` is deprecated and omitted from branch-parent help. Prefer configuration-profile reads and `branch config-profile update --parameters sidecar.<name>=<value>` for sidecar settings; legacy sidecar commands remain compatibility surfaces, not the preferred workflow.
 
 ## Branch-wide change requests
@@ -113,9 +113,10 @@ Use `pscale-branch` for `branch connections show/top`. For Neki these are read-o
 
 ```bash
 pscale branch connections show <database> <branch> --org <org> --format json
-pscale branch connections top <database> <branch> --org <org>
+pscale branch connections top <database> <branch> --org <org> --capture <trace-file> --duration 30s
 ```
 
+Prefer the one-shot JSON `show` for agents. The bounded `top` example requires `--capture` in a headless shell; a TTY instead opens a TUI. Captured traces can contain sensitive session/query data: use an approved private output path and do not log or commit them.
 
 ## Data Topology And Shards
 
@@ -227,12 +228,15 @@ SKU names such as `NKR-5` also accept underscores. Router changes are asynchrono
 
 ## Sidecars And Admin
 
-Each configuration profile has one connection-pool sidecar. Sidecars cannot be created or deleted independently. The deprecated `branch sidecar` family is retained for compatibility, but new parameter changes use the owning profile and the `sidecar` namespace. Do not mechanically retain the old `pgbouncer` namespace: discover the exact supported key in the current profile catalog. Apply the [`requires_update` preflight](#parameter-update-requirements), reject internal entries, and obtain approval for the exact profile, parameter, restart impact, and proposed value before the write.
+Each configuration profile has one connection-pool sidecar. Sidecars cannot be created or deleted independently. The deprecated `branch sidecar` family is retained for compatibility, but new parameter changes use the owning profile and the `sidecar` namespace. Read the profile catalog first; the CLI passes through API catalog entries and does not guarantee that it contains `sidecar.*` keys. If the intended key is absent, use the legacy read-only `sidecar parameters` fallback below for that same profile. Match the returned `namespace` and `name` to the exact intended `sidecar.<name>` key. Do not mechanically rename a `pgbouncer` entry to `sidecar`: a legacy name alone does not establish the new write key. If neither catalog verifies that exact key, the catalogs disagree, or required safety metadata is missing, stop and investigate compatibility; do not propose a write or fall back to deprecated `sidecar update`. Apply the [`requires_update` preflight](#parameter-update-requirements) to the matched entry, reject internal entries, and obtain approval for the exact profile, parameter, restart impact, and proposed value before the write.
 
 ```bash
 pscale branch config-profile show <database> <branch> <profile> --org <org> --format json
 pscale branch config-profile parameters <database> <branch> <profile> --org <org> --format json
-# Only after the catalog and exact-target approval confirm this key/value
+# Read-only compatibility fallback when the profile catalog lacks the intended key.
+# The legacy sidecar selector accepts the owning configuration profile name.
+pscale branch sidecar parameters <database> <branch> <profile> --org <org> --format json
+# Only after an exact namespace/name match, all preflights, and exact-target approval
 pscale branch config-profile update <database> <branch> <profile> --org <org> \
   --parameters sidecar.<name>=<value> --format json
 ```
