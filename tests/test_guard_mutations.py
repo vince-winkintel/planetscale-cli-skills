@@ -43,6 +43,33 @@ class GuardMutationTests(unittest.TestCase):
                 result = unittest.TestResult()
                 guidance.SecurityGuidanceTests(name).run(result)
             self.assertFalse(result.wasSuccessful(), 'Guard accepted mutated guidance')
+            return result
+
+    def test_nested_destructive_examples_require_organization(self):
+        for group in ('backup policy', 'branch config-profile', 'branch router'):
+            with self.subTest(group=group):
+                def mutate(root):
+                    path = root / 'new-skill/SKILL.md'
+                    path.parent.mkdir()
+                    path.write_text('```bash\npscale ' + group + ' delete <database> <id>\n```\n')
+                result = self.check_mutation('test_destructive_examples_use_explicit_organization', mutate)
+                self.assertFalse(result.errors, result.errors)
+                self.assertEqual(len(result.failures), 1)
+                self.assertIn("'--org' not found", result.failures[0][1])
+
+    def test_nested_destructive_examples_require_local_gate(self):
+        for group in ('backup policy', 'branch config-profile', 'branch router'):
+            with self.subTest(group=group):
+                def mutate(root):
+                    path = root / 'new-skill/SKILL.md'
+                    path.parent.mkdir()
+                    path.write_text('```bash\npscale ' + group +
+                                    ' delete <database> <id> --org <org>\n```\n')
+                result = self.check_mutation('test_standalone_destructive_advice_has_local_safety_gates', mutate)
+                self.assertFalse(result.errors, result.errors)
+                self.assertEqual(len(result.failures), 1)
+                self.assertIn('Missing section ## Destructive-operation safety in new-skill/SKILL.md',
+                              result.failures[0][1])
 
     def test_gate_drift_is_rejected(self):
         def mutate(root):

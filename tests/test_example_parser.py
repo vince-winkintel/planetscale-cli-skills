@@ -1,10 +1,52 @@
 """Exercise the test transport's boundary before it can run authored examples."""
+import re
 import unittest
 
-from test_security_guidance import destructive_commands, recorded_commands
+from test_security_guidance import DESTRUCTIVE_VERBS, ROOT, destructive_commands, recorded_commands
 
 
 class ExampleParserTests(unittest.TestCase):
+    def test_documented_destructive_usage_paths_are_classified(self):
+        paths = []
+        for reference in sorted(ROOT.glob('*/references/*.md')):
+            # Read command paths only: placeholders and optional flags in help
+            # are usage notation, not executable shell examples.
+            for block in re.findall(r'^Usage:[ \t]*\n((?:[ \t]+[^\n]+\n)+)',
+                                    reference.read_text(), re.M):
+                for line in block.splitlines():
+                    words = line.split()
+                    if not words or words[0] != 'pscale':
+                        continue
+                    path = []
+                    for word in words[1:]:
+                        if not re.fullmatch(r'[a-z][a-z0-9-]*', word):
+                            break
+                        path.append(word)
+                    if path and path[-1] in DESTRUCTIVE_VERBS:
+                        paths.append((reference, path))
+        self.assertTrue(paths, 'No destructive Usage paths found')
+        for reference, path in paths:
+            with self.subTest(reference=reference.relative_to(ROOT), command=path):
+                text = '```bash\npscale ' + ' '.join(path) + '\n```'
+                self.assertEqual(destructive_commands(text), [path])
+
+    def test_nested_destructive_paths_preserve_literal_boundaries(self):
+        for group in ('backup policy', 'branch config-profile', 'branch router'):
+            with self.subTest(group=group):
+                command = 'pscale ' + group + ' delete <database> <id> --org <org>'
+                text = '```bash\n  ' + command + '\n```'
+                expected = [group.split() + ['delete', 'fixture-database', 'fixture-id',
+                                             '--org', 'fixture-org']]
+                self.assertEqual(destructive_commands(text), expected)
+                self.assertEqual(recorded_commands(text), expected)
+                self.assertEqual(destructive_commands(
+                    '```bash\npscale ' + group + ' show db delete\n```'), [])
+                for wrapped in ('echo y | ' + command,
+                                'pscale branch list db; ' + command,
+                                'echo "$(' + command + ')"'):
+                    with self.subTest(wrapped=wrapped), self.assertRaisesRegex(AssertionError, 'Non-literal'):
+                        destructive_commands('```bash\n' + wrapped + '\n```')
+
     def test_destructive_classification_uses_commands_and_flag_values(self):
         risky = (
             'branch connections kill db branch id --query',

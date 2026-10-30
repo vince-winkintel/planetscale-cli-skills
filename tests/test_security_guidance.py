@@ -23,6 +23,7 @@ GATED_SKILLS = {
 DESTRUCTIVE_VERBS = {"delete", "remove", "demote", "kill", "kill-transaction", "close", "revert"}
 # Command paths, never resource names or substrings of flag names.
 NESTED_GROUPS = {
+    ("backup", "policy"), ("branch", "config-profile"), ("branch", "router"),
     ("billing", "payment-method"), ("branch", "connections"),
     ("branch", "query-patterns"), ("branch", "shard"),
     ("keyspace", "read-only-regions"), ("database", "read-only-regions"),
