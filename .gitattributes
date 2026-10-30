@@ -3,3 +3,5 @@ README.md export-ignore
 .DS_Store export-ignore
 .gitignore export-ignore
 .gitattributes export-ignore
+docs/ export-ignore
+tests/ export-ignore

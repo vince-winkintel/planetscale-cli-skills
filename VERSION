@@ -1,6 +1,13 @@
-1.0.36
+1.0.37
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- Security audit remediation (#48), pending package 1.0.37
+  - Replaced deletion-refusal, branch-name collision, and database-quota troubleshooting shortcuts with scoped read-only inspection. Demotion is supported by the reviewed CLI source, but is a separately approved lifecycle action, not a deletion/protection bypass.
+  - Added standalone destructive-operation gates for exact-target approval, dependencies, availability, verified recovery, and read-back; aligned destructive examples with explicit organization scope and documented pending database-deletion requests.
+  - Corrected umbrella coverage and credential-persistence overclaims. Authentication guidance, all upstream help/provenance files, runtime scripts, and selective-install layout are unchanged.
+  - Added portable offline documentation-argv, authentication-safety, standalone gate-mirror, and release-export regressions. Help/auth byte preservation is checked against the issue baseline for this patch rather than frozen for future CLI refreshes. See docs/security-audit-48.md for report completeness, finding dispositions, source evidence, and validation limits.
+  - Initial local preparation was delivered as source in PR #49; package 1.0.37 remains the proposed candidate. No package tag, release, registry publication, installation, or remote rescan was performed by this remediation. Hosted scan clearance awaits a future approved publication.
 
 - PlanetScale CLI v0.348.0
   - Reviewed the official release and full compare `v0.347.0...v0.348.0` on 2026-10-22; upstream tag commit `68b31936882cf9636ac2c43942cb5173afd530b6`.

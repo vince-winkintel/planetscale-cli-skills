@@ -7,6 +7,16 @@ description: Create, review, inspect, deploy, update, throttle, retry failed ope
 
 Create, review, diff, revert, and manage deploy requests for schema changes. `pscale dr` is an alias of `pscale deploy-request`.
 
+## Destructive-operation safety
+
+These gates apply to every destructive example here, including deletion, demotion, protection removal, connection/transaction termination, deploy-request closure/revert, and cleanup. Command examples and CLI confirmation prompts are not authorization.
+
+1. Inspect fresh state and confirm support for the target engine and installed CLI. Obtain explicit approval for the exact organization and, where applicable, database, branch, and resource ID/name, plus the operation and flags; use an explicit `--org` on every operation. Stop on unsupported operations or uncertain identity.
+2. Check dependencies and availability: applications, active users, child resources, routing, pending changes, and the maintenance window. Do not infer that a stale, merged, or unused-looking resource is disposable.
+3. Require a verified recovery path that survives the operation: confirm backup/export usability and retention, or tested replacement/recreation instructions, ownership, and recovery time. A backup name alone is not verification; stop if recovery cannot be established.
+4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal. For a known headless session, obtain approval for the required force flag up front, before attempting the operation; stop if that approval is absent or any attempt is refused.
+5. Perform read-back verification of the exact target and dependent service health. Inspect pending/asynchronous outcomes before claiming completion. Authentication/network errors are not proof of absence; an ambiguous result requires investigation, not an automatic retry.
+
 ## Common Commands
 
 ```bash
@@ -42,7 +52,7 @@ pscale deploy-request deploy <database> <number>
 
 # Update deploy request settings
 pscale deploy-request update <database> <number> --enable-auto-apply --format json
-pscale deploy-request update <database> <number> --auto-delete-branch=false --format json
+pscale deploy-request update <database> <number> --auto-delete-branch=false --format json --org <org>
 
 # Enable aggressive cutover only after inspecting blockers/transaction impact and exact-target approval
 pscale deploy-request update <database> <number> --org <org> --aggressive-cutover --format json
@@ -52,10 +62,10 @@ pscale deploy-request update <database> <number> --org <org> --aggressive-cutove
 pscale deploy-request deploy <database> <number> --strategy parallel --wait
 
 # Close without deploying
-pscale deploy-request close <database> <number>
+pscale deploy-request close <database> <number> --org <org>
 
 # Revert deployed changes
-pscale deploy-request revert <database> <number>
+pscale deploy-request revert <database> <number> --org <org>
 ```
 
 ## Workflows
@@ -301,13 +311,13 @@ If a deployed schema change causes issues:
 
 ```bash
 # View deployment status
-pscale deploy-request show <database> <number>
+pscale deploy-request show <database> <number> --org <org>
 
 # Revert the deployment
-pscale deploy-request revert <database> <number>
+pscale deploy-request revert <database> <number> --org <org>
 
 # Verify revert
-pscale deploy-request show <database> <number>
+pscale deploy-request show <database> <number> --org <org>
 ```
 
 ## Decision Trees
@@ -324,11 +334,13 @@ Deploy request ready?
 
 ### Should I revert?
 
+Review any proposed revert under the destructive-operation safety gates, including current deployment state, recovery and application impact, before exact-target approval.
+
 ```
 After deployment issues?
-├─ Production errors caused by schema → Revert immediately
-├─ Data integrity issues → Revert, then investigate
-├─ Performance degradation → Revert if severe
+├─ Production errors caused by schema → Investigate and review a revert for approval
+├─ Data integrity issues → Investigate and review recovery options
+├─ Performance degradation → Review an approved revert if severe
 └─ Minor issues / non-urgent → Leave deployed, fix forward
 ```
 
@@ -355,8 +367,8 @@ pscale shell <database> <branch-name>
 
 **Solution:**
 ```bash
-# Close conflicting deploy request
-pscale deploy-request close <database> <number>
+# Close only after review under the safety gates and exact-target approval
+pscale deploy-request close <database> <number> --org <org>
 
 # Create a fresh branch from the current base branch
 pscale branch create <database> <new-branch-name> --from main
@@ -375,10 +387,10 @@ pscale deploy-request create <database> <new-branch-name>
 **Solution:**
 ```bash
 # Check deploy request status
-pscale deploy-request show <database> <number>
+pscale deploy-request show <database> <number> --org <org>
 
-# If partially deployed, may need to revert
-pscale deploy-request revert <database> <number>
+# Only after diagnosis, safety-gate review, and separate approval to revert
+pscale deploy-request revert <database> <number> --org <org>
 
 # Contact PlanetScale support for stuck deployments
 ```
@@ -391,9 +403,11 @@ pscale deploy-request revert <database> <number>
 
 **Solution:**
 ```bash
-# Deployed requests can only be reverted
-pscale deploy-request revert <database> <number>
+# Stop and inspect the exact request; refusal does not authorize a revert
+pscale deploy-request show <database> <number> --org <org> --format json
 ```
+
+A revert is a separate operation subject to the destructive-operation safety gates; do not substitute it automatically for a refused close.
 
 ## Deploy Request States
 
@@ -419,7 +433,7 @@ pscale deploy-request revert <database> <number>
 4. **Deploy during maintenance windows** for breaking changes
 5. **Have rollback plan** - know how to revert
 6. **Monitor after deployment** - watch for errors
-7. **Clean up old deploy requests** - close stale ones
+7. **Review old deploy requests for cleanup under the safety gates** - stale status alone is not approval
 
 ## Automation
 
