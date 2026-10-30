@@ -9,7 +9,7 @@ requirements:
     - PLANETSCALE_SERVICE_TOKEN_ID
     - PLANETSCALE_SERVICE_TOKEN
   notes: |
-    Requires PlanetScale CLI authentication via 'pscale auth login' (stores token in ~/.config/planetscale/).
+    Requires PlanetScale CLI authentication via 'pscale auth login' or approved service tokens; the CLI manages credential persistence.
     Automation scripts use jq for structure-aware parsing of pscale JSON output.
 metadata:
   openclaw:
@@ -31,13 +31,13 @@ metadata:
         - name: PLANETSCALE_SERVICE_TOKEN_ID
           description: >
             PlanetScale service token ID for CI/CD authentication. Optional — interactive login
-            via 'pscale auth login' can be used instead. Token stored in environment variable only;
+            via 'pscale auth login' can be used instead. The CLI consumes the configured credential;
             this skill does not read, store, or transmit credentials beyond passing them to pscale CLI.
           required: false
         - name: PLANETSCALE_SERVICE_TOKEN
           description: >
             PlanetScale service token secret for CI/CD authentication. Optional — interactive login
-            via 'pscale auth login' can be used instead. Token stored in environment variable only;
+            via 'pscale auth login' can be used instead. The CLI consumes the configured credential;
             this skill does not read, store, or transmit credentials beyond passing them to pscale CLI.
           required: false
 ---
@@ -46,9 +46,19 @@ metadata:
 
 Comprehensive `pscale` command reference and workflows for managing PlanetScale databases via terminal.
 
+## Destructive-operation safety
+
+These gates apply to every destructive example here, including deletion, demotion, protection removal, and cleanup. Command examples and CLI confirmation prompts are not authorization.
+
+1. Inspect fresh state and confirm support for the target engine and installed CLI. Obtain explicit approval for the exact organization and, where applicable, database, branch, and resource ID/name, plus the operation and flags; use an explicit `--org` on every operation. Stop on unsupported operations or uncertain identity.
+2. Check dependencies and availability: applications, active users, child resources, routing, pending changes, and the maintenance window. Do not infer that a stale, merged, or unused-looking resource is disposable.
+3. Require a verified recovery path that survives the operation: confirm backup/export usability and retention, or tested replacement/recreation instructions, ownership, and recovery time. A backup name alone is not verification; stop if recovery cannot be established.
+4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal.
+5. Perform read-back verification of the exact target and dependent service health. Inspect pending/asynchronous outcomes before claiming completion. Authentication/network errors are not proof of absence; an ambiguous result requires investigation, not an automatic retry.
+
 ## Overview
 
-The PlanetScale CLI brings database branches, deploy requests, and schema migrations to your fingertips. This skill provides command references, automation scripts, and decision trees for all `pscale` operations.
+The PlanetScale CLI brings database branches, deploy requests, and schema migrations to your fingertips. This skill provides command references, automation scripts, and decision trees for the covered `pscale` workflows. Confirm installed-command and engine support before acting.
 
 ## Configuration and credential safety
 
@@ -211,10 +221,10 @@ pscale import d1 verify <database> <branch> --migration-id <id> --input ./d1-exp
 pscale auth login
 pscale auth logout
 
-# Branch management
+# Branch management; deletion requires the destructive-operation safety gates
 pscale branch create <database> <branch> [--from <source-branch>]
 pscale branch list <database>
-pscale branch delete <database> <branch>
+pscale branch delete <database> <branch> --org <org>
 pscale branch parameters list <database> <branch> --format json
 pscale branch resize status <database> <branch> --format json
 pscale branch vtgate show <database> <branch> --format json

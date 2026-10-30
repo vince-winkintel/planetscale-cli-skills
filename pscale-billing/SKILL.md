@@ -9,6 +9,16 @@ Inspect organization billing data and manage payment methods from the PlanetScal
 
 Billing output can contain sensitive business, payment, invoice, tax, address, and usage data. Always pass `--org` explicitly, prefer `--format json` for structured private review, and do not paste raw invoice or payment-method output into public logs, issues, or chat unless the user has reviewed and approved the disclosure.
 
+## Destructive-operation safety
+
+These gates apply to every destructive example here, including deletion, demotion, protection removal, and cleanup. Command examples and CLI confirmation prompts are not authorization.
+
+1. Inspect fresh state and confirm support for the target engine and installed CLI. Obtain explicit approval for the exact organization and, where applicable, database, branch, and resource ID/name, plus the operation and flags; use an explicit `--org` on every operation. Stop on unsupported operations or uncertain identity.
+2. Check dependencies and availability: applications, active users, child resources, routing, pending changes, and the maintenance window. Do not infer that a stale, merged, or unused-looking resource is disposable.
+3. Require a verified recovery path that survives the operation: confirm backup/export usability and retention, or tested replacement/recreation instructions, ownership, and recovery time. A backup name alone is not verification; stop if recovery cannot be established.
+4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal.
+5. Perform read-back verification of the exact target and dependent service health. Inspect pending/asynchronous outcomes before claiming completion. Authentication/network errors are not proof of absence; an ambiguous result requires investigation, not an automatic retry.
+
 ## Common commands
 
 ```bash

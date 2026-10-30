@@ -7,6 +7,16 @@ description: Manage PlanetScale branches by creating, renaming, protecting, dele
 
 Create, delete, diff, and manage database branches.
 
+## Destructive-operation safety
+
+These gates apply to every destructive example here, including deletion, demotion, protection removal, and cleanup. Command examples and CLI confirmation prompts are not authorization.
+
+1. Inspect fresh state and confirm support for the target engine and installed CLI. Obtain explicit approval for the exact organization and, where applicable, database, branch, and resource ID/name, plus the operation and flags; use an explicit `--org` on every operation. Stop on unsupported operations or uncertain identity.
+2. Check dependencies and availability: applications, active users, child resources, routing, pending changes, and the maintenance window. Do not infer that a stale, merged, or unused-looking resource is disposable.
+3. Require a verified recovery path that survives the operation: confirm backup/export usability and retention, or tested replacement/recreation instructions, ownership, and recovery time. A backup name alone is not verification; stop if recovery cannot be established.
+4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal.
+5. Perform read-back verification of the exact target and dependent service health. Inspect pending/asynchronous outcomes before claiming completion. Authentication/network errors are not proof of absence; an ambiguous result requires investigation, not an automatic retry.
+
 ## Common Commands
 
 ```bash
@@ -97,7 +107,7 @@ pscale branch query-patterns list <database> <branch-name> --format json
 pscale branch query-patterns show <database> <branch-name> <report-id> --format json
 
 # Delete a stale query pattern report only after explicit approval
-pscale branch query-patterns delete <database> <branch-name> <report-id> --format json
+pscale branch query-patterns delete <database> <branch-name> <report-id> --format json --org <org>
 
 # Stream the CSV to stdout for pipelines
 pscale branch query-patterns download <database> <branch-name> --output - > query-patterns.csv
@@ -131,8 +141,8 @@ pscale branch vtctl move-tables create <database> <branch-name> \
   --sharded-auto-increment-handling REPLACE \
   --global-keyspace <unsharded-global-keyspace>
 
-# Delete branch
-pscale branch delete <database> <branch-name>
+# Delete only after the destructive-operation safety gates and Branch Cleanup review
+pscale branch delete <database> <branch-name> --org <org>
 
 # Promote to production
 pscale branch promote <database> <branch-name>
@@ -721,12 +731,29 @@ VDiff reads and cleanup previews can return executable traffic-switching or dest
 
 ### Branch Cleanup
 
-```bash
-# List all branches
-pscale branch list <database>
+Apply the destructive-operation safety gates before every cleanup. Check production/default status, deletion protection, application traffic, descendant branches, open deploy requests and their revert windows. Obtain exact-target approval only after dependencies, availability, and a verified recovery path are established. Merged or stale status alone is insufficient.
 
-# Delete merged/stale branches
-pscale branch delete <database> <old-branch-name>
+```bash
+# Inspect the exact proposed target before approval
+pscale branch show <database> <old-branch-name> --org <org> --format json
+
+# Only after approval; retain interactive confirmation
+pscale branch delete <database> <old-branch-name> --org <org>
+
+# Read back inventory; increment --page until empty
+pscale branch list <database> --org <org> --page 1 --per-page 100 --format json
+```
+
+Verify target absence in the complete inventory and dependent application health. A not-found response by itself can reflect permissions or wrong scope; authentication/network failures do not establish deletion. JSON/non-interactive deletion requires `--force`, which bypasses confirmation and needs explicit approval. Do not add `--delete-descendants`, demote, or disable protection on a refusal. Inventory and approve every descendant separately if recursive deletion is actually requested.
+
+### Independently requested demotion
+
+Demotion and deletion are separate operations. For an independently requested demotion, confirm engine/target eligibility, production/default state, traffic and availability impact, and recovery first. The CLI's demote command has no confirmation prompt. After explicit approval, run only the demotion and read back `production` and service health; do not chain deletion. If support or read-back is uncertain, stop.
+
+```bash
+# Independently approved demotion only
+pscale branch demote <database> <branch-name> --org <org> --format json
+pscale branch show <database> <branch-name> --org <org> --format json
 ```
 
 ## Decision Trees
@@ -748,7 +775,7 @@ What's your goal?
 ├─ Schema migration for feature → Create branch (from main)
 ├─ Testing schema changes → Create branch (isolated)
 ├─ Hotfix schema change → Create branch (from production)
-├─ Experiment / spike → Create branch (delete after)
+├─ Experiment / spike → Create branch (review cleanup separately)
 └─ Working on existing schema → Use existing branch
 ```
 
@@ -756,13 +783,10 @@ What's your goal?
 
 ### "Branch already exists"
 
-**Solution:**
-```bash
-# Check existing branches
-pscale branch list <database>
+**Solution:** Inspect the existing branch in the intended organization. Choose a different name for new work; do not delete someone else's branch to resolve a name collision. A separately requested cleanup must follow Branch Cleanup.
 
-# Use different name or delete existing
-pscale branch delete <database> <existing-branch>
+```bash
+pscale branch show <database> <existing-branch> --org <org> --format json
 ```
 
 ### Schema diff shows no changes
@@ -785,14 +809,14 @@ pscale shell <database> <branch-name>
 
 **Error:** "Branch is protected" or "Branch is a production branch"
 
-**Solution:**
-```bash
-# Demote production branch first
-pscale branch demote <database> <branch-name>
+**Solution:** Stop and inspect the exact target; a refusal is not authorization to demote, disable protection, or delete it.
 
-# Then delete
-pscale branch delete <database> <branch-name>
+```bash
+pscale database show <database> --org <org> --format json
+pscale branch show <database> <branch-name> --org <org> --format json
 ```
+
+Confirm engine, production/default status, deletion protection, and dependents. Demotion is a supported lifecycle command, but it is not a protection bypass or a generic deletion prerequisite. If the engine or target does not support an operation, stop; do not invent a substitute command. Any separately requested lifecycle change must follow the Branch Cleanup safety gates and be verified before considering another action.
 
 ### Branch creation fails
 
@@ -840,6 +864,6 @@ main (production)
 1. **Always create branches from main** for schema changes
 2. **Use descriptive branch names** matching MR/PR numbers when applicable
 3. **Run diff before deploy request** to review changes
-4. **Delete merged branches** to keep branch list clean
+4. **Review merged branches for cleanup** using the destructive-operation safety gates
 5. **Use deploy requests** instead of direct promotion (reviewable, revertable)
 6. **Test schema changes** in branch before deploying

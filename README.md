@@ -2,6 +2,8 @@
 
 Comprehensive `pscale` command reference and automation workflows for managing PlanetScale databases via terminal.
 
+Destructive examples require explicit approval for the exact organization and applicable database, branch, resource, operation, and flags. Check dependencies and availability, establish a verified recovery path that survives the operation, then verify the result and service health with read-back checks. Troubleshooting errors, stale resources, and CLI confirmation prompts do not authorize deletion or demotion. Each affected standalone skill carries these gates for selective installs.
+
 [![ClawHub](https://img.shields.io/badge/ClawHub-planetscale--cli--skills-blue)](https://clawhub.ai/skills/planetscale-cli-skills)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -332,6 +334,12 @@ Use case?
 - [ClawHub Page](https://clawhub.ai/skills/planetscale-cli-skills)
 
 ## 🤝 Contributing
+
+Offline security regressions: `python3 -m unittest discover -s tests -v`.
+The suite records extracted documentation command arguments without invoking
+PlanetScale, checks standalone safety gates, and pins unchanged help/authentication
+references. See [the audit dispositions](docs/security-audit-48.md) for evidence,
+scope, and limitations. Release/version history remains in `VERSION`.
 
 Contributions welcome! Please:
 1. Follow existing skill structure patterns
