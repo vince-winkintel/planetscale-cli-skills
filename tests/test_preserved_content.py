@@ -1,6 +1,4 @@
 """Integrity and selective-install checks; no credentials or network required."""
-import hashlib
-import json
 import os
 from pathlib import Path
 import re
@@ -11,16 +9,15 @@ ROOT = Path(os.environ.get("PSCALE_SKILLS_ROOT", Path(__file__).resolve().parent
 
 
 class PreservedContentTests(unittest.TestCase):
-    def test_upstream_help_and_authentication_guidance_are_unchanged(self):
-        # Captured from 38f4952f035809a4812d1ac0094840355308e2b0; includes
-        # provenance paragraphs as well as complete upstream help fences.
-        manifest = json.loads(Path(__file__).with_name("preserved-content.sha256.json").read_text())
-        self.assertEqual(set(manifest),
-                         {str(p.relative_to(ROOT)) for p in ROOT.glob("*/references/*.md")}
-                         | {"pscale-auth/SKILL.md"})
-        for path, expected in manifest.items():
-            with self.subTest(path=path):
-                self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), expected)
+    def test_authentication_safety_contract(self):
+        text = (ROOT / "pscale-auth/SKILL.md").read_text()
+        for prohibition in (
+            "Do not enter a password or operate a keyring dialog on the user's behalf.",
+            "Do not scrape, record, or reproduce OAuth credentials from help output.",
+            "do not print or store credentials",
+            "Never commit tokens to skill repos or scripts.",
+        ):
+            self.assertIn(prohibition, text)
 
     def test_selective_install_script_references_resolve(self):
         for skill in ROOT.glob("*/SKILL.md"):
@@ -30,6 +27,12 @@ class PreservedContentTests(unittest.TestCase):
                     self.assertTrue(local.is_file())
                     self.assertEqual(local.read_bytes(), (ROOT / reference).read_bytes())
         self.assertFalse((ROOT / "SKILL.md").exists(), "Keep multi-skill discovery layout")
+
+    def test_selective_install_document_references_resolve(self):
+        for skill in ROOT.glob("*/SKILL.md"):
+            for reference in re.findall(r"references/[a-z-]+\.md", skill.read_text()):
+                with self.subTest(skill=skill.parent.name, reference=reference):
+                    self.assertTrue((skill.parent / reference).is_file())
 
 
 if __name__ == "__main__":

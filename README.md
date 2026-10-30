@@ -45,7 +45,7 @@ npx skills add vince-winkintel/planetscale-cli-skills \
 clawhub install planetscale-cli-skills
 ```
 
-ClawHub releases preserve the existing full-collection install shape. Build the registry package from the release tag, copy `planetscale-cli-skills/SKILL.md` to package-root `SKILL.md`, remove the now-redundant nested orchestrator directory, and retain all standalone `pscale-*` skill directories. Do not publish the repository root directly or publish only `planetscale-cli-skills/`; either choice would break one of the supported discovery/install paths. The live listing remains on its last published version until the transformed package is published.
+ClawHub releases preserve the existing full-collection install shape. Build the registry package from a `git archive` of the release tag (which excludes developer-only `docs/` and `tests/`), copy `planetscale-cli-skills/SKILL.md` to package-root `SKILL.md`, remove the now-redundant nested orchestrator directory, and retain all standalone `pscale-*` skill directories. Do not publish the repository root directly or publish only `planetscale-cli-skills/`; either choice would break one of the supported discovery/install paths. The live listing remains on its last published version until the transformed package is published.
 
 ### Via Git
 
@@ -337,8 +337,8 @@ Use case?
 
 Offline security regressions: `python3 -m unittest discover -s tests -v`.
 The suite records extracted documentation command arguments without invoking
-PlanetScale, checks standalone safety gates, and pins unchanged help/authentication
-references. See [the audit dispositions](docs/security-audit-48.md) for evidence,
+PlanetScale, checks identical standalone safety gates and authentication prohibitions,
+and verifies local references and release-archive contents. See [the audit dispositions](docs/security-audit-48.md) for evidence,
 scope, and limitations. Release/version history remains in `VERSION`.
 
 Contributions welcome! Please:

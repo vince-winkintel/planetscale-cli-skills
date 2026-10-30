@@ -9,12 +9,12 @@ Create, read, update, delete, and manage databases.
 
 ## Destructive-operation safety
 
-These gates apply to every destructive example here, including deletion, demotion, protection removal, and cleanup. Command examples and CLI confirmation prompts are not authorization.
+These gates apply to every destructive example here, including deletion, demotion, protection removal, connection/transaction termination, deploy-request closure/revert, and cleanup. Command examples and CLI confirmation prompts are not authorization.
 
 1. Inspect fresh state and confirm support for the target engine and installed CLI. Obtain explicit approval for the exact organization and, where applicable, database, branch, and resource ID/name, plus the operation and flags; use an explicit `--org` on every operation. Stop on unsupported operations or uncertain identity.
 2. Check dependencies and availability: applications, active users, child resources, routing, pending changes, and the maintenance window. Do not infer that a stale, merged, or unused-looking resource is disposable.
 3. Require a verified recovery path that survives the operation: confirm backup/export usability and retention, or tested replacement/recreation instructions, ownership, and recovery time. A backup name alone is not verification; stop if recovery cannot be established.
-4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal.
+4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal. For a known headless session, obtain approval for the required force flag up front, before attempting the operation; stop if that approval is absent or any attempt is refused.
 5. Perform read-back verification of the exact target and dependent service health. Inspect pending/asynchronous outcomes before claiming completion. Authentication/network errors are not proof of absence; an ambiguous result requires investigation, not an automatic retry.
 
 ## Common Commands
@@ -255,21 +255,24 @@ pscale keyspace read-only-regions <database> <branch> <keyspace> \
 
 ### Database retirement
 
-Database deletion is a separate retirement decision, never a quota-recovery shortcut. Apply the destructive-operation safety gates: inventory all branches (continue pages until empty), applications, credentials, backups, webhooks, and ongoing deploy/migration work. Confirm an approved availability window and a verified recovery copy outside the database's deletion scope; do not assume deleting the database preserves its backups or credentials.
+Database deletion is a separate retirement decision, never a quota-recovery shortcut. Apply the destructive-operation safety gates: inventory all branches (continue pages until empty), applications, credentials, backups, webhooks, and ongoing deploy/migration work. Confirm an approved availability window and a verified recovery copy outside the database's deletion scope; do not assume deleting the database preserves its backups or credentials. In a known headless session, request approval for `--force` up front because it bypasses CLI confirmation. Choose exactly one deletion form below; do not run both or switch forms after a refusal.
 
 ```bash
 # Read-only preflight before exact-target approval
 pscale database show <database> --org <org> --format json
 pscale branch list <database> --org <org> --page 1 --per-page 100 --format json
 
-# Only after approval and recovery verification; retain interactive confirmation
+# Interactive terminal only, after approval and recovery verification
 pscale database delete <database> --org <org>
 
-# Read-back verification of inventory and dependent service health
-pscale database list --org <org> --format json
+# Alternative: known headless session, only after explicit approval of --force
+pscale database delete <database> --org <org> --force --format json
+
+# Read-back inventory; increment --page until empty
+pscale database list --org <org> --page 1 --per-page 100 --format json
 ```
 
-JSON/non-interactive deletion requires `--force`; that bypass needs explicit approval and must not be added on a prompt failure. A deletion request may remain pending until another database administrator also requests deletion. Report that state as pending, not deleted, and do not repeat the request or impersonate another approver. Verify absence from a successful inventory read in the approved organization and check dependent service health. Errors or ambiguous output require investigation, not a claim of completed deletion.
+JSON/non-interactive deletion requires `--force`; that bypass needs explicit approval and must not be added on a prompt failure. A deletion request may remain pending until another database administrator also requests deletion. Report that state as pending, not deleted, and do not repeat the request or impersonate another approver. Verify absence only from the complete successful inventory in the approved organization: every page must succeed, through an empty page. Also check dependent service health. Errors or ambiguous output require investigation, not a claim of completed deletion.
 
 ### Delete a Vitess keyspace
 
@@ -487,8 +490,11 @@ After any failed `parameters set`, enumerate `changes list` again and look for d
 **Solution:** Inspect the intended organization's inventory and confirm its plan/limits with the owner. Discuss a plan upgrade or contact PlanetScale support. A limit error does not authorize deletion; any database retirement is a separate request subject to the destructive-operation safety gates.
 
 ```bash
-pscale database list --org <org> --format json
+# Inventory the organization; increment --page until empty
+pscale database list --org <org> --page 1 --per-page 100 --format json
 ```
+
+Require every page to succeed before treating the inventory as complete. A failed or ambiguous page is not evidence of absence or spare quota.
 
 ### Shell connection fails
 

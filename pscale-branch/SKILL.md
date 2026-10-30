@@ -9,12 +9,12 @@ Create, delete, diff, and manage database branches.
 
 ## Destructive-operation safety
 
-These gates apply to every destructive example here, including deletion, demotion, protection removal, and cleanup. Command examples and CLI confirmation prompts are not authorization.
+These gates apply to every destructive example here, including deletion, demotion, protection removal, connection/transaction termination, deploy-request closure/revert, and cleanup. Command examples and CLI confirmation prompts are not authorization.
 
 1. Inspect fresh state and confirm support for the target engine and installed CLI. Obtain explicit approval for the exact organization and, where applicable, database, branch, and resource ID/name, plus the operation and flags; use an explicit `--org` on every operation. Stop on unsupported operations or uncertain identity.
 2. Check dependencies and availability: applications, active users, child resources, routing, pending changes, and the maintenance window. Do not infer that a stale, merged, or unused-looking resource is disposable.
 3. Require a verified recovery path that survives the operation: confirm backup/export usability and retention, or tested replacement/recreation instructions, ownership, and recovery time. A backup name alone is not verification; stop if recovery cannot be established.
-4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal.
+4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal. For a known headless session, obtain approval for the required force flag up front, before attempting the operation; stop if that approval is absent or any attempt is refused.
 5. Perform read-back verification of the exact target and dependent service health. Inspect pending/asynchronous outcomes before claiming completion. Authentication/network errors are not proof of absence; an ambiguous result requires investigation, not an automatic retry.
 
 ## Common Commands
@@ -383,19 +383,19 @@ On a connections-endpoint 404, the CLI automatically looks up the database and b
 
 ```bash
 # Inspect current connections once
-pscale branch connections show <database> <branch-name> --format json
+pscale branch connections show <database> <branch-name> --format json --org <org>
 
 # Capture a bounded live-activity trace in a headless agent shell
 pscale branch connections top <database> <branch-name> --org <org> --capture <trace-file> --duration 30s
 
 # Cancel a query only after confirming the query_id with the user
-pscale branch connections kill <database> <branch-name> <query-id> --query
+pscale branch connections kill <database> <branch-name> <query-id> --query --org <org>
 
 # Terminate a connection only after explicit user approval
-pscale branch connections kill <database> <branch-name> <connection-id>
+pscale branch connections kill <database> <branch-name> <connection-id> --org <org>
 
 # Postgres only: terminate a transaction after explicit user approval
-pscale branch connections kill-transaction <database> <branch-name> <transaction-id>
+pscale branch connections kill-transaction <database> <branch-name> <transaction-id> --org <org>
 ```
 
 Prefer one-shot JSON `show` for agents. Headless `top` requires `--capture`; `--duration` bounds execution in both headless and TUI modes. Use an approved private trace path because captures can contain sensitive session/query data; do not log or commit them. In a TTY, `top` opens an interactive TUI instead.
@@ -731,20 +731,23 @@ VDiff reads and cleanup previews can return executable traffic-switching or dest
 
 ### Branch Cleanup
 
-Apply the destructive-operation safety gates before every cleanup. Check production/default status, deletion protection, application traffic, descendant branches, open deploy requests and their revert windows. Obtain exact-target approval only after dependencies, availability, and a verified recovery path are established. Merged or stale status alone is insufficient.
+Apply the destructive-operation safety gates before every cleanup. Check production/default status, deletion protection, application traffic, descendant branches, open deploy requests and their revert windows. Obtain exact-target approval only after dependencies, availability, and a verified recovery path are established. Merged or stale status alone is insufficient. In a known headless session, request approval for `--force` up front because it bypasses CLI confirmation. Choose exactly one deletion form below; do not run both or switch forms after a refusal.
 
 ```bash
 # Inspect the exact proposed target before approval
 pscale branch show <database> <old-branch-name> --org <org> --format json
 
-# Only after approval; retain interactive confirmation
+# Interactive terminal only, after approval; retain CLI confirmation
 pscale branch delete <database> <old-branch-name> --org <org>
+
+# Alternative: known headless session, only after explicit approval of --force
+pscale branch delete <database> <old-branch-name> --org <org> --force --format json
 
 # Read back inventory; increment --page until empty
 pscale branch list <database> --org <org> --page 1 --per-page 100 --format json
 ```
 
-Verify target absence in the complete inventory and dependent application health. A not-found response by itself can reflect permissions or wrong scope; authentication/network failures do not establish deletion. JSON/non-interactive deletion requires `--force`, which bypasses confirmation and needs explicit approval. Do not add `--delete-descendants`, demote, or disable protection on a refusal. Inventory and approve every descendant separately if recursive deletion is actually requested.
+Verify target absence only after every page of the complete inventory succeeds through an empty page, and check dependent application health. A not-found response by itself can reflect permissions or wrong scope; authentication/network failures do not establish deletion. JSON/non-interactive deletion requires `--force`, which bypasses confirmation and needs explicit approval. Do not add `--delete-descendants`, demote, or disable protection on a refusal. Inventory and approve every descendant separately if recursive deletion is actually requested.
 
 ### Independently requested demotion
 
