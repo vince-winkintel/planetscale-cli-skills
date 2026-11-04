@@ -87,13 +87,14 @@ At least one of `--replicas`, `--cluster-size`, or repeatable `--parameters name
 
 `dedicated-read-replica detach` is a hidden, feature-gated Postgres command; direct `--help` is available even though the parent does not list it. Read the compatibility note in [references/commands.md](references/commands.md). Detach is irreversible: it removes the dedicated replica resource and promotes it into a standalone branch in the same database. The new branch keeps the replica's name, region, size, replica count, storage configuration, and parameters, and receives a copy of the source branch's roles. Review the copied access and changed routing with the owner.
 
-Apply all destructive-operation gates above. Confirm the replica is ready with no pending changes, the destination name is suitable, clients have a verified remaining read path/capacity, and recovery is usable. Attached dedicated PgBouncers must be absent; if any exist, stop. Deleting a PgBouncer or replica is a separate destructive operation requiring its own dependency/recovery review and explicit approval, never automatic detach preparation. A 404 may mean the feature is unavailable, not that the replica is absent.
+Apply all destructive-operation gates above. Confirm the replica is ready with no pending changes, the destination name is suitable, clients have a verified remaining read path/capacity, and recovery is usable. Attached dedicated PgBouncers must be absent; if any are confirmed attached, stop. The branch-wide `pgbouncer list` below is inventory only, not an exact-replica attachment check. The CLI's PgBouncer/replica JSON models do not expose a dedicated-replica attachment identifier: `target` values such as `primary`, `replica`, or `replica_az_affinity` do not identify a named dedicated replica. If the inventory is nonempty and attachment status cannot be established from an authoritative exact-replica control-plane record or PlanetScale support, stop before detach. Do not infer attachment or absence from pooler names, regions, or generic replica targets. Deleting a PgBouncer or replica is a separate destructive operation requiring its own dependency/recovery review and explicit approval, never automatic detach preparation. A 404 may mean the feature is unavailable, not that the replica is absent.
 
 ```bash
 pscale dedicated-read-replica show <database> <branch> <name> --org <org> --format json
+# Branch-wide inventory only: resolve any uncertain attachment before proceeding
 pscale pgbouncer list <database> <branch> --org <org> --format json
 
-# Only after explicit approval for irreversible detachment; interactive confirmation
+# Only after attachment absence is established and explicit approval for irreversible detachment; interactive confirmation
 pscale dedicated-read-replica detach <database> <branch> <name> --org <org>
 
 # Read the returned branch name and verify readiness and dependent service health

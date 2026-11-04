@@ -15,11 +15,11 @@ metadata:
   openclaw:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
-      Scope is limited to: database and branch management, Neki operational management, logs, maintenance window/event management, dedicated PostgreSQL PgBouncers and read replicas, Postgres Traffic Control, VTGate sizing, Vitess keyspace parameters and read-only-region access, webhook management, billing inspection/payment-method management, deploy requests,
+      Scope is limited to: database and branch management, Neki operational management, logs, maintenance schedule inspection and Postgres window/event management, dedicated PostgreSQL PgBouncers and read replicas, Postgres Traffic Control, VTGate sizing, Vitess keyspace parameters and read-only-region access, webhook management, billing inspection/payment-method management, deploy requests,
       non-interactive SQL queries, historical/current performance metrics, query insights, read-only diagnostics, Cloudflare D1 imports, backups, audit-log exports, passwords,
       authentication-attempt exports, service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, Neki resources, branch logs, maintenance window/event management, keyspace parameters, dedicated PgBouncers, PostgreSQL dedicated read replicas, webhooks, Postgres Traffic Control, billing, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
+      - Run pscale CLI commands to manage PlanetScale databases, branches, Neki resources, branch logs, maintenance schedule inspection and Postgres window/event management, keyspace parameters, dedicated PgBouncers, PostgreSQL dedicated read replicas, webhooks, Postgres Traffic Control, billing, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -134,14 +134,16 @@ What's your use case?
 └─ One-off admin task → Password (temporary)
 ```
 
-### Direct promotion vs deploy request?
+### Schema deployment or lifecycle/capacity change?
 
 ```
-Production readiness?
-├─ Immediate promotion (dangerous) → pscale branch promote (pscale-branch)
-├─ Review + approval workflow → pscale deploy-request create (pscale-deploy-request)
-└─ Safe production deployment → Always use deploy requests
+What's your goal?
+├─ Deploy schema changes → Deploy-request review/approval workflow (pscale-deploy-request)
+├─ Promote branch lifecycle/capacity → Engine, capacity, recovery and approval gates (pscale-branch)
+└─ Experiment with schema → Isolated development branch, not a promotion shortcut
 ```
+
+Promotion does not deploy another branch's schema; it is not an alternative to a deploy request.
 
 ## Common Workflows
 

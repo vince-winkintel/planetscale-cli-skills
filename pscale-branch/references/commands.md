@@ -1,14 +1,18 @@
-Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+The following complete help sections were captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary: `branch`, `branch maintenance`, `branch maintenance run`, `branch connections`, `branch connections top`, `branch connections kill`, `branch connections kill-transaction`, `branch vtctl`, `branch promote`, and `branch demote`. Each has its own adjacent capture note. The environment was an empty credential-free HOME/XDG/config working directory with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
-This refresh replaces only `branch`, `branch maintenance`, `branch maintenance run`, `branch connections`, `branch connections top`, `branch connections kill-transaction`, and `branch vtctl`, and adds promote/demote help. Earlier attribution below describes previous captures where superseded. Unchanged fences retain their original provenance.
+This scoped attribution does not relabel any other fence. Earlier notes below record superseded captures where indicated; unchanged, unlabelled fences retain the legacy default defined below.
 
 Previous `pscale branch`, `branch connections`, and `branch connections top` help captures come from the official, checksum-verified PlanetScale CLI v0.348.0 macOS arm64 binary with `NO_COLOR=1`, an empty credential-free home, and only trailing-whitespace normalization. Archive SHA-256: `528bb8951d4d93f7ca869850787163f5d49ba405acc58d4146b9b3427e83b7e7`. The `branch extensions`, `branch extensions list`, `branch parameters`, and `branch vtgate` captures retain their v0.344.0 provenance (archive SHA-256 `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`), with the same color and whitespace settings. Complete toggle, parameter-list, and VTGate rollout help surfaces are in [branch-configuration-commands.md](branch-configuration-commands.md). Other sections retain their stated earlier provenance.
 
-Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch create` surface was recaptured from the checksum-verified v0.325.0 binary. The file header identifies the newer parent/extension/parameter/VTGate captures; maintenance and other recaptured sections identify their own provenance.
+Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch create` surface was recaptured from the checksum-verified v0.325.0 binary. The explicit current-section list and adjacent capture notes above/below identify newer captures. The preceding historical-family paragraph identifies the v0.348.0 parent/connection captures and the retained v0.344.0 extension/parameter/VTGate captures; maintenance and other recaptured sections identify their own provenance.
 
 ## pscale branch
 
-Previous capture note (superseded for this fence): Complete parent help has the v0.348.0 capture provenance identified in the introduction. The current parent lists `connections` under MySQL and Postgres; the `connections` child help documents Neki support as well. See operational approval gates in the skill.
+Historical v0.348.0 capture note (verbatim; superseded for the parent fence):
+
+> Complete parent help has the v0.348.0 capture provenance identified in the introduction. The upstream parent still labels connections under “MySQL and Postgres”; the connections help and operational skill explicitly cover read-only Neki sessions.
+
+Current commentary: the current parent still groups `connections` under MySQL and Postgres. The current connections help and source-backed action note below cover Neki; historical read-only restrictions are not current authorization rules.
 
 Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
@@ -593,7 +597,11 @@ Cancel is an operational write. Confirm the target and latest request state befo
 
 ## pscale branch connections
 
-Previous capture note (superseded for this fence): This complete parent fence and the complete `connections top` fence below were captured from the checksum-verified v0.348.0 binary identified above; only trailing whitespace was normalized. `connections show`, `kill`, and `kill-transaction` help was re-executed and is unchanged. The previous release excluded Neki actions; current operational guidance and replaced help support them.
+Historical v0.348.0 capture note (verbatim; superseded for the parent/top/kill-transaction fences and the re-captured kill attribution):
+
+> This complete parent fence and the complete `connections top` fence below were captured from the checksum-verified v0.348.0 binary identified above; only trailing whitespace was normalized. `connections show`, `kill`, and `kill-transaction` help was re-executed and is unchanged. Their action examples are not applicable to Neki.
+
+Current commentary: the historical Neki exclusion above describes the earlier release only. Current Neki actions follow the matching client dispatch/tests documented below; `connections show` retains its unchanged earlier help capture.
 
 Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
@@ -737,6 +745,10 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ```
 
 ## pscale branch connections kill
+
+The Neki sub-list in parent help names `show/top` and `kill-transaction`, but is not an exhaustive action-support matrix. In the immutable [client command dispatch](https://github.com/planetscale/cli/blob/05bded8a8fdbcda5b4ee47dd015460a20bb8a238/internal/cmd/branch/connections_commands.go#L57-L101), `kill` resolves the engine, validates engine-specific flags, then dispatches query cancellation or connection termination for that engine. The matching [`TestConnectionsSendsNekiActions` fixture](https://github.com/planetscale/cli/blob/05bded8a8fdbcda5b4ee47dd015460a20bb8a238/internal/cmd/branch/connections_test.go#L546-L573) covers Neki query, connection, and transaction actions. This establishes CLI request support, not live server entitlement or guaranteed success. Use fresh server-issued action IDs, exact-target approval, and read-back; stop on feature/permission failures rather than substituting IDs or retrying automatically.
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 ```text
 Kill a branch connection or query.

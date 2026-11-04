@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Manage PlanetScale branch creation, rename, protection, deletion, promotion/demotion, diff, restore/PITR, switchover, logs, and Postgres/Vitess/Neki live connections with approved termination. Use for Postgres/Neki maintenance; Postgres extensions, parameters and sizing; Vitess VTGate capacity and parameter rollouts; tablet throttling, routing rules, owned Lookup Vindex backfills, and vtctl MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, connections show/top, live connections, live sessions, kill, kill-transaction, deletion protection, extensions enable/disable, refresh-schema, schema_ready, schema snapshot readiness, schema diff, query patterns, Postgres parameters, resize, VTGate parameters/update/changes, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote/demote branch, MoveTables, global keyspace.
+description: Manage PlanetScale branch creation, rename, protection, deletion, promotion/demotion, diff, restore/PITR, switchover, logs, and Postgres/Vitess/Neki live connections with approved termination. Use for Postgres/Neki maintenance; Postgres extensions, parameters and sizing; Vitess VTGate capacity and parameter rollouts; tablet throttling, routing rules, owned Lookup Vindex backfills, and vtctl MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, branch connections, connections show, connections top, live connections, live sessions, kill, kill-transaction, deletion protection, extensions enable/disable, refresh-schema, schema_ready, schema snapshot readiness, schema diff, query patterns, Postgres parameters, resize, VTGate parameters/update/changes, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, demote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -375,7 +375,7 @@ Maintenance cannot start while a change request is in progress. For PostgreSQL, 
 
 ### Connection inspection and safe termination
 
-`pscale branch connections` supports Postgres/Vitess connections and Neki client sessions across the branch's routers. Prefer JSON output for agent workflows so identifiers are explicit and not truncated. Neki supports `show`, `top`, query/connection `kill`, and `kill-transaction`. Use only the selected row's server-issued `query_id`, `connection_id`, or `transaction_id` for its matching action; never substitute a PID, router UID, or sidecar/backend ID. Check [references/commands.md](references/commands.md) for compatibility before proposing Neki actions.
+`pscale branch connections` supports Postgres/Vitess connections and Neki client sessions across the branch's routers. Prefer JSON output for agent workflows so identifiers are explicit and not truncated. Neki supports `show`, `top`, query/connection `kill`, and `kill-transaction`. Use only the selected row's server-issued `query_id`, `connection_id`, or `transaction_id` for its matching action; never substitute a PID, router UID, or sidecar/backend ID. Check the [source-backed action compatibility note](references/commands.md#pscale-branch-connections-kill) before proposing Neki actions. Client support does not establish server feature availability or permission; stop on unavailable action IDs or a refusal.
 
 For Neki, omit Vitess `--keyspace`/`--shard` targets and Postgres `--instance`/`--role` filters: the CLI rejects these engine-specific flags. JSON connection rows can include `router_name`, `router_cell`, `router_uid`, `availability_zone`, `backend_start`, and `sidecar_backends`; the last contains shard/backend details, not independently actionable kill IDs. Preserve the top-level `warnings` array: unreachable-router warnings mean incomplete results even when the command succeeds or returns no sessions. Do not claim an empty result proves the branch has no connections. Live Neki `top` can offer cancellation/termination actions. Replay remains read-only and rejects backend actions.
 
@@ -782,14 +782,14 @@ Demotion optionally accepts Postgres `--cluster-size` (including PS-DEV) and `--
 
 ## Decision Trees
 
-### Should I promote directly or use deploy request?
+### Schema deployment or lifecycle/capacity change?
 
 ```
-What's your environment?
-├─ Production database → ALWAYS use deploy request (safe, reviewable)
-├─ Pre-production database with team → Use deploy request (review workflow)
-├─ Lifecycle promotion requested → Review engine, capacity, recovery, and exact-target approval
-└─ Experimental changes → Keep as branch, don't promote
+What's your goal?
+├─ Deploy a branch's schema changes → Use the deploy-request review/approval workflow
+├─ Promote an eligible branch's lifecycle/capacity → Apply promotion gates; this does not deploy another branch's schema
+├─ Independently requested demotion → Apply demotion gates; do not chain deletion
+└─ Experiment with schema → Keep an isolated development branch; promotion is not a schema-deployment shortcut
 ```
 
 ### When to create a new branch?

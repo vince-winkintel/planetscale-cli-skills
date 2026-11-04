@@ -1,6 +1,6 @@
 ---
 name: pscale-maintenance
-description: Inspect PlanetScale maintenance schedules and history, and manage Postgres branch maintenance windows and events with approval. Use for planned maintenance, deadlines, window changes, event rescheduling, and pending Vitess or MySQL versions. Triggers on pscale maintenance, branch maintenance window, branch maintenance event, planned maintenance, or maintenance reschedule.
+description: Inspect PlanetScale maintenance schedules and history, and manage Postgres branch maintenance windows and events with approval. Use for planned maintenance, deadlines, window changes, event rescheduling, and pending Vitess or MySQL versions. Triggers on maintenance schedule, maintenance window, pending Vitess version, pending MySQL version, pscale maintenance, branch maintenance window, branch maintenance event, planned maintenance, or maintenance reschedule.
 ---
 
 # pscale maintenance
