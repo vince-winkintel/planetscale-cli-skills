@@ -31,6 +31,8 @@ These gates apply to every destructive example here, including deletion, demotio
 
 ## Branch-wide change requests
 
+Use the supported CLI change-request commands; see the installed [compatibility note](references/commands.md#compatibility) if an older CLI cannot access the queues. Do not rewrite endpoints or bypass failures with raw API calls.
+
 Use `branch changes` for one inventory across Neki admin, cluster, configuration-profile, router, and sidecar requests. Per-resource `changes` commands remain useful when the target component is already known.
 
 ```bash
@@ -119,7 +121,7 @@ Unlike `role get`, `pscale inspect --shard` accepts the shard **ID**. `--shard` 
 
 ## Live Router Connections
 
-Use `pscale-branch` for `branch connections show/top`. For Neki these are read-only client-session views across branch routers; `kill` and `kill-transaction` are rejected. Do not supply Vitess `--keyspace`/`--shard` or Postgres `--instance`/`--role` flags. Preserve `warnings` in JSON: an unreachable router makes the result incomplete, even if the command succeeds with no rows. This branch-wide session inventory differs from `pscale inspect`, which targets one shard/connection path.
+Use `pscale-branch` for `branch connections show/top` and separately approved Neki query, transaction, or connection termination. Use only fresh server-issued action IDs from the selected row; router PIDs/backend metadata are not substitutes. Live `top` actions depend on permission and row IDs; replay remains read-only. Follow the exact-target, dependency, recovery, approval, and read-back gates before any termination. Do not supply Vitess `--keyspace`/`--shard` or Postgres `--instance`/`--role` flags. Preserve `warnings` in JSON: an unreachable router makes the result incomplete, even if the command succeeds with no rows. This branch-wide session inventory differs from `pscale inspect`, which targets one shard/connection path.
 
 ```bash
 pscale branch connections show <database> <branch> --org <org> --format json

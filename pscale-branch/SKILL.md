@@ -1,6 +1,6 @@
 ---
 name: pscale-branch
-description: Manage PlanetScale branches by creating, renaming, protecting, deleting, promoting, diffing, restoring, and switching over; querying PostgreSQL/Neki logs, live connections, and query patterns; and managing Postgres/Neki maintenance, Postgres extension toggles, parameters and sizing, Vitess VTGate capacity and parameter rollouts, tablet throttling, routing rules, Lookup Vindexes, and vtctl MoveTables. Use for schema branch workflows, PITR, branch logs, Postgres/Vitess connections and read-only Neki live sessions, deletion protection, primary switchovers, maintenance, extension enable/disable, schema snapshot refresh/readiness, diffs, resize, VTGate parameters/update/changes, throttlers, routing rules, owned Lookup Vindex backfills, promotion, or MoveTables. Triggers on pscale branch, branch connections, connections show, connections top, live connections, live sessions, kill-transaction, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, extensions, refresh-schema, schema_ready, schema diff, query patterns, Postgres parameters, VTGate, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, MoveTables, global keyspace.
+description: Manage PlanetScale branch creation, rename, protection, deletion, promotion/demotion, diff, restore/PITR, switchover, logs, and Postgres/Vitess/Neki live connections with approved termination. Use for Postgres/Neki maintenance; Postgres extensions, parameters and sizing; Vitess VTGate capacity and parameter rollouts; tablet throttling, routing rules, owned Lookup Vindex backfills, and vtctl MoveTables. Triggers on pscale branch, create branch, restore point, PITR, pscale logs, branch switchover, branch maintenance, branch connections, connections show, connections top, live connections, live sessions, kill, kill-transaction, deletion protection, extensions enable/disable, refresh-schema, schema_ready, schema snapshot readiness, schema diff, query patterns, Postgres parameters, resize, VTGate parameters/update/changes, tablet throttler, keyspace routing rules, lookup vindex, vtctl, vtctld, promote branch, demote branch, MoveTables, global keyspace.
 ---
 
 # pscale branch
@@ -95,7 +95,7 @@ pscale branch vtgate resize <database> <branch-name> \
   --format json
 pscale branch vtgate resize status <database> <branch-name> --format json
 
-# Inspect live branch connections once (Postgres, Vitess, and read-only Neki)
+# Inspect live branch connections once (Postgres, Vitess, and Neki)
 # For bounded headless top capture and trace safety, see Connection inspection below.
 pscale branch connections show <database> <branch-name> --format json
 
@@ -144,8 +144,8 @@ pscale branch vtctl move-tables create <database> <branch-name> \
 # Delete only after the destructive-operation safety gates and Branch Cleanup review
 pscale branch delete <database> <branch-name> --org <org>
 
-# Promote to production
-pscale branch promote <database> <branch-name>
+# Promote only after exact-target lifecycle/capacity approval
+pscale branch promote <database> <branch-name> --org <org>
 ```
 
 ## Workflows
@@ -341,7 +341,7 @@ Only one switchover can run on a branch at a time. If the create response contai
 
 ### Postgres and Neki branch maintenance
 
-`pscale branch maintenance run` starts asynchronous Postgres or Neki branch image maintenance. PlanetScale applies the image upgrade to replicas first, then switches over from the old primary to an upgraded replica. Expect seconds of unavailability during the switchover, and expect all direct connections to be terminated; applications must rely on retry logic. A single-instance branch has no replica to promote and is unavailable until the instance returns. For Neki configuration-profile maintenance, use `pscale-neki`.
+`pscale branch maintenance run` starts asynchronous Postgres or Neki branch image maintenance. PlanetScale applies the image upgrade to replicas first, then switches over from the old primary to an upgraded replica. Expect seconds of unavailability during the switchover, and expect all direct connections to be terminated; applications must rely on retry logic. A single-instance branch has no replica to promote and is unavailable until the instance returns. For Neki configuration-profile maintenance, use `pscale-neki`. For Postgres weekly windows and scheduled events, use `pscale-maintenance`: `branch maintenance window show/set` and `event list/show/reschedule`. These scheduling commands do not support Neki. Review scheduled work before proposing an immediate run; neither rescheduling nor `run` is a cancellation or deadline bypass.
 
 ```bash
 # PostgreSQL: inspect instance topology and make sure no resize request is in progress
@@ -375,9 +375,9 @@ Maintenance cannot start while a change request is in progress. For PostgreSQL, 
 
 ### Connection inspection and safe termination
 
-`pscale branch connections` supports Postgres/Vitess connections and read-only Neki client sessions across the branch's routers. Prefer JSON output for agent workflows so identifiers are explicit and not truncated. Neki supports `show` and `top`, not `kill` or `kill-transaction`; do not interpret router session PIDs or backend details as permission to terminate them.
+`pscale branch connections` supports Postgres/Vitess connections and Neki client sessions across the branch's routers. Prefer JSON output for agent workflows so identifiers are explicit and not truncated. Neki supports `show`, `top`, query/connection `kill`, and `kill-transaction`. Use only the selected row's server-issued `query_id`, `connection_id`, or `transaction_id` for its matching action; never substitute a PID, router UID, or sidecar/backend ID. Check the [source-backed action compatibility note](references/commands.md#pscale-branch-connections-kill) before proposing Neki actions. Client support does not establish server feature availability or permission; stop on unavailable action IDs or a refusal.
 
-For Neki, omit Vitess `--keyspace`/`--shard` targets and Postgres `--instance`/`--role` filters: the CLI rejects these engine-specific flags. JSON connection rows can include `router_name`, `router_cell`, `router_uid`, `availability_zone`, `backend_start`, and `sidecar_backends`; the last contains shard/backend details, not independently actionable kill IDs. Preserve the top-level `warnings` array: unreachable-router warnings mean incomplete results even when the command succeeds or returns no sessions. Do not claim an empty result proves the branch has no connections. `top` is read-only for Neki, including replay; its router view has no cancellation/termination actions.
+For Neki, omit Vitess `--keyspace`/`--shard` targets and Postgres `--instance`/`--role` filters: the CLI rejects these engine-specific flags. JSON connection rows can include `router_name`, `router_cell`, `router_uid`, `availability_zone`, `backend_start`, and `sidecar_backends`; the last contains shard/backend details, not independently actionable kill IDs. Preserve the top-level `warnings` array: unreachable-router warnings mean incomplete results even when the command succeeds or returns no sessions. Do not claim an empty result proves the branch has no connections. Live Neki `top` can offer cancellation/termination actions. Replay remains read-only and rejects backend actions.
 
 On a connections-endpoint 404, the CLI automatically looks up the database and branch to distinguish a missing target from live connections not being enabled. Treat its specific missing-database, missing-branch, or disabled-live-connections message as the diagnosis. Only if the ambiguous fallback ("does not exist ... or live connections are not enabled") remains because those lookups failed, run read-only `pscale database show <database> --org <org> --format json` and `pscale branch show <database> <branch> --org <org> --format json` to investigate. Do not create or change resources to bypass the error.
 
@@ -394,13 +394,17 @@ pscale branch connections kill <database> <branch-name> <query-id> --query --org
 # Terminate a connection only after explicit user approval
 pscale branch connections kill <database> <branch-name> <connection-id> --org <org>
 
-# Postgres only: terminate a transaction after explicit user approval
+# Postgres or Neki only: terminate a transaction after explicit user approval
 pscale branch connections kill-transaction <database> <branch-name> <transaction-id> --org <org>
 ```
 
 Prefer one-shot JSON `show` for agents. Headless `top` requires `--capture`; `--duration` bounds execution in both headless and TUI modes. Use an approved private trace path because captures can contain sensitive session/query data; do not log or commit them. In a TTY, `top` opens an interactive TUI instead.
 
-The termination examples above apply only to supported Postgres/Vitess targets, never Neki. Treat `kill` and `kill-transaction` as destructive operational actions: show the selected row, explain the effect, get confirmation, run exactly one action, then verify with `connections show`.
+`kill --query` cancels the matching query; plain `kill` terminates the matching connection. Postgres/Neki `kill-transaction` terminates the connection matching the transaction ID, not merely one SQL statement; Vitess does not support it. These CLI action commands do not prompt for confirmation. Treat `kill` and `kill-transaction` as destructive operational actions: show the selected row, explain the effect, get confirmation, run exactly one action, then verify with `connections show`.
+
+In live `top`, `c`, `k`, and `Shift+K` correspond to query cancellation, transaction termination, and connection termination where supported. Footer controls are filtered by the selected row's required action IDs; in the Blockers detail tab the highlighted blocker is the target, so confirm its identity rather than the original subject. A known permission denial hides/disables actions. The CLI combines database and organization permissions and selects `manage_production_live_connections` for a production branch or `manage_live_connections` otherwise. If branch/permission lookup fails, controls may remain visible because authorization is enforced by the server on every kill; visible keys are not proof of permission or user approval. Replay never authorizes actions.
+
+JSON action output includes `success` and optional `keyspace`, `shard`, `tablet`, `id`, and `kind`; absent fields must not be synthesized. Human action text alone does not prove success. Inspect the result and re-read the exact session plus application health, preserving incomplete-result warnings. Stop on stale IDs, permission failures, or uncertain outcomes rather than selecting another session or retrying automatically.
 
 ### Query pattern reports
 
@@ -681,7 +685,7 @@ Do not externalize until the copy/backfill state and lookup-table consistency ar
 
 Prefer canonical `pscale branch vtctl move-tables` for new table-movement work. `vtctld` remains a compatibility alias. Generated help uses `vtctl`, while MoveTables `next_steps` may emit the compatible `pscale branch vtctld` form; treat either as the same command surface. The top-level `pscale workflow` family is deprecated and emits a warning for the parent and its subcommands; do not start new work through that legacy surface. The top-level `pscale data-imports` family is unavailable; use external keyspaces plus MoveTables instead.
 
-`branch vtctl` is listed in `pscale branch --help`. Its `lookup-vindex`, `materialize`, `planned-reparent-shard`, and `list-tablets` children remain callable but are hidden from the vtctl parent listing; absence from parent help does not mean they are unavailable. Complete Lookup Vindex help is captured in `references/lookup-vindex-commands.md`. `list-tablets` is used by the throttler workflow above; check its direct `--help` when a current CLI is available. Materialize and PlannedReparentShard are not operationally covered by this skill.
+`branch vtctl` is listed in `pscale branch --help`. Its `lookup-vindex`, `materialize`, `planned-reparent-shard`, and `list-tablets` children are visible in the vtctl parent listing. Visibility is command discovery, not authorization to mutate topology. Complete Lookup Vindex help is captured in `references/lookup-vindex-commands.md`. `list-tablets` is used by the throttler workflow above; check its direct `--help` when a current CLI is available. Materialize and PlannedReparentShard are not operationally covered by this skill.
 
 Start with `pscale branch vtctl move-tables list` to inventory workflows on the branch. Omitting `--target-keyspace` lists workflows across every keyspace; pass the flag only to filter deliberately. Each JSON workflow that exposes its name and target keyspace includes a generated `next_steps` status command while preserving the API's original wrapper or raw-array shape.
 
@@ -749,6 +753,21 @@ pscale branch list <database> --org <org> --page 1 --per-page 100 --format json
 
 Verify target absence only after every page of the complete inventory succeeds through an empty page, and check dependent application health. A not-found response by itself can reflect permissions or wrong scope; authentication/network failures do not establish deletion. JSON/non-interactive deletion requires `--force`, which bypasses confirmation and needs explicit approval. Do not add `--delete-descendants`, demote, or disable protection on a refusal. Inventory and approve every descendant separately if recursive deletion is actually requested.
 
+### Independently requested promotion and sizing
+
+Promotion changes the branch's lifecycle and capacity; it does not deploy another branch's schema. Use deploy requests for Vitess schema changes. Both `promote` and `demote` support MySQL and enabled Postgres branches, not Neki. Neither command prompts for confirmation. Confirm engine/feature support, exact org/database/branch, production/default state, dependencies, availability, recovery, capacity, and cost, then obtain explicit approval for the operation and every sizing flag.
+
+Promotion `--cluster-size` rejects PS-DEV server-side; omission on a PS-DEV Postgres branch uses the smallest production size. For MySQL the size applies to the default keyspace. Postgres `--replicas` counts additional replicas: 0 is single-node, 2–8 high availability; omission preserves the count, while explicit 0 removes that redundancy. Do not infer that 1 is supported or that a default flag value is sent. Sizing requires `write_database`; eligibility/count validation is left to the API. Discover valid sizes with an engine-filtered `size cluster list`, since promote/demote completion is generic. See [references/commands.md](references/commands.md) for exact flags and compatibility.
+
+```bash
+pscale branch show <database> <branch-name> --org <org> --format json
+# After explicit approval for promotion and the exact Postgres capacity
+pscale branch promote <database> <branch-name> --org <org> --format json --cluster-size <size> --replicas 2
+pscale branch show <database> <branch-name> --org <org> --format json
+```
+
+Read back production state, readiness, actual capacity, pending changes, and service health before claiming completion; a returned success message alone is insufficient. Do not automatically repeat promotion, alter flags, demote, or delete after a refusal. The human safe-migrations reminder applies to MySQL (or a response without `kind`); it is not an instruction to enable it automatically.
+
 ### Independently requested demotion
 
 Demotion and deletion are separate operations. For an independently requested demotion, confirm engine/target eligibility, production/default state, traffic and availability impact, and recovery first. The CLI's demote command has no confirmation prompt. After explicit approval, run only the demotion and read back `production` and service health; do not chain deletion. If support or read-back is uncertain, stop.
@@ -759,16 +778,18 @@ pscale branch demote <database> <branch-name> --org <org> --format json
 pscale branch show <database> <branch-name> --org <org> --format json
 ```
 
+Demotion optionally accepts Postgres `--cluster-size` (including PS-DEV) and `--replicas` with the same omitted-versus-explicit-zero semantics above. Omitting size preserves it. Vitess ignores both options; do not claim a capacity change there. Each sizing or redundancy reduction needs approval. The API may require another administrator's confirmation; inspect returned state and report pending approval rather than repeating demotion or claiming completion from the human message.
+
 ## Decision Trees
 
-### Should I promote directly or use deploy request?
+### Schema deployment or lifecycle/capacity change?
 
 ```
-What's your environment?
-├─ Production database → ALWAYS use deploy request (safe, reviewable)
-├─ Pre-production database with team → Use deploy request (review workflow)
-├─ Personal dev database → Direct promotion OK (but deploy request still safer)
-└─ Experimental changes → Keep as branch, don't promote
+What's your goal?
+├─ Deploy a branch's schema changes → Use the deploy-request review/approval workflow
+├─ Promote an eligible branch's lifecycle/capacity → Apply promotion gates; this does not deploy another branch's schema
+├─ Independently requested demotion → Apply demotion gates; do not chain deletion
+└─ Experiment with schema → Keep an isolated development branch; promotion is not a schema-deployment shortcut
 ```
 
 ### When to create a new branch?

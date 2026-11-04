@@ -1,6 +1,6 @@
 ---
 name: pscale-read-only-replica
-description: Manage dedicated PostgreSQL read replicas with PlanetScale CLI. Use when listing, inspecting, creating, resizing, configuring, or deleting Postgres dedicated read replicas, choosing replica regions, or changing replica parameters. Triggers on pscale dedicated-read-replica, pscale read-only-replica, Postgres read replica, analytics replica, read capacity, replica region, replica parameters.
+description: Manage dedicated PostgreSQL read replicas with PlanetScale CLI. Use when listing, inspecting, creating, resizing, configuring, detaching, or deleting Postgres dedicated read replicas, choosing replica regions, or changing replica parameters. Triggers on pscale dedicated-read-replica, pscale read-only-replica, Postgres read replica, analytics replica, read capacity, replica region, replica parameters.
 ---
 
 # pscale dedicated-read-replica
@@ -82,6 +82,27 @@ pscale dedicated-read-replica show <database> <branch> <name> --org <org> --form
 ```
 
 At least one of `--replicas`, `--cluster-size`, or repeatable `--parameters namespace.name=value` is required. Parameter values must be greater than or equal to the primary branch's corresponding values. Review restart, connection, capacity, and cost impact before approval; then poll until the returned state is terminal and ready.
+
+## Detach into a standalone branch
+
+`dedicated-read-replica detach` is a hidden, feature-gated Postgres command; direct `--help` is available even though the parent does not list it. Read the compatibility note in [references/commands.md](references/commands.md). Detach is irreversible: it removes the dedicated replica resource and promotes it into a standalone branch in the same database. The new branch keeps the replica's name, region, size, replica count, storage configuration, and parameters, and receives a copy of the source branch's roles. Review the copied access and changed routing with the owner.
+
+Apply all destructive-operation gates above. Confirm the replica is ready with no pending changes, the destination name is suitable, clients have a verified remaining read path/capacity, and recovery is usable. Attached dedicated PgBouncers must be absent; if any are confirmed attached, stop. The branch-wide `pgbouncer list` below is inventory only, not an exact-replica attachment check. The CLI's PgBouncer/replica JSON models do not expose a dedicated-replica attachment identifier: `target` values such as `primary`, `replica`, or `replica_az_affinity` do not identify a named dedicated replica. If the inventory is nonempty and attachment status cannot be established from an authoritative exact-replica control-plane record or PlanetScale support, stop before detach. Do not infer attachment or absence from pooler names, regions, or generic replica targets. Deleting a PgBouncer or replica is a separate destructive operation requiring its own dependency/recovery review and explicit approval, never automatic detach preparation. A 404 may mean the feature is unavailable, not that the replica is absent.
+
+```bash
+pscale dedicated-read-replica show <database> <branch> <name> --org <org> --format json
+# Branch-wide inventory only: resolve any uncertain attachment before proceeding
+pscale pgbouncer list <database> <branch> --org <org> --format json
+
+# Only after attachment absence is established and explicit approval for irreversible detachment; interactive confirmation
+pscale dedicated-read-replica detach <database> <branch> <name> --org <org>
+
+# Read the returned branch name and verify readiness and dependent service health
+pscale branch show <database> <new-branch> --org <org> --format json
+pscale dedicated-read-replica list <database> <branch> --org <org> --format json
+```
+
+Headless/JSON execution requires separately approved `--force` up front; it suppresses confirmation, not readiness or feature restrictions. Do not retry a refused or ambiguous detach automatically. JSON returns a Postgres branch model; the new branch may still be promoting (`ready: false`). Use bounded read-only checks of that returned branch and source capacity; report pending state if readiness is not established. A success message does not prove promotion or application cutover is complete.
 
 ## Delete
 

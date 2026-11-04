@@ -1,6 +1,17 @@
-1.0.37
+1.0.38
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- PlanetScale CLI v0.349.0
+  - Reviewed all 14 published release items and the full `v0.348.0...v0.349.0` source comparison on 2026-11-04; upstream tag commit `05bded8a8fdbcda5b4ee47dd015460a20bb8a238`.
+  - Added Postgres weekly maintenance window and event inspection, approved window changes/rescheduling, UTC/API JSON contracts, pagination, deadlines, and read-back gates; immediate Postgres/Neki maintenance remains separately approved.
+  - Added hidden, feature-gated, irreversible dedicated-read-replica detach guidance with dependency, copied-role, recovery, force-approval, and asynchronous readiness checks. No automatic PgBouncer/replica cleanup or promotion.
+  - Added emergency backup source pairing and eligibility checks, promote/demote sizing and omission semantics, engine limits, permission/cost/availability review, and pending-state verification.
+  - Added Neki live query/transaction/connection actions with fresh matching action IDs and approval; documented top permission lookup limits, selected-row/blocker ID controls, read-only replay, and incomplete-result warnings.
+  - Recorded visible vtctl advanced children, Neki branch/profile/router/admin change-request endpoint migration (CLI command names unchanged), and nullable service-token last-used IP/ASN organization metadata. Compatibility minima are in installed references; original unchanged help attribution remains intact.
+  - Reviewed upstream CI security and three dependency bumps; no skill command changes arise from those four items. No workflow, scheduler, refresh-engine, runtime script, or test changes.
+  - Verified the official macOS arm64 archive SHA-256 `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6` and extracted binary equality. Complete affected help/parent/child/alias captures use an empty credential-free HOME/XDG/config/cwd, `NO_COLOR=1`, and `TERM=dumb`; only terminal padding and trailing whitespace normalized. Replay/source manifest, per-item dispositions, and validation evidence are outside the repository.
+  - Proposed package 1.0.38, unpublished. No live PlanetScale API calls, credential use, package release/publication, or installation by this refresh.
 
 - Security audit remediation (#48), pending package 1.0.37
   - Replaced deletion-refusal, branch-name collision, and database-quota troubleshooting shortcuts with scoped read-only inspection. Demotion is supported by the reviewed CLI source, but is a separately approved lifecycle action, not a deletion/protection bypass.

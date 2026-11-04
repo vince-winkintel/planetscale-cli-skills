@@ -54,6 +54,22 @@ pscale backup policy list <database> --format json
 
 ## Workflows
 
+### Emergency backup from a live tablet
+
+`backup create --emergency` requests a clone from a live tablet instead of waiting for the next scheduled backup. It requires `--emergency-source primary` or `--emergency-source replica`; `rdonly` and all other values are rejected. Supplying `--emergency-source` without a true `--emergency` is also rejected. Normal backup creation omits both flags. See [references/commands.md](references/commands.md) for compatibility and complete help.
+
+Confirm the exact org/database/branch, engine and feature eligibility, selected tablet source, workload impact, capacity, and storage cost before explicit approval. The CLI validates the flag pairing but does not preflight engine support; API acceptance is not guaranteed. Never automatically escalate a failed regular backup into an emergency backup or switch from replica to primary after a refusal.
+
+```bash
+pscale database show <database> --org <org> --format json
+pscale branch show <database> <branch> --org <org> --format json
+# After approval for the exact target and replica source
+pscale backup create <database> <branch> --org <org> --format json --emergency --emergency-source replica
+pscale backup show <database> <branch> <backup-id> --org <org> --format json
+```
+
+Retain the returned backup ID, inspect completion/state with bounded read-only checks, and verify backup usability and retention before relying on it for recovery. A create success message alone is not evidence of a completed usable backup. An uncertain result requires inspection, not another automatic create.
+
 ### Restore to a new branch
 
 Inspect the source backup and target database first. Valid SKUs are engine-specific: read the database `kind`, then list sizes with `--engine postgresql`, `--engine mysql`, or `--engine neki`. Do not choose from the unfiltered mixed-engine list. Backup-restore `--cluster-size` completion is generic and not database-kind aware, so verify the selected value against the filtered list. For MySQL and PostgreSQL restores, always pass `--cluster-size` explicitly; only Neki restores may omit it to inherit the source default-profile size. For PostgreSQL restores, optional `--replicas` sets the number of **additional** replicas: `0` creates a single-node branch, while omitting the flag uses the selected cluster size's default. The CLI rejects `--replicas` for Vitess/MySQL restores.
