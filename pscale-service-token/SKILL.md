@@ -91,12 +91,14 @@ pscale service-token delete <old-token-id> --org my-org
 
 ### Inspect a service token
 
-`pscale service-token show` returns safe service-token metadata such as ID, name, creation time, and last-used time. It does not print the token secret and does not include access grants; use `show-access` when grants are needed.
+`pscale service-token show` returns safe service-token metadata such as ID, name, creation time, expiry, last-used time, last-used IP, and last-used network organization. It does not print the token secret and does not include access grants; use `show-access` when grants are needed.
 
 ```bash
 pscale service-token show <token-id> --org <org> --format json
 pscale service-token show-access <token-id> --org <org> --format json
 ```
+
+List/show human and CSV output uses `last_used_ip` and `last_used_organization` columns. JSON uses nullable `last_used_ip` and `last_used_asn_organization`; the latter identifies the IP's network/ASN organization, not the PlanetScale organization or an access grant. Missing values display as empty strings in the table; JSON retains nulls. Do not infer misuse, current permissions, or safety to delete from last-use metadata alone. Protect IP/network metadata in incident evidence and avoid publishing it.
 
 Treat token IDs and grant details as sensitive operational metadata. Never ask the user to paste a service token secret into chat; use environment variables or a secrets manager.
 

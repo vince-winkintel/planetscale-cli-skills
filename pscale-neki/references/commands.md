@@ -1850,3 +1850,7 @@ Neki workflows touch several shared command families whose exact help is owned e
 - `pscale backup restore` and `pscale backup restore show`: [../../pscale-backup/references/commands.md](../../pscale-backup/references/commands.md)
 - `pscale sql`: [../../pscale-sql/references/commands.md](../../pscale-sql/references/commands.md)
 - `pscale role` creation, lookup, reset, deletion, renewal, update, and reassignment: [../../pscale-password/references/commands.md](../../pscale-password/references/commands.md)
+
+## Compatibility
+
+Use CLI v0.349.0 or later for the current Neki change-request endpoints. The CLI command names remain `branch changes` and resource `changes`; branch-wide, config-profile, router, and admin requests now use `change-requests` internally. Legacy sidecar endpoints are unchanged. Do not substitute endpoint paths or use raw API calls to overcome a failure. Relevant parent/list/show/cancel help and list aliases were re-executed unchanged against the checksum-verified v0.349.0 binary (archive SHA-256 `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`), retaining original capture attribution. Neki live connection actions also require this minimum; use `pscale-branch` for their ID, permission, and approval gates.

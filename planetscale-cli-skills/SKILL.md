@@ -15,11 +15,11 @@ metadata:
   openclaw:
     purpose: >
       Provide command reference and automation for PlanetScale CLI (pscale) operations only.
-      Scope is limited to: database and branch management, Neki operational management, logs, maintenance schedule inspection, dedicated PostgreSQL PgBouncers and read replicas, Postgres Traffic Control, VTGate sizing, Vitess keyspace parameters and read-only-region access, webhook management, billing inspection/payment-method management, deploy requests,
+      Scope is limited to: database and branch management, Neki operational management, logs, maintenance window/event management, dedicated PostgreSQL PgBouncers and read replicas, Postgres Traffic Control, VTGate sizing, Vitess keyspace parameters and read-only-region access, webhook management, billing inspection/payment-method management, deploy requests,
       non-interactive SQL queries, historical/current performance metrics, query insights, read-only diagnostics, Cloudflare D1 imports, backups, audit-log exports, passwords,
       authentication-attempt exports, service tokens, and organization management via the pscale CLI tool.
     capabilities:
-      - Run pscale CLI commands to manage PlanetScale databases, branches, Neki resources, branch logs, maintenance inspection, keyspace parameters, dedicated PgBouncers, PostgreSQL dedicated read replicas, webhooks, Postgres Traffic Control, billing, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
+      - Run pscale CLI commands to manage PlanetScale databases, branches, Neki resources, branch logs, maintenance window/event management, keyspace parameters, dedicated PgBouncers, PostgreSQL dedicated read replicas, webhooks, Postgres Traffic Control, billing, deploy requests, D1 imports, non-interactive SQL queries, performance metrics, query insights, read-only diagnostics, audit-log exports, and authentication-attempt exports
       - Execute bundled automation scripts (create-branch-for-mr.sh, deploy-schema-change.sh, sync-branch-with-main.sh)
       - Read PlanetScale CLI output and help users interpret results
     install_mechanism: >
@@ -73,7 +73,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Route parameter update-requirement interpretation to `pscale-branch` for Postgres catalogs and `pscale-neki` for configuration-profile, sidecar, and admin catalogs. `REQUIRES UPDATE` is a human boolean indicator; JSON `requires_update` preserves a nullable string. Inspect non-null requirements before proposing writes; they do not authorize automatic maintenance or capacity changes.
 - Route Postgres branch extension enable/disable and Vitess VTGate parameter/update/change-rollout work to `pscale-branch`. Route approved failed deploy-operation retries to `pscale-deploy-request`; retry is not queue unblocking or revert. Keyspace storage size units and staff-managed maximum limits belong to `pscale-database`.
 - Route Neki read-only replica capacity to `pscale-neki` and `branch config-profile create/update --read-only-replicas`. These per-shard counts are not dedicated PostgreSQL replica resources; confirm the engine and retain exact-target capacity/cost approval.
-- Route Neki live router sessions to `pscale-branch` (`branch connections show/top`): read-only, no kill actions or engine-incompatible target/filter flags; preserve incomplete-result warnings. Sidecar settings belong to `pscale-neki` and `config-profile update --parameters sidecar.<name>=<value>`; `branch sidecar` is deprecated. Parameter inventories expose `INTERNAL` / JSON `internal`; internal settings are not write candidates, and false alone is not authorization.
+- Route Neki live router sessions to `pscale-branch` (`branch connections show/top` plus separately approved termination): use fresh matching action IDs, respect permissions, omit engine-incompatible flags, and preserve incomplete-result warnings. Live `top` controls do not establish authorization; replay remains read-only. Sidecar settings belong to `pscale-neki` and `config-profile update --parameters sidecar.<name>=<value>`; `branch sidecar` is deprecated. Parameter inventories expose `INTERNAL` / JSON `internal`; internal settings are not write candidates, and false alone is not authorization.
 
 ## Binary-native agent bootstrap
 
@@ -93,22 +93,24 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **deploy-request** | `pscale-deploy-request` | Create, review, inspect queues/operations, check storage, throttle, deploy, update auto-apply/auto-delete/per-request aggressive-cutover settings, retry failed operations after diagnosis, unblock failed deploy/revert queues, force cutover, and revert schema changes |
 | **database** | `pscale-database` | Create, list, show, update, delete, and dump databases; manage database-level and keyspace-level Vitess throttlers, keyspace VTTablet/MySQL parameters, rollout concurrency, disk-storage settings, internal/external keyspaces, aggressive-cutover defaults, PostgreSQL IP restrictions, and read-only regions |
 | **neki** | `pscale-neki` | Manage Neki data topology, shards, branch-wide change requests, config profiles, per-shard read-only replica capacity (`--read-only-replicas`) and extension sets, routers, sidecars, admin config, profile maintenance, restore sizing overrides, target-specific inspection, and router/shard role access |
-| **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise maintenance schedules, pending versions, deadlines, and historical windows |
+| **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise schedules/history and Postgres branch windows/events; approve exact-target window changes or event rescheduling with deadline and recovery checks |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
 | **metrics** | `pscale-metrics` | Query historical/current branch metrics and engine-aware grouped performance reports |
 | **insights** | `pscale-insights` | Analyze production query statistics, execution samples, query tags, error details, anomaly correlations, and schema recommendations |
 | **traffic-control** | `pscale-traffic-control` | Inventory and safely manage Postgres Traffic Control budgets and fingerprint/keyspace/tag rules |
 | **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess, PostgreSQL, and Neki diagnostic checks against one connection target |
 | **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |
-| **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; manage scheduled backup policies |
+| **backup** | `pscale-backup` | Create, list, show, restore, and delete branch backups; approve emergency live-tablet sources and manage scheduled backup policies |
 | **billing** | `pscale-billing` | Inspect invoices and manage organization payment methods with sensitive billing-data safeguards |
 | **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
 | **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions; inspect and mutate Postgres/Neki roles, inherited-role pairings, and connection targets |
 | **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers |
-| **dedicated-read-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, and delete dedicated PostgreSQL read replicas; recognize the deprecated `read-only-replica` compatibility name |
+| **dedicated-read-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, detach with irreversible-operation approval, and delete dedicated PostgreSQL read replicas; recognize the deprecated `read-only-replica` compatibility name |
 | **webhook** | `pscale-webhook` | List, inspect, create, update, test, and delete database webhooks, including authorization headers |
 | **org** | `pscale-org` | List, show, switch, and update organizations; manage SSO, directory sync, email domains, members, and teams |
-| **service-token** | `pscale-service-token` | Create, show, and manage CI/CD service tokens |
+| **service-token** | `pscale-service-token` | Create, show, and manage CI/CD service tokens; inspect nullable last-used IP/network metadata |
+
+Route Postgres scheduled maintenance to `pscale-maintenance` (`branch maintenance window/event`); immediate Postgres/Neki maintenance stays in `pscale-branch`. Promotion/demotion sizing belongs to `pscale-branch`, requires engine/feature and capacity approval, and does not support Neki. Detach belongs to `pscale-read-only-replica`, is hidden/feature-gated, and is never automatic cleanup.
 
 ## Decision Trees
 

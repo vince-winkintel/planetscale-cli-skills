@@ -1,10 +1,16 @@
-Current `pscale branch`, `branch connections`, and `branch connections top` help captures come from the official, checksum-verified PlanetScale CLI v0.348.0 macOS arm64 binary with `NO_COLOR=1`, an empty credential-free home, and only trailing-whitespace normalization. Archive SHA-256: `528bb8951d4d93f7ca869850787163f5d49ba405acc58d4146b9b3427e83b7e7`. The `branch extensions`, `branch extensions list`, `branch parameters`, and `branch vtgate` captures retain their v0.344.0 provenance (archive SHA-256 `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`), with the same color and whitespace settings. Complete toggle, parameter-list, and VTGate rollout help surfaces are in [branch-configuration-commands.md](branch-configuration-commands.md). Other sections retain their stated earlier provenance.
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+
+This refresh replaces only `branch`, `branch maintenance`, `branch maintenance run`, `branch connections`, `branch connections top`, `branch connections kill-transaction`, and `branch vtctl`, and adds promote/demote help. Earlier attribution below describes previous captures where superseded. Unchanged fences retain their original provenance.
+
+Previous `pscale branch`, `branch connections`, and `branch connections top` help captures come from the official, checksum-verified PlanetScale CLI v0.348.0 macOS arm64 binary with `NO_COLOR=1`, an empty credential-free home, and only trailing-whitespace normalization. Archive SHA-256: `528bb8951d4d93f7ca869850787163f5d49ba405acc58d4146b9b3427e83b7e7`. The `branch extensions`, `branch extensions list`, `branch parameters`, and `branch vtgate` captures retain their v0.344.0 provenance (archive SHA-256 `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`), with the same color and whitespace settings. Complete toggle, parameter-list, and VTGate rollout help surfaces are in [branch-configuration-commands.md](branch-configuration-commands.md). Other sections retain their stated earlier provenance.
 
 Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch create` surface was recaptured from the checksum-verified v0.325.0 binary. The file header identifies the newer parent/extension/parameter/VTGate captures; maintenance and other recaptured sections identify their own provenance.
 
 ## pscale branch
 
-Complete parent help has the v0.348.0 capture provenance identified in the introduction. The upstream parent still labels connections under “MySQL and Postgres”; the connections help and operational skill explicitly cover read-only Neki sessions.
+Previous capture note (superseded for this fence): Complete parent help has the v0.348.0 capture provenance identified in the introduction. The current parent lists `connections` under MySQL and Postgres; the `connections` child help documents Neki support as well. See operational approval gates in the skill.
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 ```text
 Create, delete, diff, and manage branches
@@ -15,9 +21,7 @@ Usage:
 MySQL, Postgres, and Neki branch commands:
   create          Create a new branch from a database
   delete          Delete a branch from a database
-  demote          Demote a production branch to development
   list            List all branches of a database
-  promote         Promote a new branch from a database
   schema          Show the schema of a branch
   show            Show a specific branch of a database
   switch          Switches the current project to use the specified branch
@@ -25,6 +29,8 @@ MySQL, Postgres, and Neki branch commands:
 
 MySQL and Postgres:
   connections     Show and kill branch connections
+  demote          Demote a production branch to development
+  promote         Promote a branch to production
 
 Vitess/MySQL-specific:
   diff            Show the schema diff of a MySQL branch
@@ -43,7 +49,7 @@ Postgres-specific:
   switchover      Switch over the primary of a Postgres branch (Postgres only)
 
 Postgres and Neki:
-  maintenance     Run maintenance for a Postgres or Neki branch
+  maintenance     Manage maintenance for a Postgres or Neki branch
 
 Neki-specific:
   admin           Manage the admin config for a Neki database branch
@@ -232,14 +238,20 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch maintenance
 
-Help fences in this section and the next (`maintenance`, `maintenance run`) are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+Previous capture note (superseded for this fence): Help fences in this section and the next (`maintenance`, `maintenance run`) are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 ```text
 Manage maintenance for a Postgres or Neki branch.
 
-PlanetScale upgrades a branch's image in emergencies, such as patching security
-issues, or when you initiate the upgrade yourself. 'maintenance run' initiates
-one.
+'pscale branch maintenance run' upgrades a branch to the latest image now.
+
+PlanetScale schedules maintenance that restarts Postgres, such as security
+fixes and image updates, in each Postgres branch's weekly maintenance window,
+with at least 7 days' notice. Use 'pscale branch maintenance window' to see or
+change the window, and 'pscale branch maintenance event' to see and reschedule
+upcoming maintenance.
 
 See https://planetscale.com/docs/postgres/operations-philosophy
 
@@ -247,7 +259,9 @@ Usage:
   pscale branch maintenance [command]
 
 Available Commands:
+  event       List, show, and reschedule maintenance events for a Postgres branch
   run         Run maintenance for a Postgres or Neki branch now
+  window      Show and set the maintenance window of a Postgres branch
 
 Flags:
   -h, --help   help for maintenance
@@ -270,13 +284,16 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch maintenance run
 
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+
 ```text
 Run maintenance for a Postgres or Neki branch, updating it to the latest
 available image. Vitess (MySQL) databases are not supported.
 
 This is how regular version bumps, bugfixes, and quality-of-life improvements
-reach a branch. PlanetScale otherwise upgrades images only in emergencies, such
-as patching security issues.
+reach a branch right away. On Postgres, PlanetScale also schedules some updates
+in the branch's maintenance window (see 'pscale branch maintenance event').
 
 The upgrade is applied to the replicas first, followed by a switchover from the
 old primary to an upgraded replica. That failover leads to a short period of
@@ -576,10 +593,12 @@ Cancel is an operational write. Confirm the target and latest request state befo
 
 ## pscale branch connections
 
-This complete parent fence and the complete `connections top` fence below were captured from the checksum-verified v0.348.0 binary identified above; only trailing whitespace was normalized. `connections show`, `kill`, and `kill-transaction` help was re-executed and is unchanged. Their action examples are not applicable to Neki.
+Previous capture note (superseded for this fence): This complete parent fence and the complete `connections top` fence below were captured from the checksum-verified v0.348.0 binary identified above; only trailing whitespace was normalized. `connections show`, `kill`, and `kill-transaction` help was re-executed and is unchanged. The previous release excluded Neki actions; current operational guidance and replaced help support them.
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 ```text
-Show and kill MySQL or Postgres branch connections, and show Neki branch connections.
+Show and kill MySQL, Postgres, or Neki branch connections.
 
 MySQL (Vitess):
   show/kill/top with --keyspace and --shard.
@@ -589,7 +608,8 @@ Postgres:
   kill-transaction terminates a transaction_id from show.
 
 Neki:
-  show/top list client sessions across the branch's routers. Read-only.
+  show/top list client sessions across the branch's routers.
+  kill-transaction terminates a transaction_id from show.
 
 Agent workflow:
   1. Run: pscale branch connections show <database> <branch> --format json
@@ -601,7 +621,7 @@ Agent workflow:
 Action semantics:
   kill <database> <branch> <query-id> --query        Cancels the listed query_id.
   kill-transaction <database> <branch> <transaction-id>
-                                                     Postgres only. destructive. Terminates the listed transaction_id if it still matches server state.
+                                                     Postgres and Neki only. destructive. Terminates the listed transaction_id if it still matches server state.
   kill <database> <branch> <connection-id>           destructive. Terminates the listed connection_id.
 
 Use --format json when an agent or script needs to inspect query_id,
@@ -613,7 +633,7 @@ Usage:
 
 Available Commands:
   kill             Kill a branch connection or query
-  kill-transaction Kill a Postgres branch transaction
+  kill-transaction Kill a Postgres or Neki branch transaction
   show             Show branch connections once
   top              Show live branch connection activity
 
@@ -671,7 +691,9 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch connections top
 
-Complete v0.348.0 binary capture; same archive checksum and normalization as the connections parent above.
+Previous capture note (superseded for this fence): Complete v0.348.0 binary capture; same archive checksum and normalization as the connections parent above.
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 ```text
 Show live branch connection activity.
@@ -683,8 +705,8 @@ previously captured trace in the TUI — actions are rejected in replay mode.
 
 For Postgres, connections top shows session activity across instances. For
 Vitess, pass --keyspace and --shard or run interactively to select them when
-the server reports available targets. For Neki, connections top shows read-only
-client sessions across the branch's routers.
+the server reports available targets. For Neki, connections top shows client
+sessions across the branch's routers.
 
 Usage:
   pscale branch connections top [database] [branch] [flags]
@@ -748,11 +770,14 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch connections kill-transaction
 
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+
 ```text
-Kill a Postgres branch transaction.
+Kill a Postgres or Neki branch transaction.
 
 This is destructive. Pass a transaction_id from connections show to terminate
-the matching Postgres connection.
+the matching connection.
 
 Usage:
   pscale branch connections kill-transaction <database> <branch> <transaction-id> [flags]
@@ -1220,7 +1245,9 @@ Cancel is an operational write. Confirm the target and latest request state befo
 
 ## pscale branch vtctl
 
-The `vtctl` parent fence below is exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`. The legacy `vtctld` alias was also executed and verified to render the same canonical `vtctl` parent surface. The v0.341.0 parent intentionally omits hidden advanced children (`list-tablets`, `lookup-vindex`, `materialize`, and `planned-reparent-shard`); their direct help remains callable. Subsequent child fences through `get-routing-rules` retain their previously recorded v0.339.0 provenance unless noted otherwise.
+Previous capture note (superseded for this fence): The `vtctl` parent fence below is exact output from the official, checksum-verified PlanetScale CLI v0.341.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `422dbd3568e62c2167c0aa629658ce31cedd5a3595d8c801eff88f7653bc4323`. The legacy `vtctld` alias was also executed and verified to render the same canonical `vtctl` parent surface. The previous parent omitted advanced children (`list-tablets`, `lookup-vindex`, `materialize`, and `planned-reparent-shard`); the current parent lists them. Subsequent child fences through `get-routing-rules` retain their previously recorded v0.339.0 provenance unless noted otherwise.
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 ```text
 Run vtctl commands against a branch. This command is only supported for Vitess databases.
@@ -1237,8 +1264,12 @@ Available Commands:
   get-routing-rules            Get live routing rules for a branch
   get-shard                    Get a shard record for a branch
   list-keyspaces               List vtctld keyspaces for a branch
+  list-tablets                 List tablets for a branch, grouped by keyspace and shard
   list-workflows               List vtctld workflows for a branch
+  lookup-vindex                Manage Lookup Vindex operations
+  materialize                  Manage Materialize workflows
   move-tables                  Manage MoveTables workflows
+  planned-reparent-shard       Reparent a shard to a new primary
   refresh-state-by-shard       Reload tablet records for all tablets in a shard
   set-shard-tablet-control     Update shard tablet controls for a branch
   start-workflow               Start a workflow on a branch
@@ -2096,6 +2127,101 @@ Usage:
 
 Flags:
   -h, --help   help for show
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## Compatibility
+
+Neki live connection kill actions, promote/demote sizing flags, and Postgres maintenance window/event commands require CLI v0.349.0 or later, plus API support/permissions. Replay remains read-only. New maintenance window/event help is in the standalone maintenance skill. Changed fences explicitly identify their v0.349.0 capture below or above; unchanged captures retain their original attribution.
+
+## pscale branch promote
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+
+```text
+Promote a branch to production.
+
+This command is supported for MySQL databases and for enabled Postgres branches. Neki databases are not supported.
+
+--cluster-size sets the cluster size to use. PS-DEV is not permitted. When
+omitted, a PS-DEV Postgres branch uses the smallest production size. For
+MySQL, the size applies to the default keyspace. Changing the size requires
+the write_database permission.
+
+--replicas sets the Postgres replica count, not including the primary. 0 is a
+single node. 2 to 8 is high availability. Omit it to leave the count
+unchanged. Changing the replica count requires the write_database permission.
+
+Usage:
+  pscale branch promote <database> <branch> [flags]
+
+Examples:
+  pscale branch promote mydb dev
+  pscale branch promote mydb dev --cluster-size PS-10
+  pscale branch promote mydb dev --cluster-size PS-10 --replicas 2
+
+Flags:
+      --cluster-size string   Cluster size to apply when promoting (for example, PS-10). PS-DEV is not permitted. Use 'pscale size cluster list' to see valid sizes.
+  -h, --help                  help for promote
+      --replicas int          Postgres replica count, not including the primary. 0 is a single node. 2 to 8 is high availability.
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale branch demote
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+
+```text
+Demote a production branch to development.
+
+This command is supported for MySQL databases and for enabled Postgres branches. Neki databases are not supported.
+
+--cluster-size sets the Postgres cluster size to use. PS-DEV is allowed. Omit
+it to leave the size unchanged. Changing the size requires the write_database
+permission.
+
+--replicas sets the Postgres replica count, not including the primary. 0 is a
+single node. 2 to 8 is high availability. Omit it to leave the count
+unchanged. Changing the replica count requires the write_database permission.
+
+Vitess ignores both options.
+
+Usage:
+  pscale branch demote <database> <branch> [flags]
+
+Examples:
+  pscale branch demote mydb main
+  pscale branch demote mydb main --cluster-size PS-DEV
+  pscale branch demote mydb main --cluster-size PS-10 --replicas 0
+
+Flags:
+      --cluster-size string   Postgres cluster size to apply when demoting (for example, PS-DEV). Use 'pscale size cluster list' to see valid sizes.
+  -h, --help                  help for demote
+      --replicas int          Postgres replica count, not including the primary. 0 is a single node. 2 to 8 is high availability.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

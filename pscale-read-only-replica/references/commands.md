@@ -1,4 +1,4 @@
-All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`.
+Except for the separately attributed detach section, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`.
 
 `pscale dedicated-read-replica` is the canonical command. The hidden `pscale read-only-replica` compatibility alias remains available but prints a deprecation warning on stderr when invoked.
 
@@ -174,6 +174,49 @@ Aliases:
 Flags:
       --force   Delete a dedicated read replica without confirmation
   -h, --help    help for delete
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## Compatibility
+
+The hidden, feature-gated `dedicated-read-replica detach` command requires CLI v0.349.0 or later and API availability. Existing parent/list/show/create/update/delete captures remain unchanged with their original v0.343.0 attribution; the parent intentionally does not list detach.
+
+## pscale dedicated-read-replica detach
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+
+```text
+Detach a dedicated read replica from its branch and promote it to a
+standalone branch of the database.
+
+The new branch keeps the replica's name, region, cluster size, replica count,
+storage configuration, and parameters, and receives a copy of the source
+branch's roles. The dedicated read replica no longer exists once it is
+detached. This cannot be undone.
+
+The replica must be ready with no pending changes, and any dedicated
+PgBouncers attached to it must be deleted first.
+
+This command is only available for PostgreSQL databases.
+
+Usage:
+  pscale dedicated-read-replica detach <database> <branch> <name> [flags]
+
+Flags:
+      --force   Detach a dedicated read replica without confirmation
+  -h, --help    help for detach
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

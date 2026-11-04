@@ -207,10 +207,12 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale backup parent with update
 
-All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+Previous capture note (superseded for this fence): All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 ```text
-Manage branch backups and backup policies
+Manage branch backups, backup policies, and restores
 
 Usage:
   pscale backup [command]
@@ -302,6 +304,48 @@ Usage:
 
 Flags:
   -h, --help   help for show
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug                     Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color                  Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## Compatibility
+
+Emergency backup create flags require CLI v0.349.0 or later; the API determines target eligibility. The `b` alias has been executed and matches create help. Older unchanged child captures retain their recorded attribution.
+
+## pscale backup create
+
+Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+
+```text
+Backup a branch's data and schema.
+
+--emergency requests an emergency backup, which clones data from a live
+tablet instead of waiting for the next scheduled backup. --emergency-source
+selects which tablet type to clone from (primary or replica) and is required
+with --emergency (and rejected otherwise). rdonly is not accepted.
+
+Usage:
+  pscale backup create <database> <branch> [flags]
+
+Aliases:
+  create, b
+
+Flags:
+      --emergency                 Request an emergency backup that clones data from a live tablet instead of waiting for the next scheduled backup. Requires --emergency-source.
+      --emergency-source string   Tablet type to clone from for an emergency backup: primary or replica. Required with --emergency; rejected otherwise.
+  -h, --help                      help for create
+      --name string               Optional name for the backup
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
