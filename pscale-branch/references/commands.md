@@ -1008,7 +1008,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch routing-rules
 
-This parent and its `get`/`update` help fences are exact output from the official, checksum-verified PlanetScale CLI v0.339.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `1e396701709cd49d1d1cccca252e2bd81f224b2830ca189a84a16983bde182e8`.
+This parent and its `update` help fence are exact output from the official, checksum-verified PlanetScale CLI v0.339.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `1e396701709cd49d1d1cccca252e2bd81f224b2830ca189a84a16983bde182e8`. The `get` fence was subsequently recaptured at v0.350.0 and has its own adjacent attribution below.
 
 ```text
 Fetch or update routing rules for a MySQL branch
@@ -1043,7 +1043,7 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 Compatibility: `routing-rules show` aliases `routing-rules get` starting with PlanetScale CLI v0.350.0. Both inspect the same MySQL schema snapshot and preserve its warnings; neither is the live `vtctl get-routing-rules` reader or the full-replacement `routing-rules update` write. Unknown non-runnable subcommands point to the owning parent's help (for example, `pscale branch routing-rules --help`) in human errors and JSON `UNKNOWN_COMMAND` next steps. Suggestions are discovery aids, not write authorization.
 
-This complete fence supersedes its earlier file-level capture attribution: captured from the official, checksum-verified v0.350.0 macOS arm64 binary (archive SHA-256 `aa17d5be045b30665d8ffaaf42159254fe3259186763c47304260af4f6aa56df`), normalizing only terminal padding/trailing whitespace. The `show` alias was separately captured and matches canonical `get`; the routing-rules and branch parent help were also captured and match their stored fences. Other fences retain their original provenance.
+This complete fence has been recaptured from the official, checksum-verified v0.350.0 macOS arm64 binary (archive SHA-256 `aa17d5be045b30665d8ffaaf42159254fe3259186763c47304260af4f6aa56df`), normalizing only terminal padding/trailing whitespace. It replaces the earlier section-level v0.339.0 attribution for `get`; that attribution now covers only the parent and `update` fences. The `show` alias was separately captured and matches canonical `get`; the routing-rules and branch parent help were also captured and match their stored fences. Other fences retain their original provenance.
 
 ```text
 Show the routing rules of a MySQL branch
