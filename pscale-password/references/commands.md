@@ -306,13 +306,20 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale role get
 
-The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`.
+Compatibility: `role show` aliases canonical `role get` starting with PlanetScale CLI v0.350.0; it takes the same arguments/flags and can return sensitive credentials. The CLI-generated role `database_url` uses `sslmode=verify-full&sslrootcert=system` starting with that release, including Postgres/Neki targets and PgBouncer URLs. The shared URL builder also serves role creation/reset output. `system` requires libpq 16+: it selects the SSL implementation's trusted CA roots (platform/OpenSSL configuration still matters), not a literal file named `system`. For an older libpq-based consumer, retain `verify-full` and use an explicit approved trusted CA-bundle path or upgrade. Never disable certificate/hostname verification or log the returned URL. See the [PostgreSQL 16 sslrootcert contract](https://www.postgresql.org/docs/16/libpq-connect.html#LIBPQ-CONNECT-SSLROOTCERT) and immutable upstream [role URL builder](https://github.com/planetscale/cli/blob/38ad9f38efba35085dd84b6fa29a2b2c5e5a6964/internal/cmd/role/reset_default.go).
+
+The complete help fence below was captured from the official, checksum-verified PlanetScale CLI v0.350.0 macOS arm64 release binary (archive SHA-256 `aa17d5be045b30665d8ffaaf42159254fe3259186763c47304260af4f6aa56df`). `role show --help` was separately captured and matches canonical `get`. Only terminal padding/trailing whitespace was normalized. The parent, create, default, and reset-default help were re-executed and match their stored fences; their original provenance remains unchanged.
+
+Previous capture note (superseded for this fence): The help fence below is exact output from the official, checksum-verified PlanetScale CLI v0.343.0 macOS arm64 release binary after normalizing only trailing whitespace. The archive SHA-256 is `98672666af6ca95e58a60f51fccebbb75294e428fc37d96ee372cac1b322acfe`.
 
 ```text
 Retrieve information about a specific role
 
 Usage:
   pscale role get <database> <branch> <role-id> [flags]
+
+Aliases:
+  get, show
 
 Flags:
       --bouncer string                  Return connection details for a PgBouncer (name). Postgres only.

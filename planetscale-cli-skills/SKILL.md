@@ -82,6 +82,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Validate automated bootstrap output starts with `---\nname: pscale-cli`; do not infer a valid skill document from exit status alone.
 - The binary-native guide is useful for first-party command discovery, but it does not replace this repository's specialized safety workflows, focused references, and helper scripts.
 - Unrecognized root tokens and subcommands of non-runnable command groups fail with exit status 2 instead of printing help and exiting zero. Runnable groups such as `keyspace parameters` can interpret an unrecognized token as a positional argument and execute their default action, so automation must validate the expected JSON/resource shape as well as the exit code.
+- For unknown non-runnable subcommands, the error points to the owning parent's `--help`; JSON `UNKNOWN_COMMAND` next steps also name that parent (for example, `pscale role --help`). Inspect that read-only help to correct the command, not the root inventory alone. Suggestions are not authorization to execute an operational command. The `show` aliases for role, Neki data-topology, and MySQL routing-rules lookups are documented in their focused references.
 - The top-level `pscale data-imports` family is unavailable. Use `pscale keyspace create-external` to attach an external MySQL source and `pscale branch vtctl move-tables` for table-movement workflows; treat an unknown-command error as a failed operation.
 
 ## Sub-Skills

@@ -169,11 +169,18 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch data-topology get
 
+Compatibility: `data-topology show` aliases `data-topology get` starting with PlanetScale CLI v0.350.0. Both read the same cached Neki topology with the same refresh/staleness semantics; neither replaces `data-topology update`. Unknown non-runnable subcommands now point to `pscale branch data-topology --help`, including JSON `UNKNOWN_COMMAND` next steps; inspect help rather than automatically executing operational suggestions.
+
+This complete fence supersedes its introductory v0.332.0 capture attribution: captured from the official, checksum-verified v0.350.0 macOS arm64 binary (archive SHA-256 `aa17d5be045b30665d8ffaaf42159254fe3259186763c47304260af4f6aa56df`), normalizing only terminal padding/trailing whitespace. The `show` alias was separately captured and matches canonical `get`; the data-topology and branch parent help were also captured. The stored data-topology parent remains unchanged. Other fences retain their original provenance.
+
 ```text
 Show the data topology of a Neki branch
 
 Usage:
   pscale branch data-topology get <database> <branch> [flags]
+
+Aliases:
+  get, show
 
 Flags:
   -h, --help   help for get
