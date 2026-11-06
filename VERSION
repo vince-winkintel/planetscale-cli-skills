@@ -1,6 +1,15 @@
-1.0.38
+1.0.39
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- PlanetScale CLI v0.350.0
+  - Reviewed all three published release items and the full `v0.349.0...v0.350.0` source comparison on 2026-11-06; upstream tag commit `38ad9f38efba35085dd84b6fa29a2b2c5e5a6964`.
+  - Documented `show` as an alias for role, Neki data-topology, and MySQL routing-rules `get`; canonical examples retain `get`. Replaced all three affected complete help fences and retained superseded capture provenance.
+  - Documented parent-specific help recovery for unknown non-runnable subcommands, including JSON `UNKNOWN_COMMAND` next steps, without automatically executing suggestions or changing the existing runnable-group warning.
+  - Documented system-CA role connection URLs (`sslmode=verify-full&sslrootcert=system`), libpq 16+ support and unsupported-consumer explicit-CA compatibility, including non-libpq drivers, preserving hostname verification and secret-handling gates. Included standalone references and Neki role guidance. Linked exact CLI minima from version-neutral workflows, retained local TLS fallbacks for selective installs, and scoped earlier capture/unchanged-output claims to exclude the three recaptured `get` fences.
+  - Reviewed pinned upstream build/release tools and Go 1.26.10 changes; these do not change this repository's runtime scripts, authentication, workflows, scheduler, or tests.
+  - Verified official macOS arm64 archive SHA-256 `aa17d5be045b30665d8ffaaf42159254fe3259186763c47304260af4f6aa56df` against the published checksum and GitHub asset digest; extracted binary equality verified. Captured 15 complete affected parent/child/alias help/version surfaces in an empty credential-free HOME/config/cwd with network denied and the upstream update notifier disabled. Only terminal padding/trailing whitespace normalized; exact source, capture, and verification evidence is outside the clone.
+  - Proposed package 1.0.39, unpublished. No live PlanetScale API calls, credential use, merge, package release/publication, or installation by this refresh.
 
 - PlanetScale CLI v0.349.0
   - Reviewed all 14 published release items and the full `v0.348.0...v0.349.0` source comparison on 2026-11-04; upstream tag commit `05bded8a8fdbcda5b4ee47dd015460a20bb8a238`.
