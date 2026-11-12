@@ -1,6 +1,14 @@
-1.0.39
+1.0.40
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- PlanetScale CLI v0.351.0
+  - Reviewed all 41 changed paths and all 28 release entries in the full `v0.350.0...v0.351.0` comparison; upstream commit `e6449dc17ee2af30aed4a1a07aa5112bf6b7d8ca`. Every changed source file was verified against its official compare Git blob ID.
+  - Added organization-scoped OIDC trust discovery and guarded create/update/delete guidance to the existing service-token skill, including provider required claims, structured JSON, complete-list replacement, combined org/database scope, explicit-empty clearing, least privilege, approval, secret handling, readback, and forced-deletion safeguards.
+  - Documented asynchronous vtctld/MoveTables listing, per-operation waits and errors, merged `workflows` output, and all-cells source selection with mutual exclusion. Selectively installed references carry immutable source links and actual behavior minima.
+  - Reviewed upstream CI/container/tooling changes and runtime dependencies (ANSI, text, sync, go-colorful, runewidth), plus tool-only TOML/glob/sync updates. No additional skill commands or changes to this repository's runtime scripts, auth/security gates, tests, or workflows are justified by those updates.
+  - Verified the official macOS arm64 archive against published SHA-256 `4014a3b02163ec59caa4f93d3961a0a45bb4e5392a77469720976bd265bc382f` and release asset digests. Parent completed 38 isolated, credential-free, network-denied help/version captures covering root, OIDC parent/all children, branch, vtctl/vtctld parents and affected MoveTables children/aliases. Replaced the complete create fence; only terminal padding/trailing whitespace normalized. Other fences retain their original provenance; new behavioral references remain source-backed, not live-output claims.
+  - Proposed package 1.0.40, unpublished. No live resource operations, credential use, installation, publication, or external writes by this refresh.
 
 - PlanetScale CLI v0.350.0
   - Reviewed all three published release items and the full `v0.349.0...v0.350.0` source comparison on 2026-11-06; upstream tag commit `38ad9f38efba35085dd84b6fa29a2b2c5e5a6964`.

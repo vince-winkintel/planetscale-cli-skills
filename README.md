@@ -122,7 +122,7 @@ pscale branch create my-database feature-branch --from main
 | **pscale-read-only-replica** | Dedicated PostgreSQL read-replica lifecycle, sizing, regions, parameters, and approved irreversible feature-gated detach | `pscale dedicated-read-replica list/show/create/update/delete/detach` |
 | **pscale-webhook** | Database webhook lifecycle, authorization headers, and test events | `pscale webhook list/show/create/update/test/delete` |
 | **pscale-org** | Switch organizations, update settings, manage SSO/directory sync/domains, and inspect or manage members/teams | `pscale org list/switch/update/sso/member/team` |
-| **pscale-service-token** | CI/CD authentication and last-used IP/network metadata | `pscale service-token create/show` |
+| **pscale-service-token** | CI/CD authentication, last-used IP/network metadata, and approved OIDC trust policy | `pscale service-token create/show`, `pscale oidc-trust` |
 
 ## 🛠️ Automation Scripts
 
