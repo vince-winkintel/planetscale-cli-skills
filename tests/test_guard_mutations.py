@@ -45,6 +45,41 @@ class GuardMutationTests(unittest.TestCase):
             self.assertFalse(result.wasSuccessful(), 'Guard accepted mutated guidance')
             return result
 
+    def test_oidc_guards_reject_missing_safeguards_and_unscoped_delete(self):
+        skill_path = 'pscale-service-token/SKILL.md'
+        reference_path = 'pscale-service-token/references/oidc-trust-commands.md'
+        phrases = (
+            'explicit user approval for the exact organization',
+            'separate advance approval for non-interactive `--force`',
+            'Clearing conditions can broaden eligibility',
+            'changing either org or database access replaces both lists together',
+        )
+        mutations = [(skill_path, phrase, '') for phrase in phrases]
+        mutations.append((reference_path,
+                          'pscale oidc-trust delete <trust-id> --org <org>',
+                          'pscale oidc-trust delete <trust-id>'))
+        for path, before, after in mutations:
+            with self.subTest(missing=before), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for source in (skill_path, reference_path):
+                    target = root / source
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes((guidance.ROOT / source).read_bytes())
+                with patch.object(guidance, 'ROOT', root):
+                    def run_guard():
+                        result = unittest.TestResult()
+                        guidance.SecurityGuidanceTests(
+                            'test_oidc_policy_safeguards_and_reference_delete_scope').run(result)
+                        return result
+                    baseline = run_guard()
+                    self.assertTrue(baseline.wasSuccessful(), baseline.failures + baseline.errors)
+                    target = root / path
+                    self.assertIn(before, target.read_text())
+                    target.write_text(target.read_text().replace(before, after))
+                    result = run_guard()
+                    self.assertFalse(result.errors, result.errors)
+                    self.assertFalse(result.wasSuccessful(), 'OIDC guard accepted mutation')
+
     def test_nested_destructive_examples_require_organization(self):
         for group in ('backup policy', 'branch config-profile', 'branch router'):
             with self.subTest(group=group):

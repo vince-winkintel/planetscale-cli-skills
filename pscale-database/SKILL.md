@@ -278,12 +278,14 @@ JSON/non-interactive deletion requires `--force`; that bypass needs explicit app
 
 Keyspace deletion is destructive. Apply the destructive-operation safety gates, including availability checks and a verified recovery path, before asking for approval of the organization, database, branch, exact keyspace, and routing/workflow dependencies.
 
+Workflow inspection submits a background API operation and waits for its result on current clients; use `--include-logs=false` to avoid unnecessary workflow logs. A failure, cancellation, timeout, malformed output, empty output, or `{}` is inconclusive and blocks deletion: require a successful, structurally valid workflow inventory for the exact target, not merely an operation ID or a zero exit status. A valid inventory with an explicit empty workflows array differs from missing output. Preserve status and diagnostics; do not automatically resubmit jobs after ambiguous results.
+
 ```bash
 # Inspect the target and related branch state first
 pscale keyspace show <database> <branch> <keyspace> --org <org> --format json
 pscale branch vtctl get-keyspace-routing-rules <database> <branch> --org <org> --format json
 pscale branch vtctl list-workflows <database> <branch> --org <org> \
-  --keyspace <keyspace> --format json
+  --keyspace <keyspace> --include-logs=false --format json
 
 # Interactive deletion requires typing database/branch/keyspace exactly
 pscale keyspace delete <database> <branch> <keyspace> --org <org>

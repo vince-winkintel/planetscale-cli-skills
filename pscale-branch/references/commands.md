@@ -1565,6 +1565,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch vtctl move-tables create
 
+The following complete fence supersedes its historical v0.339.0 capture. It was captured from the official, checksum-verified PlanetScale CLI v0.351.0 macOS arm64 binary in an empty credential-free HOME/XDG/config/cwd with `NO_COLOR=1`, `TERM=dumb`, and network denied. Archive SHA-256: `4014a3b02163ec59caa4f93d3961a0a45bb4e5392a77469720976bd265bc382f`. Only trailing terminal whitespace/padding was normalized; the binary itself emits canonical `vtctl` for both `vtctl` and `vtctld` invocations. Other fences retain their stated provenance. See the [cell-selection contract and CLI minimum](workflow-listing.md#approve-source-cell-scope-before-create) before preparing a create command.
+
 ```text
 Create a MoveTables workflow
 
@@ -1572,10 +1574,11 @@ Usage:
   pscale branch vtctl move-tables create <database> <branch> [flags]
 
 Flags:
+      --all-cells                                Select source tablets from all cells. This is the default when --cells is omitted
       --all-tables                               Move all tables from the source keyspace
       --atomic-copy                              Use atomic copy for the workflow
       --auto-start                               Automatically start the workflow after creation (default true)
-      --cells strings                            Cells to restrict the workflow to (comma-separated)
+      --cells strings                            Restrict source tablet selection to these cells (comma-separated). When omitted, all cells are used
       --defer-secondary-keys                     Defer secondary keys during the copy phase (default true)
       --exclude-tables strings                   Tables to exclude from the move (comma-separated)
       --global-keyspace string                   Unsharded keyspace in which to create the backing sequence tables when --sharded-auto-increment-handling is REPLACE
