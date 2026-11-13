@@ -13,11 +13,19 @@ Provider discovery contract: official commit `d4dd5a80ef64eb48ee8148d571fe10e4ff
 All commands require authentication and an explicit `--org`. Use the existing approved authentication path; do not fetch, decode, log, paste, or persist OIDC assertions, exchanged access tokens, or service-token secrets. Do not enable debug logging for credential-bearing operations. Trust metadata is not a credential, but redact organization/repository identifiers when reporting it outside the approved context.
 
 ```bash
+# v0.351.0: bare providers is the compatible inspection command
+pscale oidc-trust providers --org <org> --format json
+
+# v0.352.0+: explicit list/show and structured claim descriptions
 pscale oidc-trust providers list --org <org> --format json
 pscale oidc-trust providers show <provider-name> --org <org> --format json
+
+# Both versions support trust list/show
 pscale oidc-trust list --org <org> --format json
 pscale oidc-trust show <trust-id> --org <org> --format json
 ```
+
+On v0.351.0, bare `providers` returns provider JSON with `required_claims` but no `claims` descriptions; select the exact provider by its returned `name` and review every required claim. Do not run `providers list` or `providers show` on that version. If required policy detail is unavailable, stop and obtain authoritative provider policy or an approved upgrade rather than inventing claims.
 
 Use provider `name`, `issuer`, and the JSON `required_claims` array to review the intended issuer and every required claim. Provider list JSON is an array; provider show JSON is one object, retaining the `claims` array (or null when absent), whose entries contain `name`, boolean `required`, and `description`. Do not convert missing/null claim detail into proof that no restrictions are required. Human show output appends a claim table only when claims exist; human/CSV provider summaries join required claims into text, and CSV show emits the provider summary only, not the claim-detail table. Use JSON for policy review. `show` selects an exact provider name from the organization-scoped provider list, not a trust ID; it fails if that provider is unavailable. Never fall back to a different provider or broaden policy after that failure.
 
