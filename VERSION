@@ -2,6 +2,13 @@
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
+- PlanetScale CLI v0.352.0
+  - Reviewed all three published release entries and the full seven-file `v0.351.0...v0.352.0` source delta at immutable commit `d4dd5a80ef64eb48ee8148d571fe10e4ffb1efd1`; all 896 official source blobs matched Git object identities.
+  - Added OIDC provider list/ls/show discovery, structured claim descriptions, JSON array versus object contracts, CSV summary-only limitations, exact provider matching, compatibility behavior, and immutable source/minimum-version references. Captured complete affected provider help and updated operational routing without weakening policy approval or credential safeguards.
+  - Reviewed removal of the upstream self-compiled-binary warning and its test/completion plumbing. No shipped workflow depends on that warning; no runtime scripts, auth/security gates, tests, or scheduler changes are justified.
+  - Verified official macOS arm64 archive SHA-256 `8ac6b09f8df40d94dc16468a7db7e5df5e099e04401e6d5ee0a92cd73bd930fd` against published checksums. Executed 39 credential-free, network-denied help/version captures including root, OIDC parent/all children/provider alias, and both vtctl/vtctld MoveTables families; complete new fences match after trailing terminal-padding normalization only.
+  - Preserves the still-needed v0.351.0 refresh below in one cumulative replacement PR. Proposed package remains 1.0.40, unpublished; no merge, release, publication, installation, or live resource operations.
+
 - PlanetScale CLI v0.351.0
   - Reviewed all 41 changed paths and all 28 release entries in the full `v0.350.0...v0.351.0` comparison; upstream commit `e6449dc17ee2af30aed4a1a07aa5112bf6b7d8ca`. Every changed source file was verified against its official compare Git blob ID.
   - Added organization-scoped OIDC trust discovery and guarded create/update/delete guidance to the existing service-token skill, including provider required claims, structured JSON, complete-list replacement, combined org/database scope, explicit-empty clearing, least privilege, approval, secret handling, readback, and forced-deletion safeguards.

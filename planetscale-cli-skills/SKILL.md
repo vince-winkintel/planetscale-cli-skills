@@ -109,7 +109,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **dedicated-read-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, detach with irreversible-operation approval, and delete dedicated PostgreSQL read replicas; recognize the deprecated `read-only-replica` compatibility name |
 | **webhook** | `pscale-webhook` | List, inspect, create, update, test, and delete database webhooks, including authorization headers |
 | **org** | `pscale-org` | List, show, switch, and update organizations; manage SSO, directory sync, email domains, members, and teams |
-| **service-token / oidc-trust** | `pscale-service-token` | Create, show, and manage CI/CD service tokens; inspect nullable last-used IP/network metadata; inspect providers and manage approved least-privilege OIDC trust policy |
+| **service-token / oidc-trust** | `pscale-service-token` | Create, show, and manage CI/CD service tokens; inspect nullable last-used IP/network metadata; list OIDC providers and show their claims before managing approved least-privilege trust policy |
 
 Route Postgres scheduled maintenance to `pscale-maintenance` (`branch maintenance window/event`); immediate Postgres/Neki maintenance stays in `pscale-branch`. Promotion/demotion sizing belongs to `pscale-branch`, requires engine/feature and capacity approval, and does not support Neki. Detach belongs to `pscale-read-only-replica`, is hidden/feature-gated, and is never automatic cleanup.
 

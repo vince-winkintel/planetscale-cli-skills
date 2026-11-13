@@ -35,7 +35,7 @@ pscale service-token delete <token-id> --org <org>
 
 ## OIDC trusts for workload identity
 
-Use `pscale oidc-trust` to inspect providers and manage organization-scoped trust policy. Read the local [OIDC trust reference](references/oidc-trust-commands.md) for the CLI minimum, provider requirements, exact replacement/clearing semantics, and approved examples before proposing a change. This manages trust configuration; it does not perform token exchange or replace the authentication workflow.
+Use `pscale oidc-trust providers list` and `providers show <provider-name> --org <org> --format json` to inspect the organization-scoped issuer, required claims, and available claim descriptions before proposing trust policy. Read the local [OIDC trust reference](references/oidc-trust-commands.md) for compatibility minima, JSON versus human/CSV behavior, exact replacement/clearing semantics, and approved examples. This manages trust configuration; it does not perform token exchange or replace the authentication workflow.
 
 Every create, update, or delete needs explicit user approval for the exact organization, trust identity, provider/claims, TTL, and complete access scope. Use least privilege and a short approved TTL; prefer specific database access over organization-wide or all-database grants. Never print or store OIDC assertions, exchanged credentials, or service-token secrets. Read back the trust after writes. Clearing conditions can broaden eligibility; changing either org or database access replaces both lists together. Deletion also requires dependency checks, verified recovery, and separate advance approval for non-interactive `--force` under the safety gates above.
 
