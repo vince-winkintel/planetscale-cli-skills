@@ -132,6 +132,54 @@ class SecurityGuidanceTests(unittest.TestCase):
                 self.assertNotIn(obsolete, text)
                 self.assertIn("safety gates", text)
 
+    def test_move_tables_all_cells_default_is_not_a_cli_minimum(self):
+        reference = (ROOT / "pscale-branch/references/workflow-listing.md").read_text()
+        skill = (ROOT / "pscale-branch/SKILL.md").read_text()
+        self.assertIn("server default, not a CLI-version feature", reference)
+        self.assertIn("regardless of CLI version", skill)
+        self.assertNotIn("never infer the same default on an older CLI", skill)
+        self.assertIn("mutual exclusion", reference)
+
+    def test_oidc_provider_inspection_is_scoped_and_versioned(self):
+        skill = section("pscale-service-token/SKILL.md", "## OIDC trusts for workload identity")
+        for command in (
+            "pscale oidc-trust providers list --org <org> --format json",
+            "pscale oidc-trust providers show <provider-name> --org <org> --format json",
+        ):
+            self.assertIn(command, skill)
+        reference = section("pscale-service-token/references/oidc-trust-commands.md",
+                            "## Inspect before proposing policy")
+        commands = recorded_commands(reference)
+        self.assertIn(["oidc-trust", "providers", "--org", "fixture-org",
+                       "--format", "json"], commands)
+        for argv in commands:
+            self.assertIn("--org", argv)
+            self.assertEqual(argv[argv.index("--org") + 1], "fixture-org")
+            self.assertEqual(argv[-2:], ["--format", "json"])
+        self.assertIn("v0.351.0", reference)
+        self.assertIn("no `claims` descriptions", reference)
+
+    def test_oidc_policy_safeguards_and_reference_delete_scope(self):
+        text = section("pscale-service-token/SKILL.md", "## OIDC trusts for workload identity")
+        for phrase in (
+            "explicit user approval for the exact organization", "trust identity",
+            "provider/claims", "TTL", "complete access scope", "least privilege",
+            "Never print or store OIDC assertions", "Read back the trust after writes",
+            "Clearing conditions can broaden eligibility",
+            "changing either org or database access replaces both lists together",
+            "dependency checks", "verified recovery",
+            "separate advance approval for non-interactive `--force`",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+        reference = (ROOT / "pscale-service-token/references/oidc-trust-commands.md").read_text()
+        commands = destructive_commands(reference)
+        self.assertTrue(commands, "OIDC reference lost its destructive example")
+        for argv in commands:
+            self.assertEqual(argv[:2], ["oidc-trust", "delete"])
+            self.assertIn("--org", argv)
+            self.assertEqual(argv[argv.index("--org") + 1], "fixture-org")
+
     def test_close_refusal_does_not_authorize_revert(self):
         text = section("pscale-deploy-request/SKILL.md", "### Cannot close deploy request")
         self.assertEqual(recorded_commands(text), [[
@@ -153,6 +201,17 @@ class SecurityGuidanceTests(unittest.TestCase):
                     index = argv.index("--org")
                     self.assertLess(index + 1, len(argv))
                     self.assertFalse(argv[index + 1].startswith("--"))
+
+    def test_keyspace_delete_requires_conclusive_workflow_inspection(self):
+        text = section("pscale-database/SKILL.md", "### Delete a Vitess keyspace")
+        commands = recorded_commands(text)
+        listing = [argv for argv in commands if argv[:3] == ["branch", "vtctl", "list-workflows"]]
+        self.assertEqual(len(listing), 1)
+        self.assertIn("--include-logs=false", listing[0])
+        for phrase in ("background API operation", "timeout", "malformed",
+                       "blocks deletion", "`{}`", "do not automatically resubmit"):
+            self.assertIn(phrase, text)
+        self.assertLess(text.index("blocks deletion"), text.index("```bash"))
 
     def test_database_retirement_reads_back_and_handles_pending_request(self):
         text = section("pscale-database/SKILL.md", "### Database retirement")
