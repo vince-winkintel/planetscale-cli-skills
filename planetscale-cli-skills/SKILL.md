@@ -194,13 +194,14 @@ pscale deploy-request create <database> <feature-branch>
 
 ### CI/CD Integration
 
+Management requires approved user/API-token authentication, not service-token authentication; do not silently switch credentials. Create/duplicate require explicit approval for the organization, operation, name/expiry and access scope, plus a user-controlled secret-delivery mechanism that keeps the response out of agent output; stop if none is available. Never display or store returned token values in chat, logs, evidence, temporary files, or this repository. The user provisions the response directly into approved CI secrets; verify safe metadata and access without exposing secrets.
+
 ```bash
-# Create service token for CI/CD
+# Only through the approved user-controlled secret-delivery mechanism above
 pscale service-token create --org <org>
 
-# Use in CI/CD pipelines (GitHub Actions, GitLab CI, etc.)
-export PLANETSCALE_SERVICE_TOKEN_ID=<token-id>
-export PLANETSCALE_SERVICE_TOKEN=<token>
+# User provisions PLANETSCALE_SERVICE_TOKEN_ID and PLANETSCALE_SERVICE_TOKEN
+# directly into CI secrets; CI injects them without agent-side token handling.
 
 # Create and deploy via CI/CD after review/approval gates pass
 pscale deploy-request create <database> <branch> --format json
@@ -223,9 +224,12 @@ pscale import d1 verify <database> <branch> --migration-id <id> --input ./d1-exp
 
 ### Most Common Commands
 
+Logout is not an automatic troubleshooting probe. Confirm the credential method and obtain explicit authorization for all affected sessions first. An explicit API token is revoked before local deletion of the stored login; a different stored session remains unrevoked without a warning. An unreadable stored token can also be deleted locally without revocation. Do not inspect credential files or operate keyring dialogs; stop on ambiguous identity or partial cleanup.
+
 ```bash
 # Authentication
 pscale auth login
+# Logout only after the local session-authorization gates above
 pscale auth logout
 
 # Branch management; deletion requires the destructive-operation safety gates

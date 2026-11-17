@@ -31,6 +31,64 @@ class GuardMutationTests(unittest.TestCase):
                 unittest.defaultTestLoader.loadTestsFromTestCase(preserved.PreservedContentTests).run(result)
                 self.assertFalse(result.wasSuccessful(), 'Missing keyring prohibition accepted')
 
+    def test_token_and_logout_contract_mutations_are_rejected(self):
+        token = 'pscale-service-token/SKILL.md'
+        auth = 'pscale-auth/SKILL.md'
+        umbrella = 'planetscale-cli-skills/SKILL.md'
+        mutations = [
+            (token, 'user-controlled secret-delivery mechanism', '',
+             'test_token_secret_delivery_is_local_and_consistent'),
+            (token, 'stop if none is available', '',
+             'test_token_secret_delivery_is_local_and_consistent'),
+            (token, 'Never display or store returned token values in chat, logs, evidence, temporary files, or this repository.', '',
+             'test_token_secret_delivery_is_local_and_consistent'),
+            (token, '## Workflows', '## Workflows\n\n# Returns:\n#   TOKEN_ID: xxxxx\n#   TOKEN: yyyyy',
+             'test_token_secret_delivery_is_local_and_consistent'),
+            (auth, 'Obtain explicit authorization for the intended session before logout', '',
+             'test_logout_gates_and_nonrevocation_are_local'),
+            (auth, 'without revoking that separate session and without the unreadable-token warning', '',
+             'test_logout_gates_and_nonrevocation_are_local'),
+            (auth, '# Confirm credential method and authorize all affected sessions', '# Logout current account',
+             'test_logout_gates_and_nonrevocation_are_local'),
+            ('pscale-database/SKILL.md', '# Verify branch exists',
+             'pscale auth logout && pscale auth login\n# Verify branch exists',
+             'test_logout_gates_and_nonrevocation_are_local'),
+            (token, 'PLANETSCALE_TTL', 'UNRELATED_TTL',
+             'test_effective_omission_and_upstream_help_warning'),
+            ('pscale-service-token/references/commands.md', 'Known upstream help typo', '',
+             'test_effective_omission_and_upstream_help_warning'),
+            ('pscale-service-token/references/commands.md', ' --database=""', '',
+             'test_effective_omission_and_upstream_help_warning'),
+            (token, 'pscale service-token duplicate <id> --name <approved-name> --org <org>',
+             'pscale service-token duplicate <id> --org <org>',
+             'test_common_token_mutation_examples_record_exact_argv'),
+        ]
+        # Independently installed auth/umbrella skills cannot borrow sibling gates.
+        for skill in (auth, umbrella):
+            mutations.append((skill, 'stop if none is available', '',
+                              'test_token_secret_delivery_is_local_and_consistent'))
+        for path, before, after, check in mutations:
+            with self.subTest(path=path, mutation=before), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for pattern in ('*/SKILL.md', '*/references/*.md'):
+                    for source in preserved.ROOT.glob(pattern):
+                        target = root / source.relative_to(preserved.ROOT)
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        target.write_bytes(source.read_bytes())
+                with patch.object(preserved, 'ROOT', root):
+                    def run_guard():
+                        result = unittest.TestResult()
+                        preserved.PreservedContentTests(check).run(result)
+                        return result
+                    baseline = run_guard()
+                    self.assertTrue(baseline.wasSuccessful(), baseline.failures + baseline.errors)
+                    target = root / path
+                    self.assertIn(before, target.read_text())
+                    target.write_text(target.read_text().replace(before, after))
+                    result = run_guard()
+                    self.assertFalse(result.errors, result.errors)
+                    self.assertFalse(result.wasSuccessful(), 'Credential guard accepted mutation')
+
     def check_mutation(self, name, mutate):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -21,15 +21,22 @@ These gates apply to every destructive example here, including deletion, demotio
 
 Service-token management requires approved user/API-token authentication; the command family rejects service-token authentication. Use an explicit `--org`. Before create, duplicate, update, grant changes, or deletion, inspect the exact token's metadata and access where applicable, obtain explicit approval for the organization, token ID, operation, name/expiry and complete access scope, and use least privilege. Check dependent automation before changing expiry or grants. Deletion and access removal also require the safety gates above.
 
-`duplicate <id> --name <approved-name>` returns a new secret-bearing token response. `update <id>` accepts `--name` and/or `--ttl`; it does not rotate the secret or change ID/grants. Omitted fields remain unchanged; TTL is integer seconds or literal `never` to remove expiry. Removing or extending expiry needs explicit approval. Do not infer duplicate grant/expiry behavior or use update as rotation. Read the [command reference](references/commands.md) for compatibility minima, exact request/output semantics, and read-back requirements.
+`duplicate <id> --name <approved-name>` returns a new secret-bearing token response. `update <id>` accepts `--name` and/or `--ttl`; it does not rotate the secret or change ID/grants. Effectively omitted fields remain unchanged: before relying on omission, confirm that `PLANETSCALE_NAME` / `PLANETSCALE_TTL` and matching user-config `name` / `ttl` keys do not supply them. Nonempty inherited values count as supplied, including duplicate's required name; `PLANETSCALE_TTL=never` can remove expiry during a name-only argv update. Do not print config files or environment values to check this; stop if effective settings cannot be confirmed safely. TTL is integer seconds or literal `never` to remove expiry. Removing or extending expiry needs explicit approval. Do not infer duplicate grant/expiry behavior or use update as rotation. Read the [command reference](references/commands.md) for compatibility minima, exact request/output semantics, and read-back requirements.
 
 Never display or store returned token values in chat, logs, evidence, temporary files, or this repository. Create/duplicate require a user-controlled secret-delivery mechanism that keeps the response out of agent output; stop if none is available. Examples below describe only previously authorized workflows. Inspect metadata with `show` and grants with `show-access`, and verify the result after an approved mutation without exposing secrets.
 
 ## Common Commands
 
 ```bash
-# Create service token
+# Create only through the approved user-controlled secret-delivery mechanism
 pscale service-token create --org <org>
+
+# Duplicate only after scope/expiry approval and with secret-safe delivery
+pscale service-token duplicate <id> --name <approved-name> --org <org>
+
+# Update only after name/expiry approval and effective-config checks above
+# TTL is integer seconds or never; never requires non-expiring-token approval
+pscale service-token update <id> --name <approved-name> --ttl <seconds-or-never> --org <org>
 
 # List service tokens
 pscale service-token list --org <org>
@@ -52,7 +59,7 @@ Every create, update, or delete needs explicit user approval for the exact organ
 ### CI/CD Setup (GitHub Actions)
 
 ```bash
-# 1. Create service token
+# 1. Create only through the approved user-controlled secret-delivery mechanism
 pscale service-token create --org my-org
 
 # 2. User provisions the result directly into approved CI secrets
@@ -71,12 +78,12 @@ pscale service-token create --org my-org
 ### CI/CD Pipeline Integration
 
 ```bash
-# 1. Create service token
+# 1. Create only through the approved user-controlled secret-delivery mechanism
 pscale service-token create --org my-org
 
-# 2. Add to your CI/CD secrets/variables
-#   PLANETSCALE_SERVICE_TOKEN_ID
-#   PLANETSCALE_SERVICE_TOKEN
+# 2. User provisions PLANETSCALE_SERVICE_TOKEN_ID and PLANETSCALE_SERVICE_TOKEN
+#    directly into approved CI secrets through that mechanism.
+#    Do not display or capture returned token values in agent output.
 
 # 3. Use in your pipeline config (.github/workflows, .gitlab-ci.yml, etc.)
 # deploy:
@@ -90,10 +97,11 @@ pscale service-token create --org my-org
 # 1. List existing tokens
 pscale service-token list --org my-org
 
-# 2. Create new token
+# 2. Create only through the approved user-controlled secret-delivery mechanism
 pscale service-token create --org my-org
 
-# 3. Update CI/CD secrets
+# 3. User updates CI secrets directly through that mechanism; never capture
+#    the returned token in agent output. Verify replacement access first.
 
 # 4. Review cleanup under the safety gates; verify replacement access and obtain approval
 pscale service-token delete <old-token-id> --org my-org

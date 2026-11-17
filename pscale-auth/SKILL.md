@@ -16,7 +16,7 @@ pscale auth login
 # Login in automation-friendly JSON mode
 pscale auth login --format json
 
-# Logout
+# Logout only after explicit authorization for the intended session (see below)
 pscale auth logout
 
 # Check current authentication status
@@ -49,11 +49,11 @@ The CLI resolves its built-in OAuth client values at runtime and omits their val
 
 ### 2. Service Tokens (CI/CD)
 
-For automated environments:
+For automated environments, have the user inject both fields directly from an approved secret manager; do not type, read back, or capture their values:
 
 ```bash
-export PLANETSCALE_SERVICE_TOKEN_ID=<token-id>
-export PLANETSCALE_SERVICE_TOKEN=<token>
+# User-controlled CI secret injection supplies PLANETSCALE_SERVICE_TOKEN_ID
+# and PLANETSCALE_SERVICE_TOKEN; no agent-side token handling.
 pscale database list --org <org>
 ```
 
@@ -75,7 +75,7 @@ Prefer environment/secret-manager injection over putting tokens in shell history
 
 Help, version, and skill discovery do not load stored credentials. Protected commands, `auth check`, `api`, and live branch-connection inspection load them when needed; a read-only command can still prompt for credential access or migrate a legacy token. Direct API tokens and either service-token field bypass ordinary stored-token loading, but a partial service-token pair fails authentication. Avoid mixed credential methods: raw `api` and ordinary API clients differ in precedence. See the [credential behavior reference](references/commands.md) for compatibility minima and precise source behavior.
 
-Logout intentionally loads the stored user token even with service-token credentials set; it does not revoke those service tokens or unset their environment variables. An explicit API token changes the revocation target. Obtain explicit authorization for the intended session before logout. Unreadable stored tokens can be deleted locally without remote revocation, with a warning; never interpret that as verified revocation. Keyring logout removes the legacy token file before the keyring entry; fallback file logout also removes the default config. Errors can leave partial cleanup. Do not read credential files, operate the keyring, or use logout as an automatic troubleshooting probe.
+Logout intentionally loads the stored user token even with service-token credentials set; it does not revoke those service tokens or unset their environment variables. A nonempty explicit API token becomes the revocation target; after successful revocation, logout also deletes the stored login locally without revoking that separate session and without the unreadable-token warning. Obtain explicit authorization for the intended session before logout, including both affected credentials when an explicit API token differs from the stored session. Unreadable stored tokens can be deleted locally without remote revocation, with a warning; local deletion is never verified revocation of the stored session, whether or not a warning appears. Keyring logout removes the legacy token file before the keyring entry; fallback file logout also removes the default config. Errors can leave partial cleanup. Do not read credential files, operate the keyring, or use logout as an automatic troubleshooting probe.
 
 ## Workflows
 
@@ -95,7 +95,8 @@ pscale database list --org <org>
 ### Switch Between Accounts
 
 ```bash
-# Logout current account
+# Confirm credential method and authorize all affected sessions under the local
+# logout gates above before logout; stop on ambiguity or partial cleanup.
 pscale auth logout
 
 # Login with different account
@@ -104,13 +105,15 @@ pscale auth login
 
 ### CI/CD Authentication
 
+Management requires approved user/API-token authentication, not service-token authentication; do not silently switch credentials. Create/duplicate require explicit approval for the organization, operation, name/expiry and access scope, plus a user-controlled secret-delivery mechanism that keeps the response out of agent output; stop if none is available. Never display or store returned token values in chat, logs, evidence, temporary files, or this repository. Have the user provision the result directly into approved CI secrets; verify safe metadata and access without exposing the secret.
+
 ```bash
-# Create service token (see pscale-service-token)
+# Only through the approved user-controlled secret-delivery mechanism above
 pscale service-token create --org <org>
 
 # Use in CI/CD environment
-export PLANETSCALE_SERVICE_TOKEN_ID=<token-id>
-export PLANETSCALE_SERVICE_TOKEN=<token>
+# User-controlled CI secret injection supplies PLANETSCALE_SERVICE_TOKEN_ID
+# and PLANETSCALE_SERVICE_TOKEN; no agent-side token handling.
 
 # Test authentication
 pscale database list --org <org>
@@ -146,7 +149,7 @@ pscale database list --org <org>
 - Check current org: `pscale org show`
 - Switch org: `pscale org switch <org-name>`
 - List all orgs: `pscale org list`
-- Logout and login with correct account
+- Switch accounts only after confirming the credential method and explicitly authorizing all affected sessions under the local logout gates above; never use logout/login as an automatic probe
 
 ### Service token authentication fails
 

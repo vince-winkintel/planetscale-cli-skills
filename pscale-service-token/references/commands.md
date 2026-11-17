@@ -20,7 +20,9 @@ Create and duplicate use the secret-bearing output model: human/CSV include a `t
 
 ## Update
 
-`pscale service-token update <id> --org <org>` requires at least one explicitly supplied `--name` or `--ttl`. It sends a PATCH to the individual service-token endpoint. This changes name or expiry only: **it does not rotate the token secret or change the ID or grants**.
+`pscale service-token update <id> --org <org>` requires at least one effectively supplied `--name` or `--ttl`. It sends a PATCH to the individual service-token endpoint. This changes name or expiry only: **it does not rotate the token secret or change the ID or grants**.
+
+Omission means absent from effective configuration, not just argv. [Root initialization](https://github.com/planetscale/cli/blob/323c9899fe9072e00bd142ee2f99d76552f0c8fb/internal/cmd/root.go#L481-L577) presets unchanged flags from nonempty environment/user-config values using `Flags.Set`, marking them changed. Confirm that `PLANETSCALE_NAME` / `PLANETSCALE_TTL` and matching user-config `name` / `ttl` keys do not supply omitted fields; do not print secrets or dump config/environment. For example, `PLANETSCALE_TTL=never` plus a name-only argv update sends `ttl: null`, removing expiry. A nonempty inherited name also satisfies duplicate's required `--name`. Explicit CLI flags take precedence; empty inherited strings are not preset. Project-scoped `.pscale.yml` only allows org/database/branch, not these keys. Stop if effective configuration cannot be confirmed safely. The omission rows below assume no inherited value.
 
 | Input | Request behavior |
 | --- | --- |
@@ -170,6 +172,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ```
 
 ## pscale service-token delete-access --help
+
+**Known upstream help typo:** the organization-level removal example inside the verbatim fence incorrectly uses `add-access`, which grants access instead. Do not copy it for removal. The correct approved organization-level removal is `pscale service-token delete-access <token-id> delete_databases --org <org> --database=""`, subject to the local destructive-operation gates and exact grant approval. The explicit empty database prevents `PLANETSCALE_DATABASE`, user configuration, or project `.pscale.yml` from silently selecting database scope; `--org` alone does not clear that inherited scope. Confirm the exact organization-level grant before removal. The capture is intentionally unchanged.
 
 ```text
 delete access granted to a service token in the organization
