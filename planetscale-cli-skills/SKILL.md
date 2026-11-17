@@ -63,6 +63,8 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 ## Configuration and credential safety
 
 - Directory-local `.pscale.yml` files are project configuration, not trusted credential configuration. The CLI accepts only `org`, `database`, and `branch` from them and warns while ignoring keys such as API endpoints or tokens.
+- Stored credentials load only when needed; help/version/skill discovery do not prove authentication. Route auth checks, migration errors, explicit-token precedence, and logout to `pscale-auth`. Logout can delete unreadable local credentials without revoking them remotely and still needs authorization for the intended session; do not operate a keyring or inspect token files.
+- Route service-token duplication and name/expiry updates to `pscale-service-token`. Require exact-target authorization and least privilege. Duplicate returns a secret-bearing response; never expose or capture it in agent output. Update does not rotate the secret or change ID/grants. Inspect current metadata/access and read back approved changes.
 - Keep API URLs and credentials in the user config, environment/secret manager, or explicit approved flags. Never commit them to a repository-local config.
 - `pscale api` follows cross-host redirects without forwarding authentication or caller-supplied headers. Even with this protection, pass secret-bearing headers only to an explicitly verified API host and do not expose them in logs.
 - When `--format json` is active, raw API error codes are preserved in `issues[0].code` instead of being collapsed to `COMMAND_FAILED`. Branch automation should branch on that exact nested code when present.
@@ -109,7 +111,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **dedicated-read-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, detach with irreversible-operation approval, and delete dedicated PostgreSQL read replicas; recognize the deprecated `read-only-replica` compatibility name |
 | **webhook** | `pscale-webhook` | List, inspect, create, update, test, and delete database webhooks, including authorization headers |
 | **org** | `pscale-org` | List, show, switch, and update organizations; manage SSO, directory sync, email domains, members, and teams |
-| **service-token / oidc-trust** | `pscale-service-token` | Create, show, and manage CI/CD service tokens; inspect nullable last-used IP/network metadata; list OIDC providers and show their claims before managing approved least-privilege trust policy |
+| **service-token / oidc-trust** | `pscale-service-token` | Create, duplicate, update name/expiry, show, and manage CI/CD service tokens; inspect nullable last-used IP/network metadata; list OIDC providers and show their claims before managing approved least-privilege trust policy |
 
 Route Postgres scheduled maintenance to `pscale-maintenance` (`branch maintenance window/event`); immediate Postgres/Neki maintenance stays in `pscale-branch`. Promotion/demotion sizing belongs to `pscale-branch`, requires engine/feature and capacity approval, and does not support Neki. Detach belongs to `pscale-read-only-replica`, is hidden/feature-gated, and is never automatic cleanup.
 

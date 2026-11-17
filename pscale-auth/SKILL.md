@@ -71,6 +71,12 @@ pscale database list --org <org> --api-token <token>
 
 Prefer environment/secret-manager injection over putting tokens in shell history. Never commit tokens to skill repos or scripts.
 
+## Credential loading and logout
+
+Help, version, and skill discovery do not load stored credentials. Protected commands, `auth check`, `api`, and live branch-connection inspection load them when needed; a read-only command can still prompt for credential access or migrate a legacy token. Direct API tokens and either service-token field bypass ordinary stored-token loading, but a partial service-token pair fails authentication. Avoid mixed credential methods: raw `api` and ordinary API clients differ in precedence. See the [credential behavior reference](references/commands.md) for compatibility minima and precise source behavior.
+
+Logout intentionally loads the stored user token even with service-token credentials set; it does not revoke those service tokens or unset their environment variables. An explicit API token changes the revocation target. Obtain explicit authorization for the intended session before logout. Unreadable stored tokens can be deleted locally without remote revocation, with a warning; never interpret that as verified revocation. Keyring logout removes the legacy token file before the keyring entry; fallback file logout also removes the default config. Errors can leave partial cleanup. Do not read credential files, operate the keyring, or use logout as an automatic troubleshooting probe.
+
 ## Workflows
 
 ### First-Time Setup
@@ -127,7 +133,7 @@ pscale database list --org <org>
 **Symptoms:** `401 Unauthorized` or `403 Forbidden` responses
 
 **Solutions:**
-- Run `pscale auth logout && pscale auth login` to refresh session
+- Inspect an authorized `pscale auth check --format json` result; propose logout/login only after confirming the credential method and obtaining approval for the intended session
 - Verify organization access: `pscale org show`
 - Check service token hasn't expired (if using tokens)
 - Ensure token has required permissions (database read/write, branch create, etc.)
@@ -150,7 +156,7 @@ pscale database list --org <org>
 - Verify both `PLANETSCALE_SERVICE_TOKEN_ID` and `PLANETSCALE_SERVICE_TOKEN` are set
 - Check token hasn't been revoked: `pscale service-token list --org <org>`
 - Ensure token has required permissions for the operation
-- Use `--debug` flag to see authentication details
+- Inspect sanitized error codes and credential method only; do not enable credential-bearing debug capture
 
 ## Related Skills
 

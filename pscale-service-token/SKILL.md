@@ -1,6 +1,6 @@
 ---
 name: pscale-service-token
-description: Manage PlanetScale service tokens for CI/CD authentication and OIDC trust policy (provider claim discovery, trust create/update/delete). Use when setting up automated deployments, configuring CI/CD pipelines (GitHub Actions, GitLab CI, CircleCI, etc.), creating non-interactive authentication, inspecting service token metadata, rotating CI/CD credentials, or reviewing PlanetScale workload identity policy. Preferred over passwords for production automation. Triggers on PlanetScale OIDC trust, oidc-trust, PlanetScale workload identity, service token, service-token show, CI/CD auth, automation token, pipeline authentication.
+description: Manage PlanetScale service tokens for CI/CD authentication and OIDC trust policy (provider claim discovery, trust create/update/delete). Use when setting up automated deployments, configuring CI/CD pipelines (GitHub Actions, GitLab CI, CircleCI, etc.), creating non-interactive authentication, inspecting service token metadata, duplicating service tokens, updating token names or expiry, rotating CI/CD credentials, or reviewing PlanetScale workload identity policy. Preferred over passwords for production automation. Triggers on PlanetScale OIDC trust, oidc-trust, PlanetScale workload identity, service token, service-token show, CI/CD auth, automation token, pipeline authentication.
 ---
 
 # pscale service-token
@@ -16,6 +16,14 @@ These gates apply to every destructive example here, including deletion, demotio
 3. Require a verified recovery path that survives the operation: confirm backup/export usability and retention, or tested replacement/recreation instructions, ownership, and recovery time. A backup name alone is not verification; stop if recovery cannot be established.
 4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal. For a known headless session, obtain approval for the required force flag up front, before attempting the operation; stop if that approval is absent or any attempt is refused.
 5. Perform read-back verification of the exact target and dependent service health. Inspect pending/asynchronous outcomes before claiming completion. Authentication/network errors are not proof of absence; an ambiguous result requires investigation, not an automatic retry.
+
+## Token mutation and credential handling
+
+Service-token management requires approved user/API-token authentication; the command family rejects service-token authentication. Use an explicit `--org`. Before create, duplicate, update, grant changes, or deletion, inspect the exact token's metadata and access where applicable, obtain explicit approval for the organization, token ID, operation, name/expiry and complete access scope, and use least privilege. Check dependent automation before changing expiry or grants. Deletion and access removal also require the safety gates above.
+
+`duplicate <id> --name <approved-name>` returns a new secret-bearing token response. `update <id>` accepts `--name` and/or `--ttl`; it does not rotate the secret or change ID/grants. Omitted fields remain unchanged; TTL is integer seconds or literal `never` to remove expiry. Removing or extending expiry needs explicit approval. Do not infer duplicate grant/expiry behavior or use update as rotation. Read the [command reference](references/commands.md) for compatibility minima, exact request/output semantics, and read-back requirements.
+
+Never display or store returned token values in chat, logs, evidence, temporary files, or this repository. Create/duplicate require a user-controlled secret-delivery mechanism that keeps the response out of agent output; stop if none is available. Examples below describe only previously authorized workflows. Inspect metadata with `show` and grants with `show-access`, and verify the result after an approved mutation without exposing secrets.
 
 ## Common Commands
 
@@ -47,13 +55,9 @@ Every create, update, or delete needs explicit user approval for the exact organ
 # 1. Create service token
 pscale service-token create --org my-org
 
-# Returns:
-#   TOKEN_ID: xxxxx
-#   TOKEN: yyyyy
-
-# 2. Add to GitHub Secrets
-#   PLANETSCALE_SERVICE_TOKEN_ID = xxxxx
-#   PLANETSCALE_SERVICE_TOKEN = yyyyy
+# 2. User provisions the result directly into approved CI secrets
+#    through the secret-delivery mechanism agreed before creation.
+#    Do not display or capture returned token values in agent output.
 
 # 3. Use in workflow
 # .github/workflows/deploy.yml
@@ -118,7 +122,7 @@ Treat token IDs and grant details as sensitive operational metadata. Never ask t
 - Verify both TOKEN_ID and TOKEN are set correctly
 - Check token hasn't been deleted: `pscale service-token list`
 - Ensure token has required permissions
-- Try creating new token (old may be expired)
+- Inspect expiry and access first; create a replacement only with explicit approval and a secret-safe delivery path
 
 ### Token not showing in list
 
@@ -140,7 +144,7 @@ pscale service-token list --org <correct-org>
 3. **Review tokens for cleanup under the safety gates**; verify CI/CD dependencies before approving deletion
 4. **Never commit tokens** to version control
 5. **Use secrets management** (GitHub Secrets, environment variables, vault systems)
-6. **Limit token scope** if possible (coming in future PlanetScale updates)
+6. **Limit token scope** to approved grants; inspect `show-access` and separately authorize any grant changes
 
 ## Related Skills
 
