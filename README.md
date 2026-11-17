@@ -102,7 +102,7 @@ pscale branch create my-database feature-branch --from main
 
 | Skill | Use When | Common Commands |
 |-------|----------|----------------|
-| **pscale-auth** | Login, logout, authentication | `pscale auth login/logout` |
+| **pscale-auth** | Login, authorized logout, lazy credential loading and migration | `pscale auth login/logout` |
 | **pscale-branch** | Refresh MySQL schema snapshots with bounded readiness checks; create, restore to a PostgreSQL recovery point, rename, protect, diff, promote/demote with approved sizing, and switchover branches; query PostgreSQL/Neki logs; inspect live connections, including Neki router sessions with incomplete-result warnings and separately approved termination using fresh action IDs; manage Postgres size/replicas/parameters/maintenance and extension toggles, run Postgres/Neki branch-wide maintenance, resize Vitess VTGates and roll out VTGate parameters, inspect branch infra, manage live routing rules, Lookup Vindexes, tablet throttling, query pattern reports, and Vitess MoveTables workflows | `pscale branch create/update/switchover/diff/refresh-schema/parameters/maintenance/extensions/resize/vtgate/infra/query-patterns/vtctl lookup-vindex`, `pscale branch connections show/top`, `pscale logs` |
 | **pscale-deploy-request** | Deploy schema changes safely; inspect queues, operations, reviews, storage, and throttling; update auto-apply/auto-delete/per-request aggressive-cutover settings with approval and read-back; retry diagnosed failed operations; unblock failed deploy/revert queues | `pscale deploy-request create/deploy/update/retry/unblock/queue/operations/storage-check/throttler` |
 | **pscale-database** | Manage settings, database-level and keyspace-level Vitess throttlers, keyspace VTTablet/MySQL parameters, rollout concurrency, disk-storage settings, internal/external keyspaces, aggressive-cutover defaults, PostgreSQL IP restrictions, shells, and read-only regions/dumps | `pscale database show/update/throttler/aggressive-cutover/ip-restriction`, `pscale keyspace create-external/settings/update-settings/parameters/delete/read-only-regions`, `pscale shell` |
@@ -122,7 +122,7 @@ pscale branch create my-database feature-branch --from main
 | **pscale-read-only-replica** | Dedicated PostgreSQL read-replica lifecycle, sizing, regions, parameters, and approved irreversible feature-gated detach | `pscale dedicated-read-replica list/show/create/update/delete/detach` |
 | **pscale-webhook** | Database webhook lifecycle, authorization headers, and test events | `pscale webhook list/show/create/update/test/delete` |
 | **pscale-org** | Switch organizations, update settings, manage SSO/directory sync/domains, and inspect or manage members/teams | `pscale org list/switch/update/sso/member/team` |
-| **pscale-service-token** | CI/CD authentication, last-used IP/network metadata, OIDC provider claim discovery, and approved trust policy | `pscale service-token create/show`, `pscale oidc-trust providers list/show` |
+| **pscale-service-token** | CI/CD authentication, approved token duplication/name/expiry changes, last-used IP/network metadata, OIDC provider claim discovery, and approved trust policy | `pscale service-token create/show/duplicate/update`, `pscale oidc-trust providers list/show` |
 
 ## 🛠️ Automation Scripts
 

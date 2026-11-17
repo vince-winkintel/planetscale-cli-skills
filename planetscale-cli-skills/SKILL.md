@@ -63,6 +63,8 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 ## Configuration and credential safety
 
 - Directory-local `.pscale.yml` files are project configuration, not trusted credential configuration. The CLI accepts only `org`, `database`, and `branch` from them and warns while ignoring keys such as API endpoints or tokens.
+- Stored credentials load only when needed; help/version/skill discovery do not prove authentication. Route auth checks, migration errors, explicit-token precedence, and logout to `pscale-auth`. Logout can delete unreadable local credentials without revoking them remotely and still needs authorization for the intended session; do not operate a keyring or inspect token files.
+- Route service-token duplication and name/expiry updates to `pscale-service-token`. Require exact-target authorization and least privilege. Duplicate returns a secret-bearing response; never expose or capture it in agent output. Update does not rotate the secret or change ID/grants. Inspect current metadata/access and read back approved changes.
 - Keep API URLs and credentials in the user config, environment/secret manager, or explicit approved flags. Never commit them to a repository-local config.
 - `pscale api` follows cross-host redirects without forwarding authentication or caller-supplied headers. Even with this protection, pass secret-bearing headers only to an explicitly verified API host and do not expose them in logs.
 - When `--format json` is active, raw API error codes are preserved in `issues[0].code` instead of being collapsed to `COMMAND_FAILED`. Branch automation should branch on that exact nested code when present.
@@ -109,7 +111,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **dedicated-read-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, detach with irreversible-operation approval, and delete dedicated PostgreSQL read replicas; recognize the deprecated `read-only-replica` compatibility name |
 | **webhook** | `pscale-webhook` | List, inspect, create, update, test, and delete database webhooks, including authorization headers |
 | **org** | `pscale-org` | List, show, switch, and update organizations; manage SSO, directory sync, email domains, members, and teams |
-| **service-token / oidc-trust** | `pscale-service-token` | Create, show, and manage CI/CD service tokens; inspect nullable last-used IP/network metadata; list OIDC providers and show their claims before managing approved least-privilege trust policy |
+| **service-token / oidc-trust** | `pscale-service-token` | Create, duplicate, update name/expiry, show, and manage CI/CD service tokens; inspect nullable last-used IP/network metadata; list OIDC providers and show their claims before managing approved least-privilege trust policy |
 
 Route Postgres scheduled maintenance to `pscale-maintenance` (`branch maintenance window/event`); immediate Postgres/Neki maintenance stays in `pscale-branch`. Promotion/demotion sizing belongs to `pscale-branch`, requires engine/feature and capacity approval, and does not support Neki. Detach belongs to `pscale-read-only-replica`, is hidden/feature-gated, and is never automatic cleanup.
 
@@ -192,13 +194,14 @@ pscale deploy-request create <database> <feature-branch>
 
 ### CI/CD Integration
 
+Management requires approved user/API-token authentication, not service-token authentication; do not silently switch credentials. Create/duplicate require explicit approval for the organization, operation, name/expiry and access scope, plus a user-controlled secret-delivery mechanism that keeps the response out of agent output; stop if none is available. Never display or store returned token values in chat, logs, evidence, temporary files, or this repository. The user provisions the response directly into approved CI secrets; verify safe metadata and access without exposing secrets.
+
 ```bash
-# Create service token for CI/CD
+# Only through the approved user-controlled secret-delivery mechanism above
 pscale service-token create --org <org>
 
-# Use in CI/CD pipelines (GitHub Actions, GitLab CI, etc.)
-export PLANETSCALE_SERVICE_TOKEN_ID=<token-id>
-export PLANETSCALE_SERVICE_TOKEN=<token>
+# User provisions PLANETSCALE_SERVICE_TOKEN_ID and PLANETSCALE_SERVICE_TOKEN
+# directly into CI secrets; CI injects them without agent-side token handling.
 
 # Create and deploy via CI/CD after review/approval gates pass
 pscale deploy-request create <database> <branch> --format json
@@ -221,9 +224,12 @@ pscale import d1 verify <database> <branch> --migration-id <id> --input ./d1-exp
 
 ### Most Common Commands
 
+Logout is not an automatic troubleshooting probe. Confirm the credential method and obtain explicit authorization for all affected sessions first. An explicit API token is revoked before local deletion of the stored login; a different stored session remains unrevoked without a warning. An unreadable stored token can also be deleted locally without revocation. Do not inspect credential files or operate keyring dialogs; stop on ambiguous identity or partial cleanup.
+
 ```bash
 # Authentication
 pscale auth login
+# Logout only after the local session-authorization gates above
 pscale auth logout
 
 # Branch management; deletion requires the destructive-operation safety gates

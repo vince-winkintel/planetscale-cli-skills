@@ -502,11 +502,9 @@ Require every page to succeed before treating the inventory as complete. A faile
 
 **Error:** "Authentication failed"
 
-**Solution:**
-```bash
-# Re-authenticate
-pscale auth logout && pscale auth login
+**Solution:** Confirm the credential method and inspect an authorized `pscale auth check --format json` result first; even read-only checks may access credential storage. Do not use logout/login as an automatic troubleshooting probe. Logout requires explicit authorization for all affected sessions: an explicit API token is revoked first, then the separate stored login is deleted locally without its revocation or a warning; an unreadable stored token can also be deleted unrevoked. Do not read credential files or operate keyring dialogs. Stop on ambiguous identity, failed revocation, or partial cleanup; the user must complete any separately approved credential interaction.
 
+```bash
 # Verify branch exists
 pscale branch list <database>
 ```
