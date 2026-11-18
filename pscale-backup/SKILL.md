@@ -98,6 +98,22 @@ For Neki restores, use `pscale backup restore show <database> <source-branch> <b
 
 Restoring creates a new branch and can incur capacity cost. Confirm the source branch, database, backup ID, new branch name, cluster size or inherited Neki profile/router sizes, and replica count before execution. Treat the returned branch as provisioning until its readiness fields confirm it can accept connections.
 
+### PostgreSQL restore storage performance
+
+For a PostgreSQL backup restore, optional `--storage-iops <integer>` and `--storage-throughput <integer>` set storage IOPS and throughput in **MiB/s** on the new branch. Either flag can be supplied alone. Omitted fields are not sent; explicit zero is sent and is not an omission/default request. The CLI does not enforce numeric service limits here; confirm supported values for the target size/region instead of assuming test/example values are minima or defaults. These flags are rejected for Vitess/MySQL and Neki, including an explicitly supplied zero.
+
+Inspect the database kind, source branch/backup and recovery suitability, target name (must be new), engine-filtered cluster sizes, and requested storage values. Obtain explicit approval for the exact organization/database, backup or recovery point, new branch, sizing and capacity cost before creation. Use `--org` explicitly. After an ambiguous response, inspect the target before retrying; a returned branch is provisioning until readiness is verified. See [the storage compatibility and source contract](references/commands.md#postgresql-restore-storage-contract).
+
+```bash
+# After approval for this PostgreSQL restore, new branch, size, IOPS/throughput and cost
+pscale backup restore <database> <new-branch> <backup-id> --org <org> \
+  --cluster-size <postgres-cluster-size> --storage-iops <approved-iops> \
+  --storage-throughput <approved-mib-per-second> --format json
+pscale branch show <database> <new-branch> --org <org> --format json
+```
+
+The restore positional argument is the **new target branch**, not the source branch. Use the source branch only when inspecting the backup. `backup restore` has no `--restore-point`, `--wait`, `--min-storage`, or `--max-storage` option; use the branch-create workflow for point-in-time recovery.
+
 ### Backup Before Migration
 
 ```bash

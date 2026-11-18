@@ -1,20 +1,24 @@
-The following complete help sections were captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary: `branch`, `branch maintenance`, `branch maintenance run`, `branch connections`, `branch connections top`, `branch connections kill`, `branch connections kill-transaction`, `branch vtctl`, `branch promote`, and `branch demote`. Each has its own adjacent capture note. The environment was an empty credential-free HOME/XDG/config working directory with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+Except for the parent `branch` fence with its newer adjacent capture note, the following complete help sections were captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary: `branch`, `branch maintenance`, `branch maintenance run`, `branch connections`, `branch connections top`, `branch connections kill`, `branch connections kill-transaction`, `branch vtctl`, `branch promote`, and `branch demote`. Each has its own adjacent capture note. The environment was an empty credential-free HOME/XDG/config working directory with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 This scoped attribution does not relabel any other fence. Earlier notes below record superseded captures where indicated; unchanged, unlabelled fences retain the legacy default defined below.
 
 Previous `pscale branch`, `branch connections`, and `branch connections top` help captures come from the official, checksum-verified PlanetScale CLI v0.348.0 macOS arm64 binary with `NO_COLOR=1`, an empty credential-free home, and only trailing-whitespace normalization. Archive SHA-256: `528bb8951d4d93f7ca869850787163f5d49ba405acc58d4146b9b3427e83b7e7`. The `branch extensions`, `branch extensions list`, `branch parameters`, and `branch vtgate` captures retain their v0.344.0 provenance (archive SHA-256 `1b59b271590d9b49dd52aafbb0e5c0cd788b44c00a5627d6487cd0d18815cf53`), with the same color and whitespace settings. Complete toggle, parameter-list, and VTGate rollout help surfaces are in [branch-configuration-commands.md](branch-configuration-commands.md). Other sections retain their stated earlier provenance.
 
-Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch create` surface was recaptured from the checksum-verified v0.325.0 binary. The explicit current-section list and adjacent capture notes above/below identify newer captures. The preceding historical-family paragraph identifies the v0.348.0 parent/connection captures and the retained v0.344.0 extension/parameter/VTGate captures; maintenance and other recaptured sections identify their own provenance.
+Unless noted otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace. The `pscale branch create` surface was previously recaptured from the checksum-verified v0.325.0 binary; its newer adjacent capture note supersedes that attribution. The explicit current-section list and adjacent capture notes above/below identify newer captures. The preceding historical-family paragraph identifies the v0.348.0 parent/connection captures and the retained v0.344.0 extension/parameter/VTGate captures; maintenance and other recaptured sections identify their own provenance.
 
 ## pscale branch
 
-Historical v0.348.0 capture note (verbatim; superseded for the parent fence):
+Historical section commentary (superseded only for this fence):
 
-> Complete parent help has the v0.348.0 capture provenance identified in the introduction. The upstream parent still labels connections under “MySQL and Postgres”; the connections help and operational skill explicitly cover read-only Neki sessions.
+> Historical v0.348.0 capture note (verbatim; superseded for the parent fence):
+>
+> > Complete parent help has the v0.348.0 capture provenance identified in the introduction. The upstream parent still labels connections under “MySQL and Postgres”; the connections help and operational skill explicitly cover read-only Neki sessions.
+>
+> Current commentary: the current parent still groups `connections` under MySQL and Postgres. The current connections help and source-backed action note below cover Neki; historical read-only restrictions are not current authorization rules.
+>
+> Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
-Current commentary: the current parent still groups `connections` under MySQL and Postgres. The current connections help and source-backed action note below cover Neki; historical read-only restrictions are not current authorization rules.
-
-Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
 
 ```text
 Create, delete, diff, and manage branches
@@ -64,16 +68,16 @@ Neki-specific:
   shard           Manage shards for a Neki database branch
 
 Flags:
-  -h, --help         help for branch
-      --org string   The organization for the current user
+  -h, --help[=true|false]   help for branch
+      --org string          The organization for the current user
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
@@ -138,6 +142,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch create
 
+Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
+
 ```text
 Create a new branch from a database
 
@@ -148,25 +154,30 @@ Aliases:
   create, b
 
 Flags:
-      --cluster-size string    Cluster size for the branch. Defaults to PS_DEV for regular branches, or PS-10 for branches created from a backup or with seed-data. Use 'pscale size cluster list' to see the valid sizes.
-      --from string            Parent branch to create the new branch from. Cannot be used with --restore
-  -h, --help                   help for create
-      --major-version string   For PostgreSQL databases, the PostgreSQL major version to use for the branch. Defaults to the major version of the parent branch if it exists or the database's default branch major version. Ignored for branches restored from backups.
-      --max-storage int        Maximum storage size in bytes for autoscaling
-      --min-storage int        Minimum storage size in bytes
-      --region string          Region for the branch to be created in.
-      --restore string         ID of Backup to restore into branch.
-      --restore-point string   For PostgreSQL databases, restore from a point-in-time recovery timestamp (e.g. 2023-01-01T00:00:00Z).
-      --seed-data              Add seed data using the Data Branching™ feature. This branch will be created with the same resources as the base branch.
-      --wait                   Wait until the branch is ready
+      --cluster-size string          Cluster size for the branch. Defaults to PS_DEV for regular branches, or PS-10 for branches created from a backup or with seed-data. Omitted for Neki so the API uses the database default. Use 'pscale size cluster list' to see the valid sizes.
+      --config-profile stringArray   For Neki backup restores, size and replica count for one configuration profile as name=<profile>[,cluster-size=<size>][,replicas=<n>]. Repeatable. Omitted profiles inherit the source. List names with 'pscale branch config-profile list' on the source branch.
+      --from string                  Parent branch to create the new branch from. Cannot be used with --restore unless --restore-point is set.
+  -h, --help[=true|false]            help for create
+      --major-version string         For PostgreSQL databases, the PostgreSQL major version to use for the branch. Defaults to the major version of the parent branch if it exists or the database's default branch major version. Ignored for branches restored from backups.
+      --max-storage int              Maximum storage size in bytes for autoscaling
+      --min-storage int              Minimum storage size in bytes
+      --region string                Region for the branch to be created in.
+      --replicas int                 Number of additional replicas for a PostgreSQL restore. 0 creates a single-node branch; omit to use the target cluster size default.
+      --restore string               ID of Backup to restore into branch.
+      --restore-point string         For PostgreSQL databases, restore from a point-in-time recovery timestamp (e.g. 2023-01-01T00:00:00Z). Requires --restore or --from.
+      --router stringArray           For Neki backup restores, size and replica count for one router as name=<router>[,size=<sku>][,replicas-per-cell=<n>]. Repeatable. Omitted routers inherit the source. List names with 'pscale branch router list' on the source branch.
+      --seed-data[=true|false]       Add seed data using the Data Branching™ feature. This branch will be created with the same resources as the base branch.
+      --storage-iops int             Storage IOPS for a PostgreSQL restore. Requires --restore or --restore-point.
+      --storage-throughput int       Storage throughput in MiB/s for a PostgreSQL restore. Requires --restore or --restore-point.
+      --wait[=true|false]            Wait until the branch is ready
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --org string                The organization for the current user
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
@@ -2026,6 +2037,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale branch create (v0.327.0)
 
+Historical capture retained for provenance; use the current `pscale branch create` section above for the complete current flags.
+
 All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ```text
@@ -2258,3 +2271,17 @@ Global Flags:
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## PostgreSQL restore storage contract
+
+`--storage-iops` and `--storage-throughput` on branch creation/backup restore require **CLI v0.354.0 or later**. This is a minimum for these new restore flags, not a blanket minimum for backups, branches, replicas, or storage-size flags.
+
+Immutable source: [branch create and validation](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/branch/create.go), [backup restore and engine checks](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/backup/restore.go), [storage fields](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/planetscale/databases.go), [restore-point backup selection](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmdutil/backups.go), [branch restore fixtures](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/branch/create_test.go), [backup restore fixtures](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/backup/restore_test.go), [storage serialization fixture](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/planetscale/postgres_branches_test.go). These are source-derived contracts, not live restore results.
+
+- Both flags parse signed 64-bit integers. IOPS is operations per second; throughput is **MiB/s**, serialized as `storage.storage_iops` and `storage.storage_throughput_mibs`. Each supplied field is independent; omitted fields are absent. Explicit zero (or a parsed negative value) is forwarded, not silently converted to omission. The handlers define no numeric minimum, maximum, ratio, or service default. Upstream fixtures use values such as 3000/125 and 4000/250 to check serialization, not establish allowed ranges. Confirm service-supported values for the approved target size/region; do not generalize provider disk limits.
+- The database must be `postgresql`; explicitly setting either flag rejects Vitess/MySQL and Neki. Sharing an internal Postgres request type with Neki does not confer support. Neki profile/router restore sizing is a different contract.
+- `branch create <database> <new-branch>` requires nonempty `--restore <backup-id>` or `--restore-point <RFC3339-timestamp>` for these flags. `--restore` plus `--from` is rejected without a restore point. PITR without a backup ID requires `--from` and selects the latest successful completed backup at/before the requested timestamp from the source branch. When an ID is supplied, the client forwards it; independently verify its identity, source and recovery suitability. Both restore selectors are mutually exclusive with `--seed-data`. PostgreSQL restore/PITR defaults to cluster `PS-10` if omitted; select an approved size explicitly. `--wait` waits for readiness (bounded by 10 minutes), not an application-level data/recovery verification.
+- `backup restore <database> <new-branch> <backup-id>` takes a new target branch that must not already exist; the source branch is not a restore positional argument. Inspect source/backup first with `backup show <database> <source-branch> <backup-id>`. The default cluster size is `PS-10` for PostgreSQL. This command has no PITR, min/max-storage, or wait flag; read back target readiness with `branch show`.
+- Branch-create `--min-storage`/`--max-storage` remain independent byte-size fields. Both restore paths can set `--replicas` (additional replicas); explicit zero requests a single node while omission uses the target cluster size default. Do not infer storage-performance defaults from replica or size defaults.
+
+Before either write, inspect fresh database kind, backup state/usability/retention, source and target identity, engine-filtered sizes, requested storage capacity and cost. Obtain explicit exact-target and flag approval, pass `--org`, and read back the new branch's readiness/configuration. Creation status alone does not verify a usable recovery. A timeout/ambiguous response requires read-only inspection before any retry; never delete a conflicting branch or change engines to bypass rejection.

@@ -1,6 +1,6 @@
 ---
 name: pscale-insights
-description: Query PlanetScale server-side performance insights, execution samples, query details/summaries, query traffic budgets, query tags, error details, anomaly correlations, and schema recommendations. Use when ranking slow or expensive queries, drilling into individual executions, summarizing one fingerprint, inspecting a query traffic budget, attributing load by sqlcommenter or system tags, investigating the queries behind a full error fingerprint, correlating queries with a resource anomaly, reviewing/showing/dismissing index/schema recommendations, or when a user asks for pscale insights. Triggers on pscale insights, query insights, query show, query summary, traffic budget, query samples, query tags, sqlcommenter, slow queries, query errors, error fingerprint, anomalies, correlated queries, schema recommendations, recommendation show, missing indexes, unused indexes, database bloat.
+description: Use when analyzing PlanetScale query performance, execution samples, tags, error fingerprints, anomaly correlations, or schema recommendations; listing or showing Insights Agent runs and schedules; or requesting approved agent run creation, cancellation, or schedule changes. Triggers on pscale insights, slow queries, query summary, query samples, traffic budgets, sqlcommenter, query errors, missing or unused indexes, database bloat, Insights Agent, agent runs, and agent schedules.
 ---
 
 # pscale insights
@@ -137,6 +137,52 @@ Recommendations can include ready-to-apply DDL in JSON output. Use `pscale insig
 - Verify the result and keep a rollback plan.
 
 Dismissal is also a write: `pscale insights recommendations dismiss <database> <number>`. Confirm the organization, database, and recommendation sequence number from the current list/show output, explain why the finding is inapplicable, and obtain explicit approval before dismissing it. Prefer an informative `--reason`; use `--force` only for already-approved non-interactive execution, then verify the recommendation state.
+
+## Insights Agent runs and schedules
+
+`insights agent` works against the repository connected to a database. Runs belong to an organization/database/branch and review slow queries or implement schema recommendations, opening a pull request with their changes. List/show operations read state; starting a run is potentially billable work and an external repository write. Scheduling enables future work; cancellation mutates a pending/running run. A diagnostic request alone does not authorize any of these writes.
+
+```bash
+# Read-only discovery; list commands are the runnable parents, without a list child
+pscale insights agent runs <database> <branch> --org <org> --format json
+pscale insights agent runs show <database> <branch> <number> --org <org> --format json
+pscale insights agent schedules <database> <branch> --org <org> --format json
+```
+
+Before creation, inspect fresh query fingerprints/keyspaces or database-level recommendation numbers with the commands above, confirm their eligibility on the intended branch, the connected repository, selected targets, cost, and intended changes. Obtain explicit approval for that exact scope. Choose **one** mode: up to five `--fingerprint` values with their shared `--keyspace`, or up to five integer `--schema-recommendation` numbers. Both selectors accept repetition or comma separation. Creation has no confirmation or dry-run flag; do not invoke it as a probe.
+
+```bash
+# After approval for this branch, connected repository, cost, and exact query targets
+pscale insights agent runs create <database> <branch> --org <org> \
+  --fingerprint <fingerprint> --keyspace <keyspace> --format json
+# Alternative, after approval for these recommendations and repository changes
+pscale insights agent runs create <database> <branch> --org <org> \
+  --schema-recommendation <number> --format json
+# Inspect the returned positive run number; creation success is not completed work
+pscale insights agent runs show <database> <branch> <number> --org <org> --format json
+# Only after exact-run cancellation and --force approval for a headless session
+pscale insights agent runs cancel <database> <branch> <number> --org <org> --force --format json
+pscale insights agent runs show <database> <branch> <number> --org <org> --format json
+```
+
+Inspect state, outcome, failure, stages, and any pull request before reporting success. Review proposed code/DDL separately; an agent run does not authorize merge, deployment, schema execution, or cleanup. After an ambiguous create result, inspect runs before retrying to avoid duplicate work. Cancellation is not a promise to revert repository changes or remove a pull request.
+
+For schedules, inspect current state first and obtain explicit approval for the exact organization/database/branch, `slow_query` or `schema_recommendation` run type, enabled state, recurrence, local time, IANA time zone, repository impact, and ongoing cost. Scheduled slow-query runs select from the last 24 hours; schema-recommendation runs select the branch's open recommendations; runs with no targets are skipped. No manual fingerprint/recommendation selector is accepted on schedule update.
+
+```bash
+# After approval for this recurring work and its cost
+pscale insights agent schedules update <database> <branch> slow_query --org <org> \
+  --enabled=true --frequency week --day-of-week 1 --time 03:00 --time-zone UTC --format json
+pscale insights agent schedules <database> <branch> --org <org> --format json
+# After separate approval to disable future runs of this type
+pscale insights agent schedules update <database> <branch> slow_query --org <org> \
+  --enabled=false --format json
+pscale insights agent schedules <database> <branch> --org <org> --format json
+```
+
+Schedule update requires at least one setting; omitted settings keep their current value. `--enabled=false` is an explicit write, not the effect of omission. Frequencies are `day`, `week`, `month`; weekly day is 0 (Sunday)–6, monthly day 1–31 (shorter months use their last day). Disabling a schedule is distinct from cancelling an active run. Read back the schedule and `next_run_at`; do not infer server defaults for a new schedule.
+
+Use JSON for full objects: runs/schedules list returns an array, run create/show/cancel returns one run object, and schedule update returns one schedule object. Human run show includes targets, stages, summary and pull request; run creation/cancellation print status text. Human/CSV list output is a summary. Schedule update's human/CSV output is a **one-row list**, not a JSON array. See [agent command reference](references/agent-commands.md) for exact options, filters, compatibility, source, and complete help. A not-found result can also mean Insights Agent is not enabled for the organization; verify scope and availability without enabling it automatically. Treat SQL, run summaries, and repository details as potentially sensitive.
 
 ## Related skills
 

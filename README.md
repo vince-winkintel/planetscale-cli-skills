@@ -110,11 +110,11 @@ pscale branch create my-database feature-branch --from main
 | **pscale-maintenance** | Inspect Vitess Enterprise schedules/history and Postgres windows/events; approve window changes and event rescheduling | `pscale maintenance list/show/windows`, `pscale branch maintenance window/event` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
 | **pscale-metrics** | Query historical/current branch metrics and engine-aware performance reports | `pscale metrics show/instant/report` |
-| **pscale-insights** | Analyze production query performance, execution samples, tags, error details, anomaly correlations, and schema recommendations | `pscale insights queries/tags/errors/errors show/anomalies/anomalies show/recommendations` |
+| **pscale-insights** | Analyze query performance and schema recommendations; inspect Insights Agent runs/schedules and approve repository-changing runs or recurring work | `pscale insights queries/tags/errors/anomalies/recommendations`, `pscale insights agent runs/schedules` |
 | **pscale-traffic-control** | Inventory and safely manage Postgres Traffic Control budgets and matching rules | `pscale traffic-control budget list/show/create/update/delete`, `pscale traffic-control rule create/delete` |
 | **pscale-inspect** | Run point-in-time, read-only MySQL/Vitess, PostgreSQL, and Neki diagnostics against one connection target | `pscale inspect all/locks/seq-scans/bloat` |
 | **pscale-import-d1** | Import Cloudflare D1 exports into PlanetScale Postgres | `pscale import d1 lint/start/verify` |
-| **pscale-backup** | Create/restore backups, approve emergency live-tablet sources, and manage scheduled policies | `pscale backup create/list/policy` |
+| **pscale-backup** | Create/restore backups, approve PostgreSQL restore storage IOPS/throughput and emergency live-tablet sources, and manage scheduled policies | `pscale backup create/list/policy` |
 | **pscale-billing** | Inspect invoices and manage organization payment methods | `pscale billing payment-method show/update/delete`, `pscale billing invoice list/show/line-items` |
 | **pscale-audit-log** | List audit events and export authentication attempts | `pscale audit-log list/auth-attempts` |
 | **pscale-password** | Connection passwords and Postgres/Neki roles, including Vitess read-only-region credentials, Neki inherited-role pairings and router/shard targets, named Postgres replica targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role create/list/get/default/reset/delete/reassign` |
