@@ -188,6 +188,26 @@ pscale branch create my-database $BRANCH_NAME --from main
 
 See `scripts/create-branch-for-mr.sh` for automation.
 
+### PostgreSQL restore storage performance
+
+These restore performance flags require **CLI v0.354.0 or later**; this minimum does not apply to older backup/branch operations or storage-size flags.
+
+For PostgreSQL branch creation from a backup or point-in-time recovery, optional `--storage-iops <integer>` and `--storage-throughput <integer>` set storage IOPS and throughput in **MiB/s** on the new branch. Either flag can be supplied alone. Omitted fields are not sent; explicit zero is sent and is not an omission/default request. The CLI does not enforce numeric service limits here; confirm supported values for the target size/region instead of assuming test/example values are minima or defaults. These flags are rejected for Vitess/MySQL and Neki, including an explicitly supplied zero.
+
+Inspect the database kind, source branch/backup and recovery suitability, target name (must be new), engine-filtered cluster sizes, and requested storage values. Obtain explicit approval for the exact organization/database, backup or recovery point, new branch, sizing and capacity cost before creation. Use `--org` explicitly. After an ambiguous response, inspect the target before retrying; a returned branch is provisioning until readiness is verified. See [the storage compatibility and source contract](references/commands.md#postgresql-restore-storage-contract).
+
+For `branch create`, storage performance flags require `--restore <backup-id>` or `--restore-point <RFC3339-timestamp>`; regular creation and `--seed-data` alone do not qualify. `--restore` conflicts with `--from` unless `--restore-point` is also supplied. PITR without `--restore` requires `--from`; both restore modes exclude `--seed-data`. The selected database must be PostgreSQL. Omitted restore cluster size resolves to billable `PS-10`; pass an approved size explicitly.
+
+```bash
+# After approval for this PostgreSQL backup, new branch, size, IOPS/throughput and cost
+pscale branch create <database> <new-branch> --org <org> --restore <backup-id> \
+  --cluster-size <postgres-cluster-size> --storage-iops <approved-iops> \
+  --storage-throughput <approved-mib-per-second> --wait --format json
+pscale branch show <database> <new-branch> --org <org> --format json
+```
+
+`--min-storage` and `--max-storage` remain separate byte-size settings; `--replicas` counts additional replicas (explicit zero requests a single node; omission uses the target size default). A successful creation request alone does not prove restore completion; check readiness and the resulting target configuration.
+
 ### Restore a Postgres branch to a point in time
 
 `pscale branch create --restore-point` creates a new PostgreSQL branch from a point-in-time recovery timestamp. This is a write that can allocate billable resources. Confirm the organization, database, source branch, timestamp, target branch name, cluster size, and retention/recovery objective with the user before running it.

@@ -1,3 +1,5 @@
+Historical parent synopsis (superseded by the complete `pscale backup parent with update` capture below):
+
 Manage branch backups and backup policies
 
 Usage:
@@ -29,7 +31,7 @@ Use "pscale backup [command] --help" for more information about a command.
 
 ## pscale backup policy
 
-All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+Unless a section identifies a newer capture, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ```text
 Manage scheduled backup policies for a database.
@@ -207,9 +209,13 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale backup parent with update
 
-Previous capture note (superseded for this fence): All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+Historical section commentary (superseded only for this fence):
 
-Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+> Previous capture note (superseded for this fence): All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
+>
+> Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
+
+Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
 
 ```text
 Manage branch backups, backup policies, and restores
@@ -227,16 +233,16 @@ Available Commands:
   update      Update a backup's protected status
 
 Flags:
-  -h, --help         help for backup
-      --org string   The organization for the current user
+  -h, --help[=true|false]   help for backup
+      --org string          The organization for the current user
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
@@ -247,7 +253,11 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale backup restore
 
-Help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+Historical section commentary (superseded only for this fence):
+
+> Help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.332.0 macOS arm64 release binary with `NO_COLOR=1`, after normalizing only trailing whitespace. The archive SHA-256 is `61eadf71c9d5e6423587fbf01fd698800d8a944775a06519a1c2ac38fcb89287`.
+
+Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
 
 ```text
 Restore a backup to a new branch.
@@ -268,17 +278,19 @@ Available Commands:
 Flags:
       --cluster-size pscale size cluster list   Cluster size for restored backup branch. For Neki, omitted unless set so the source default profile size is used. Use pscale size cluster list to see the valid sizes. (default "PS-10")
       --config-profile stringArray              For Neki backup restores, size and replica count for one configuration profile as name=<profile>[,cluster-size=<size>][,replicas=<n>]. Repeatable. Omitted profiles inherit the source. List names with 'pscale branch config-profile list' on the source branch.
-  -h, --help                                    help for restore
+  -h, --help[=true|false]                       help for restore
       --replicas int                            Number of additional replicas for a PostgreSQL restore. 0 creates a single-node branch; omit to use the target cluster size default.
       --router stringArray                      For Neki backup restores, size and replica count for one router as name=<router>[,size=<sku>][,replicas-per-cell=<n>]. Repeatable. Omitted routers inherit the source. List names with 'pscale branch router list' on the source branch.
+      --storage-iops int                        Storage IOPS for a PostgreSQL restore.
+      --storage-throughput int                  Storage throughput in MiB/s for a PostgreSQL restore.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --org string                The organization for the current user
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
@@ -289,6 +301,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ```
 
 ## pscale backup restore show
+
+This unchanged fence retains the v0.332.0 archive provenance recorded in the historical note above.
 
 ```text
 Show the configuration profile and router sizes a Neki backup restore will use.
@@ -360,3 +374,16 @@ Global Flags:
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## PostgreSQL restore storage contract
+
+`--storage-iops` and `--storage-throughput` on `backup restore` require **CLI v0.354.0 or later**. This is a minimum for these new restore flags, not a blanket minimum for backups, branches, replicas, or storage-size flags.
+
+Immutable source: [backup restore and engine checks](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/backup/restore.go), [storage fields](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/planetscale/databases.go), [backup restore fixtures](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/backup/restore_test.go), [storage serialization fixture](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/planetscale/postgres_branches_test.go). These are source-derived contracts, not live restore results.
+
+- Both flags parse signed 64-bit integers. IOPS is operations per second; throughput is **MiB/s**, serialized as `storage.storage_iops` and `storage.storage_throughput_mibs`. Each supplied field is independent; omitted fields are absent. Explicit zero (or a parsed negative value) is forwarded, not silently converted to omission. The handlers define no numeric minimum, maximum, ratio, or service default. Upstream fixtures use values such as 3000/125 and 4000/250 to check serialization, not establish allowed ranges. Confirm service-supported values for the approved target size/region; do not generalize provider disk limits.
+- The database must be `postgresql`; explicitly setting either flag rejects Vitess/MySQL and Neki. Sharing an internal Postgres request type with Neki does not confer support. Neki profile/router restore sizing is a different contract.
+- `backup restore <database> <new-branch> <backup-id>` takes a new target branch that must not already exist; the source branch is not a restore positional argument. Inspect source/backup first with `backup show <database> <source-branch> <backup-id>`. The default cluster size is `PS-10` for PostgreSQL. This command has no PITR, min/max-storage, or wait flag; read back target readiness with `branch show`.
+- `backup restore` can set `--replicas` (additional replicas); explicit zero requests a single node while omission uses the target cluster size default. Do not infer storage-performance defaults from replica or size defaults.
+
+Before this write, inspect fresh database kind, backup state/usability/retention, source and target identity, engine-filtered sizes, requested storage capacity and cost. Obtain explicit exact-target and flag approval, pass `--org`, and read back the new branch's readiness/configuration. Creation status alone does not verify a usable recovery. A timeout/ambiguous response requires read-only inspection before any retry; never delete a conflicting branch or change engines to bypass rejection.

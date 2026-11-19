@@ -34,13 +34,15 @@ Logout is a credential mutation, not a diagnostic probe. Require explicit author
 
 ## Capture provenance
 
-Complete help fences below were captured by the parent from the official checksum-verified PlanetScale CLI v0.353.0 macOS arm64 binary, in a credential-free environment with network denied. Only trailing horizontal terminal padding is removed; no spelling, punctuation, wrapping, or content is rewritten. These help examples are upstream reference text, not authorization to perform mutations.
+Except for the root help fence with its newer adjacent capture note, complete help fences below were captured by the parent from the official checksum-verified PlanetScale CLI v0.353.0 macOS arm64 binary, in a credential-free environment with network denied. Only trailing horizontal terminal padding is removed; no spelling, punctuation, wrapping, or content is rewritten. These help examples are upstream reference text, not authorization to perform mutations.
 
 - Immutable source: [323c9899fe9072e00bd142ee2f99d76552f0c8fb](https://github.com/planetscale/cli/tree/323c9899fe9072e00bd142ee2f99d76552f0c8fb).
 - Official release archive SHA-256: `0b7f7c522466d1dd428d8b52372c9534446baf05fe00a5cdb218b11470290411`.
 - Extracted binary SHA-256: `1c355a86331ec65256adfbcf8cd82f2be36e86482c644acdc8fbd10d916554b8`.
 
 ## pscale --help
+
+Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
 
 ```text
 pscale is a CLI for communicating with PlanetScale's API.
@@ -102,14 +104,14 @@ Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-  -h, --help                      help for pscale
-      --no-color                  Disable color output
+  -h, --help[=true|false]         help for pscale
+      --no-color[=true|false]     Disable color output
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
-      --skill                     Print the agent skill file and exit
-      --version                   Show pscale version
+      --skill[=true|false]        Print the agent skill file and exit
+      --version[=true|false]      Show pscale version
 
 Additional help topics:
   pscale agents                 How AI agents and automation should use pscale

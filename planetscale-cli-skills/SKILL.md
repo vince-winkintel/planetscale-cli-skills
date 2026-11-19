@@ -77,6 +77,9 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 - Route Neki read-only replica capacity to `pscale-neki` and `branch config-profile create/update --read-only-replicas`. These per-shard counts are not dedicated PostgreSQL replica resources; confirm the engine and retain exact-target capacity/cost approval.
 - Route Neki live router sessions to `pscale-branch` (`branch connections show/top` plus separately approved termination): use fresh matching action IDs, respect permissions, omit engine-incompatible flags, and preserve incomplete-result warnings. Live `top` controls do not establish authorization; replay remains read-only. Sidecar settings belong to `pscale-neki` and `config-profile update --parameters sidecar.<name>=<value>`; `branch sidecar` is deprecated. Parameter inventories expose `INTERNAL` / JSON `internal`; internal settings are not write candidates, and false alone is not authorization.
 
+- Route Insights Agent runs/schedules to `pscale-insights`: list/show reads state; create can incur cost and open a repository pull request, and cancellation/schedule updates are writes requiring exact-target approval and read-back. A diagnosis does not authorize agent execution, recurring work, merge, or deployment.
+- Route PostgreSQL restore IOPS/throughput to `pscale-branch` (`create --restore/--restore-point`) or `pscale-backup` (`restore`). Confirm source, new target, engine, supported capacity and cost before approval; these flags do not apply to Vitess or Neki.
+
 ## Binary-native agent bootstrap
 
 - `pscale --skill` prints the current binary's installable `pscale-cli` skill file to stdout when no positional arguments follow it. `pscale agent-guide --skill` is equivalent.
@@ -99,7 +102,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **maintenance** | `pscale-maintenance` | Inspect Vitess Enterprise schedules/history and Postgres branch windows/events; approve exact-target window changes or event rescheduling with deadline and recovery checks |
 | **sql** | `pscale-sql` | Run non-interactive SQL queries with JSON output and ephemeral credentials |
 | **metrics** | `pscale-metrics` | Query historical/current branch metrics and engine-aware grouped performance reports |
-| **insights** | `pscale-insights` | Analyze production query statistics, execution samples, query tags, error details, anomaly correlations, and schema recommendations |
+| **insights** | `pscale-insights` | Analyze production query statistics and schema recommendations; inspect Insights Agent runs/schedules and approve repository-changing or recurring work |
 | **traffic-control** | `pscale-traffic-control` | Inventory and safely manage Postgres Traffic Control budgets and fingerprint/keyspace/tag rules |
 | **inspect** | `pscale-inspect` | Run point-in-time, read-only MySQL/Vitess, PostgreSQL, and Neki diagnostic checks against one connection target |
 | **import d1** | `pscale-import-d1` | Import Cloudflare D1 SQLite exports into PlanetScale Postgres |

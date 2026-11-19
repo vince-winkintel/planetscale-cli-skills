@@ -4,6 +4,8 @@ Unless a section says otherwise, help fences below are exact output from the off
 
 ## `pscale insights`
 
+Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
+
 ```text
 Surface PlanetScale's server-side analysis of a database: aggregated query
 statistics (latency percentiles, rows read, errors), detected anomalies, and
@@ -16,6 +18,7 @@ Usage:
   pscale insights [command]
 
 Available Commands:
+  agent           Start and review Insights Agent runs and schedules
   anomalies       List detected resource anomalies (CPU, memory, IOPS, rows read/written)
   errors          List queries that are failing with errors
   queries         List the top queries by a performance metric
@@ -23,16 +26,16 @@ Available Commands:
   tags            List query tag keys (sqlcommenter / system)
 
 Flags:
-  -h, --help         help for insights
-      --org string   The organization for the current user
+  -h, --help[=true|false]   help for insights
+      --org string          The organization for the current user
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
@@ -464,6 +467,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale insights parent and query/recommendation updates
 
+Historical parent capture retained for provenance: the v0.327.0 parent synopsis below predates `insights agent`; use the v0.354.0 parent capture at the top of this file for the current command inventory. The query/recommendation captures retain their stated provenance.
+
 All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ```text
@@ -555,6 +560,7 @@ Use "pscale insights queries [command] --help" for more information about a comm
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
 ## pscale insights queries show
 
 All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
@@ -656,6 +662,7 @@ Global Flags:
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
 ## pscale insights recommendations
 
 All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
@@ -733,3 +740,7 @@ Global Flags:
 
 Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
 ```
+
+## Insights Agent
+
+See [agent-commands.md](agent-commands.md) for branch-scoped run and schedule commands, approval boundaries, source-confirmed options/output, compatibility, and complete captured help.
