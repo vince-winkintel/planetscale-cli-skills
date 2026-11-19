@@ -1,6 +1,6 @@
 ---
 name: pscale-insights
-description: Use when analyzing PlanetScale query performance, execution samples, tags, error fingerprints, anomaly correlations, or schema recommendations; listing or showing Insights Agent runs and schedules; or requesting approved agent run creation, cancellation, or schedule changes. Triggers on pscale insights, slow queries, query summary, query samples, traffic budgets, sqlcommenter, query errors, missing or unused indexes, database bloat, Insights Agent, agent runs, and agent schedules.
+description: Use when analyzing PlanetScale query performance, execution samples, query tags, error fingerprints, anomalies or correlated queries; reviewing, showing, or dismissing schema recommendations; listing or showing Insights Agent runs and schedules; or requesting approved agent run creation, cancellation, or schedule changes. Triggers on pscale insights, slow queries, query show, query summary, query samples, query tags, traffic budgets, sqlcommenter, query errors, anomalies, correlated queries, recommendation show, dismiss schema recommendation, missing or unused indexes, database bloat, Insights Agent, agent runs, and agent schedules.
 ---
 
 # pscale insights
@@ -140,7 +140,7 @@ Dismissal is also a write: `pscale insights recommendations dismiss <database> <
 
 ## Insights Agent runs and schedules
 
-`insights agent` works against the repository connected to a database. Runs belong to an organization/database/branch and review slow queries or implement schema recommendations, opening a pull request with their changes. List/show operations read state; starting a run is potentially billable work and an external repository write. Scheduling enables future work; cancellation mutates a pending/running run. A diagnostic request alone does not authorize any of these writes.
+`insights agent` requires **CLI v0.354.0 or later** and works against the repository connected to a database. Runs belong to an organization/database/branch and review slow queries or implement schema recommendations, opening a pull request with their changes. List/show operations read state; starting a run is potentially billable work and an external repository write. Scheduling enables future work; cancellation mutates a pending/running run. A diagnostic request alone does not authorize any of these writes.
 
 ```bash
 # Read-only discovery; list commands are the runnable parents, without a list child
@@ -179,6 +179,8 @@ pscale insights agent schedules update <database> <branch> slow_query --org <org
   --enabled=false --format json
 pscale insights agent schedules <database> <branch> --org <org> --format json
 ```
+
+Always use `--enabled=true` or `--enabled=false` with `=`. With all three required positionals supplied, `--enabled false` sets enabled to **true** and leaves `false` as an extra positional argument; the CLI accepts and ignores that extra argument, so this form can enable recurring work instead of disabling it.
 
 Schedule update requires at least one setting; omitted settings keep their current value. `--enabled=false` is an explicit write, not the effect of omission. Frequencies are `day`, `week`, `month`; weekly day is 0 (Sunday)–6, monthly day 1–31 (shorter months use their last day). Disabling a schedule is distinct from cancelling an active run. Read back the schedule and `next_run_at`; do not infer server defaults for a new schedule.
 

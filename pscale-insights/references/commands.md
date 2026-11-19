@@ -467,6 +467,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale insights parent and query/recommendation updates
 
+Historical parent capture retained for provenance: the v0.327.0 parent synopsis below predates `insights agent`; use the v0.354.0 parent capture at the top of this file for the current command inventory. The query/recommendation captures retain their stated provenance.
+
 All help fences in this section are exact output from the official, checksum-verified PlanetScale CLI v0.327.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
 ```text

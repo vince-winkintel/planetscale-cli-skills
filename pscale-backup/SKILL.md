@@ -100,9 +100,11 @@ Restoring creates a new branch and can incur capacity cost. Confirm the source b
 
 ### PostgreSQL restore storage performance
 
+These restore performance flags require **CLI v0.354.0 or later**; this minimum does not apply to older backup/branch operations or storage-size flags.
+
 For a PostgreSQL backup restore, optional `--storage-iops <integer>` and `--storage-throughput <integer>` set storage IOPS and throughput in **MiB/s** on the new branch. Either flag can be supplied alone. Omitted fields are not sent; explicit zero is sent and is not an omission/default request. The CLI does not enforce numeric service limits here; confirm supported values for the target size/region instead of assuming test/example values are minima or defaults. These flags are rejected for Vitess/MySQL and Neki, including an explicitly supplied zero.
 
-Inspect the database kind, source branch/backup and recovery suitability, target name (must be new), engine-filtered cluster sizes, and requested storage values. Obtain explicit approval for the exact organization/database, backup or recovery point, new branch, sizing and capacity cost before creation. Use `--org` explicitly. After an ambiguous response, inspect the target before retrying; a returned branch is provisioning until readiness is verified. See [the storage compatibility and source contract](references/commands.md#postgresql-restore-storage-contract).
+Inspect the database kind, source branch/backup and recovery suitability, target name (must be new), engine-filtered cluster sizes, and requested storage values. Obtain explicit approval for the exact organization/database, backup, new branch, sizing and capacity cost before creation. Use `--org` explicitly. After an ambiguous response, inspect the target before retrying; a returned branch is provisioning until readiness is verified. See [the storage compatibility and source contract](references/commands.md#postgresql-restore-storage-contract).
 
 ```bash
 # After approval for this PostgreSQL restore, new branch, size, IOPS/throughput and cost

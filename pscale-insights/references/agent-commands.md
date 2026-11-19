@@ -25,11 +25,13 @@ Creation requires fingerprint/keyspace flags together, requires one selector mod
 
 Schedule settings:
 
-- `--enabled=true|false` explicitly sets enabled state.
+- `--enabled=true|false` explicitly sets enabled state. Always use `--enabled=true` or `--enabled=false` with `=`. With all three required positionals supplied, `--enabled false` sets enabled to **true** and leaves `false` as an extra positional argument; the CLI accepts and ignores that extra argument, so this form can enable recurring work instead of disabling it.
 - `--frequency day|week|month` sets recurrence.
 - `--time HH:MM` is local time in `--time-zone <IANA-zone>` (for example `UTC` or `America/New_York`).
 - `--day-of-week 0..6` selects Sunday through Saturday for weekly recurrence; explicit zero is meaningful.
 - `--day-of-month 1..31` selects the monthly day; shorter months run on their last day.
+
+The boolean parsing follows [pflag v1.1.0 boolean defaults](https://github.com/spf13/pflag/blob/v1.1.0/bool.go#L59-L65) and [long-flag parsing](https://github.com/spf13/pflag/blob/v1.1.0/flag.go#L1024-L1034). The pinned CLI uses [minimum-only required arguments](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmdutil/cmdutil.go#L127-L143) and reads only the first three positionals in [schedule update](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/insights/agent_schedule_update.go#L37-L51).
 
 Only changed settings are sent as pointer fields; omission preserves existing values, including when flag help shows a false/zero default. Update creates or changes the run-type schedule. Do not infer server-side new-schedule defaults from Go flag defaults. At least one of the six settings is required; value/range/time-zone validity is left to the service beyond CLI type parsing. Confirm the whole intended schedule and read back `enabled`, recurrence, local time/time zone and `next_run_at`. Scheduled slow-query runs use queries recorded over the last 24 hours; schema-recommendation runs use the branch's open recommendations. No targets means the run is skipped. Disabling future scheduling does not cancel an active run.
 

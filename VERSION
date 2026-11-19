@@ -2,10 +2,10 @@
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
-- PlanetScale CLI v0.354.0
+- PlanetScale CLI v0.354.0 — unreleased candidate (package 1.0.42)
   - Reviewed all eight published release items and all 21 changed paths in `v0.353.0...v0.354.0` at immutable commit `48817e75a58151e931cf7dfc792f919c837858b5`; supplied parent verification checks all 907 source blobs against the official Git tree.
   - Extended the existing Insights module with branch-scoped agent run list/create/show/cancel and schedule list/update; documented exact options, filters, omission semantics, target limits, JSON versus human/CSV output, feature availability, and explicit approval for potentially billable repository-changing or recurring work. The final schedule-update fix uses a one-row list for human/CSV and preserves a JSON object.
-  - Added PostgreSQL-only branch backup/PITR and backup-restore storage IOPS/throughput guidance, engine/source/target constraints, independent omitted versus explicit values, lack of client numeric range guarantees, capacity approval, and readiness verification. Actual new-feature minima and immutable source links live in selectively installed references; operational skills stay version-neutral.
+  - Added PostgreSQL-only branch backup/PITR and backup-restore storage IOPS/throughput guidance, engine/source/target constraints, independent omitted versus explicit values, lack of client numeric range guarantees, capacity approval, and readiness verification. Safety-relevant feature minima are retained inline; detailed immutable source contracts live in selectively installed references.
   - Reviewed pgx/puddle and pflag dependency updates (the latter changes captured boolean help to `[=true|false]`), Ruby setup and zizmor CI bumps, and upstream AGENTS examples as data. No additional runtime/auth/security-gate, test, workflow, or automation changes are justified.
   - Parent supplied 56 full checksum-bound official help/version captures including aliases. Updated complete affected help and parent/root inventory with trailing horizontal terminal padding normalization only; retained historical provenance and unchanged capture attribution.
   - Official macOS arm64 archive SHA-256 `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256 `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`.
