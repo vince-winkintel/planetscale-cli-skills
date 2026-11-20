@@ -32,6 +32,10 @@ Logout deliberately calls the stored-token loader even when service-token creden
 
 Logout is a credential mutation, not a diagnostic probe. Require explicit authorization for the intended session and explain local deletion versus remote revocation before proceeding. Do not operate system keyring tools or dialogs, inspect secrets, or change auth/runtime scripts to work around a prompt or error. For verification use only an authorized read-only check after the user has completed required credential interactions.
 
+## Service-token creation compatibility
+
+For the standalone auth skill's CI setup example, `service-token create --cidrs` requires **PlanetScale CLI v0.355.0 or later**; existing create name/TTL and authentication commands keep their earlier compatibility. Check installed help and stop if restrictions cannot be expressed; do not silently create an unrestricted token. [Create and integer TTL handling](https://github.com/planetscale/cli/blob/00631d2b78af4f51767815c83dfc3b96d1525442/internal/cmd/token/create.go), [CIDR normalization](https://github.com/planetscale/cli/blob/00631d2b78af4f51767815c83dfc3b96d1525442/internal/cmd/token/update.go), and [effective flag fallback](https://github.com/planetscale/cli/blob/00631d2b78af4f51767815c83dfc3b96d1525442/internal/cmd/root.go#L481-L577) are immutable source contracts. Create trims and drops blank CIDR entries; effective omission or an empty normalized list leaves the token unrestricted and requires explicit approval. Nonempty environment/user-config values can supply omitted name, TTL, or CIDRs; do not dump them to inspect settings. Create TTL is integer seconds, with zero/omission omitted from the request; `never` is not valid. Creation still requires exact-target/scope approval, dependency checks, user-controlled secret delivery and safe metadata/access read-back under the skill's local gates.
+
 ## Capture provenance
 
 Except for the root help fence with its newer adjacent capture note, complete help fences below were captured by the parent from the official checksum-verified PlanetScale CLI v0.353.0 macOS arm64 binary, in a credential-free environment with network denied. Only trailing horizontal terminal padding is removed; no spelling, punctuation, wrapping, or content is rewritten. These help examples are upstream reference text, not authorization to perform mutations.
@@ -42,7 +46,11 @@ Except for the root help fence with its newer adjacent capture note, complete he
 
 ## pscale --help
 
-Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
+Superseded root capture attribution (the following fence is newer):
+
+> Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
+
+Complete root help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.355.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `3082dd232de99fa55dfd5621343a6fe9ddb2848a1a7265053c886f5760adf246`; binary SHA-256: `1c957db14d7e18e7201e4cf50ce453f610c732ba838be4e353be4971af48896e`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
 
 ```text
 pscale is a CLI for communicating with PlanetScale's API.
