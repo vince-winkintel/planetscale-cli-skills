@@ -1,6 +1,15 @@
-1.0.42
+1.0.43
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- PlanetScale CLI v0.355.0 — unreleased candidate (package 1.0.43)
+  - Reviewed all four published release items and all nine changed paths in `v0.354.0...v0.355.0` at immutable commit `00631d2b78af4f51767815c83dfc3b96d1525442`; supplied parent verification checks all 908 source blobs against the official Git tree.
+  - Added service-token create/update IP restrictions, complete-list replacement, effective environment/user-config fallback, trimming/empty normalization, omitted versus explicit-empty semantics, unrestricted creation, widening/removal approval, dependent-egress checks, secret-delivery gates and read-back. List/show/create/duplicate/update CIDR output and safe-detail versus original-model secret handling are documented.
+  - Added duplicate integer TTL semantics (zero/omission omitted; negative values not locally rejected; no string `never`), expiry verification, and the server expectation of copied CIDRs without claiming client enforcement or copied grants/expiry. Existing duplicate/update minima stay at v0.353.0; only new CIDR behavior and duplicate TTL require v0.355.0, in selectively installed references.
+  - Reviewed the merge release item and all upstream test/model changes; no additional runtime/auth/security-gate, test, workflow, or automation changes are justified.
+  - Parent supplied 12 complete checksum-bound credential-free, network-denied help/version captures. Replaced all ten service-token help fences and the root inventory with current full captures; only trailing horizontal terminal padding normalized. Historical attribution remains explicit.
+  - Official macOS arm64 archive SHA-256 `3082dd232de99fa55dfd5621343a6fe9ddb2848a1a7265053c886f5760adf246`; binary SHA-256 `1c957db14d7e18e7201e4cf50ce453f610c732ba838be4e353be4971af48896e`.
+  - Proposed package 1.0.43, unpublished. This local documentation refresh performs no credential, live resource, installation, publication, or external-write operations. The inherited audit-help denied-attempt export warning remains a separate install blocker; runtime scripts/tests/security gates are unchanged.
 
 - PlanetScale CLI v0.354.0 — unreleased candidate (package 1.0.42)
   - Reviewed all eight published release items and all 21 changed paths in `v0.353.0...v0.354.0` at immutable commit `48817e75a58151e931cf7dfc792f919c837858b5`; supplied parent verification checks all 907 source blobs against the official Git tree.

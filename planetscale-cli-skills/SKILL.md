@@ -64,7 +64,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 
 - Directory-local `.pscale.yml` files are project configuration, not trusted credential configuration. The CLI accepts only `org`, `database`, and `branch` from them and warns while ignoring keys such as API endpoints or tokens.
 - Stored credentials load only when needed; help/version/skill discovery do not prove authentication. Route auth checks, migration errors, explicit-token precedence, and logout to `pscale-auth`. Logout can delete unreadable local credentials without revoking them remotely and still needs authorization for the intended session; do not operate a keyring or inspect token files.
-- Route service-token duplication and name/expiry updates to `pscale-service-token`. Require exact-target authorization and least privilege. Duplicate returns a secret-bearing response; never expose or capture it in agent output. Update does not rotate the secret or change ID/grants. Inspect current metadata/access and read back approved changes.
+- Route service-token duplication and name/expiry/IP restriction updates to `pscale-service-token`. Require exact-target authorization and least privilege. Duplicate returns a secret-bearing response; never expose or capture it in agent output. Update does not rotate the secret or change ID/grants. Inspect current metadata/access and read back approved changes.
 - Keep API URLs and credentials in the user config, environment/secret manager, or explicit approved flags. Never commit them to a repository-local config.
 - `pscale api` follows cross-host redirects without forwarding authentication or caller-supplied headers. Even with this protection, pass secret-bearing headers only to an explicitly verified API host and do not expose them in logs.
 - When `--format json` is active, raw API error codes are preserved in `issues[0].code` instead of being collapsed to `COMMAND_FAILED`. Branch automation should branch on that exact nested code when present.
@@ -199,9 +199,11 @@ pscale deploy-request create <database> <feature-branch>
 
 Management requires approved user/API-token authentication, not service-token authentication; do not silently switch credentials. Create/duplicate require explicit approval for the organization, operation, name/expiry and access scope, plus a user-controlled secret-delivery mechanism that keeps the response out of agent output; stop if none is available. Never display or store returned token values in chat, logs, evidence, temporary files, or this repository. The user provisions the response directly into approved CI secrets; verify safe metadata and access without exposing secrets.
 
+Before creation, approve the exact organization, token name, complete CIDR list and positive integer TTL, check dependent automation egress, and confirm installed flag support. Create without effective CIDRs is unrestricted; empty/whitespace-only CIDRs normalize to no restrictions. Unrestricted creation requires explicit approval. Check `PLANETSCALE_NAME`, `PLANETSCALE_TTL`, `PLANETSCALE_CIDRS` and user-config defaults without dumping values. Widening or removing restrictions needs separate approval. Read back the new ID with `show` and `show-access` to verify CIDRs, expiry and grants before use. Create/duplicate TTL does not accept `never`; zero/omission sends no TTL. Route full omission, normalization, duplicate-copy expectations and compatibility details to the `pscale-service-token` skill.
+
 ```bash
 # Only through the approved user-controlled secret-delivery mechanism above
-pscale service-token create --org <org>
+pscale service-token create --name <approved-name> --cidrs <approved-ip-or-cidr-list> --ttl <approved-positive-seconds> --org <org>
 
 # User provisions PLANETSCALE_SERVICE_TOKEN_ID and PLANETSCALE_SERVICE_TOKEN
 # directly into CI secrets; CI injects them without agent-side token handling.
