@@ -23,7 +23,7 @@ Service-token management requires approved user/API-token authentication; the co
 
 `duplicate <id> --name <approved-name> --ttl <approved-positive-seconds>` returns a new secret-bearing token response. Create/duplicate TTL is an integer in seconds: omission or zero omits TTL, negative nonzero values are sent without positivity validation, and `never`/duration strings are invalid. Use a positive approved lifetime and verify actual expiry. `update <id>` accepts `--name`, `--ttl`, and/or `--cidrs`; it does not rotate the secret or change ID/grants. Update alone accepts integer seconds or literal `never` to remove expiry; removing or extending expiry needs explicit approval.
 
-Effectively omitted fields remain unchanged on update: before relying on omission, confirm that `PLANETSCALE_NAME`, `PLANETSCALE_TTL`, `PLANETSCALE_CIDRS` and matching user-config `name`, `ttl`, `cidrs` keys do not supply them. Explicit flags take precedence; nonempty inherited values count as supplied, including duplicate's required name. `PLANETSCALE_TTL=never` can remove expiry during a name-only update; inherited CIDRs can replace restrictions. Do not print config files or environment values; stop if effective settings cannot be confirmed safely. Do not infer duplicate grant/expiry behavior or use update as rotation. Read the [command reference](references/commands.md) for compatibility minima, exact request/output semantics, and read-back requirements.
+Effectively omitted fields remain unchanged on update: before relying on omission, confirm that `PLANETSCALE_NAME`, `PLANETSCALE_TTL`, `PLANETSCALE_CIDRS` and matching user-config `name`, `ttl`, `cidrs` keys do not supply them. Explicit flags take precedence; nonempty inherited values count as supplied, including duplicate's required name. CIDR user config must be a scalar string such as `cidrs: "192.0.2.0/24,198.51.100.1/32"`; a YAML sequence is silently ignored by flag presetting. Pass approved restrictions explicitly with `--cidrs` and read back the result; a nonempty config key alone is not proof they were applied. `PLANETSCALE_TTL=never` can remove expiry during a name-only update; inherited CIDRs can replace restrictions. Do not print config files or environment values; stop if effective settings cannot be confirmed safely. Do not infer duplicate grant/expiry behavior or use update as rotation. Read the [command reference](references/commands.md) for compatibility minima, exact request/output semantics, and read-back requirements.
 
 ### IP restriction approval and read-back
 
@@ -35,17 +35,19 @@ Duplicate has no CIDR-selection flag. The server is expected to copy CIDRs, but 
 
 Never display or store returned token values in chat, logs, evidence, temporary files, or this repository. Create/duplicate require a user-controlled secret-delivery mechanism that keeps the response out of agent output; stop if none is available. Examples below describe only previously authorized workflows. Inspect metadata with `show` and grants with `show-access`, and verify the result after an approved mutation without exposing secrets.
 
+Use human or JSON output for create/duplicate/show/update; confirm the effective format before proceeding. CSV fails after the API call, so a write may have succeeded despite the error. Follow the reconciliation guidance below, not an automatic retry.
+
 ## Common Commands
 
 ```bash
 # Create only through the approved user-controlled secret-delivery mechanism
 pscale service-token create --name <approved-name> --cidrs <approved-ip-or-cidr-list> --ttl <approved-positive-seconds> --org <org>
 
-# Duplicate with explicitly approved effective TTL omission and secret-safe delivery
-pscale service-token duplicate <id> --name <approved-name> --org <org>
-
 # Duplicate only after scope/expiry approval and with secret-safe delivery
 pscale service-token duplicate <id> --name <approved-name> --ttl <approved-positive-seconds> --org <org>
+
+# Duplicate only after scope approval, with explicitly approved effective TTL omission and secret-safe delivery
+pscale service-token duplicate <id> --name <approved-name> --org <org>
 
 # Update only after name/expiry approval and effective-config checks above
 # TTL is integer seconds or never; never requires non-expiring-token approval
@@ -132,9 +134,11 @@ pscale service-token show <token-id> --org <org> --format json
 pscale service-token show-access <token-id> --org <org> --format json
 ```
 
-Human/CSV create, duplicate, list, show, and update output includes a comma-space joined `cidrs` column. JSON uses a CIDR array; show/update omit it when empty, whereas create/duplicate/list retain the API model field (including null/empty values). Human update with effective CIDRs additionally reports `IP restrictions: none` or the resulting list. Missing CIDRs are not proof of preserved restrictions: compare fresh read-back with the approved intent. List JSON serializes the original API model and can include its `token` field if returned; prefer secret-excluding `show` for metadata inspection. Create/duplicate remain secret-bearing in every format.
+Do not use `--format csv` for create, duplicate, show, or update on the documented CLI release: singleton output serialization fails after the API call. Create/duplicate may already have created a token without delivering its secret; update may already have applied the change. Stop and reconcile safe metadata/access with human or JSON output; do not retry the mutation automatically or treat a printing error as rollback. If the new ID or intended state cannot be established, stop for operator investigation; cleanup or replacement needs separate approval. `show --format csv` cannot perform read-back. Prefer JSON for exact-token read-back with `show` and `show-access`.
 
-List/show human and CSV output uses `last_used_ip` and `last_used_organization` columns. JSON uses nullable `last_used_ip` and `last_used_asn_organization`; the latter identifies the IP's network/ASN organization, not the PlanetScale organization or an access grant. Missing values display as empty strings in the table; JSON retains nulls. Do not infer misuse, current permissions, or safety to delete from last-use metadata alone. Protect IP/network metadata in incident evidence and avoid publishing it.
+Human create, duplicate, list, show, and update output includes a comma-space joined `cidrs` column. CSV works for `list`, using Go-field headers `CIDRs`, `LastUsedIP`, and `LastUsedOrganization`, not the human-table names. Use a CSV parser: multi-CIDR cells contain quoted commas, and timestamps are raw epoch milliseconds. JSON uses a CIDR array; show/update omit it when empty, whereas create/duplicate/list retain the API model field (including null/empty values). Human update with effective CIDRs additionally reports `IP restrictions: none` or the resulting list. Missing CIDRs are not proof of preserved restrictions: compare fresh read-back with the approved intent. List JSON serializes the original API model and can include its `token` field if returned; prefer secret-excluding `show` for metadata inspection. Successful human/JSON create/duplicate responses are secret-bearing; CSV failure is not a secret-filtering mechanism.
+
+List/show human output uses `last_used_ip` and `last_used_organization` columns. JSON uses nullable `last_used_ip` and `last_used_asn_organization`; the latter identifies the IP's network/ASN organization, not the PlanetScale organization or an access grant. Missing values display as empty strings in the table; JSON retains nulls. Do not infer misuse, current permissions, or safety to delete from last-use metadata alone. Protect IP/network metadata in incident evidence and avoid publishing it.
 
 Treat token IDs and grant details as sensitive operational metadata. Never ask the user to paste a service token secret into chat; use environment variables or a secrets manager.
 

@@ -109,6 +109,8 @@ Management requires approved user/API-token authentication, not service-token au
 
 Before creation, approve the exact organization, token name, complete CIDR list and positive integer TTL, check dependent automation egress, and confirm installed flag support using the [local compatibility notes](references/commands.md). Create without effective CIDRs is unrestricted; empty/whitespace-only CIDRs normalize to no restrictions. Unrestricted creation requires explicit approval. Check `PLANETSCALE_NAME`, `PLANETSCALE_TTL`, `PLANETSCALE_CIDRS` and user-config defaults without dumping values. Widening or removing restrictions needs separate approval. Read back the new ID with `show` and `show-access` to verify CIDRs, expiry and grants before use. Create/duplicate TTL does not accept `never`; zero/omission sends no TTL. Route full omission, normalization, duplicate-copy expectations and compatibility details to the `pscale-service-token` skill.
 
+CIDR user config must be a scalar string; a YAML sequence is silently ignored, potentially leaving creation unrestricted. Pass the approved restrictions explicitly. Use human or JSON for creation and JSON for exact-token read-back: CSV create output fails after the API call, potentially leaving a created token without a delivered secret, and CSV `show` fails too. Do not automatically retry a printing failure; reconcile safe metadata/access and stop for operator investigation if the result is uncertain. Cleanup or replacement requires separate approval.
+
 ```bash
 # Only through the approved user-controlled secret-delivery mechanism above
 pscale service-token create --name <approved-name> --cidrs <approved-ip-or-cidr-list> --ttl <approved-positive-seconds> --org <org>

@@ -63,6 +63,24 @@ class GuardMutationTests(unittest.TestCase):
              'pscale service-token duplicate <id> --org <org>',
              'test_common_token_mutation_examples_record_exact_argv'),
         ]
+        for path in (token, 'pscale-service-token/references/commands.md'):
+            for phrase in ('PLANETSCALE_CIDRS', '`--cidrs ""` removes all restrictions',
+                           'YAML sequence', 'scalar string'):
+                mutations.append((path, phrase, '',
+                                  'test_service_token_cidr_safeguards_are_local'))
+            mutations.append((path,
+                              'Do not use `--format csv` for create, duplicate, show, or update', '',
+                              'test_service_token_output_format_safeguards'))
+        for skill in (token, auth, umbrella):
+            mutations.append((skill, 'Unrestricted creation', 'Creation',
+                              'test_service_token_cidr_safeguards_are_local'))
+        for skill in (auth, umbrella):
+            mutations.append((skill, 'PLANETSCALE_CIDRS', '',
+                              'test_service_token_cidr_safeguards_are_local'))
+        mutations.append((token,
+                          '# Duplicate only after scope approval, with explicitly approved effective TTL omission and secret-safe delivery',
+                          '# Duplicate with explicitly approved effective TTL omission and secret-safe delivery',
+                          'test_duplicate_examples_keep_scope_and_expiry_gates'))
         # Independently installed auth/umbrella skills cannot borrow sibling gates.
         for skill in (auth, umbrella):
             mutations.append((skill, 'stop if none is available', '',
