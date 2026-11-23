@@ -76,6 +76,54 @@ class PreservedContentTests(unittest.TestCase):
         # Preserve the known bad upstream example in its audited fence, not as advice.
         self.assertIn('  pscale service-token add-access <token id> delete_databases', reference)
 
+    def test_service_token_cidr_safeguards_are_local(self):
+        for path in ('pscale-service-token/SKILL.md',
+                     'pscale-service-token/references/commands.md'):
+            with self.subTest(path=path):
+                text = (ROOT / path).read_text()
+                for phrase in ('PLANETSCALE_CIDRS', 'YAML sequence',
+                               'scalar string', 'Unrestricted creation',
+                               'explicit approval', 'egress', 'read back'):
+                    self.assertIn(phrase, text)
+                # Check authored clearing guidance, not merely captured upstream help.
+                prose = text.split('## Capture provenance', 1)[0]
+                self.assertIn('`--cidrs ""` removes all restrictions', prose)
+        for skill in ('pscale-auth', 'planetscale-cli-skills'):
+            with self.subTest(skill=skill):
+                text = (ROOT / skill / 'SKILL.md').read_text()
+                for phrase in ('PLANETSCALE_CIDRS',
+                               'Unrestricted creation requires explicit approval',
+                               'egress', 'show-access'):
+                    self.assertIn(phrase, text)
+
+    def test_service_token_output_format_safeguards(self):
+        for path in ('pscale-service-token/SKILL.md',
+                     'pscale-service-token/references/commands.md'):
+            with self.subTest(path=path):
+                text = (ROOT / path).read_text()
+                for phrase in ('Do not use `--format csv` for create, duplicate, show, or update',
+                               'after the API call', 'do not retry',
+                               '`CIDRs`', '`LastUsedIP`', '`LastUsedOrganization`',
+                               'CSV parser', 'epoch milliseconds',
+                               'Prefer JSON for exact-token read-back'):
+                    self.assertIn(phrase, text)
+                self.assertNotIn('Human/CSV create', text)
+                self.assertNotIn('human/CSV include', text)
+                self.assertNotIn('List/show human and CSV output', text)
+
+    def test_duplicate_examples_keep_scope_and_expiry_gates(self):
+        text = (ROOT / 'pscale-service-token/SKILL.md').read_text()
+        common = text.split('## Common Commands\n', 1)[1].split('\n## ', 1)[0]
+        examples = list(re.finditer(r'^pscale service-token duplicate .+$', common, re.M))
+        self.assertEqual(len(examples), 2)
+        self.assertIn('--ttl <approved-positive-seconds>', examples[0].group())
+        for example in examples:
+            gate = common[:example.start()].splitlines()[-1]
+            self.assertIn('scope', gate)
+            self.assertIn('secret-safe delivery', gate)
+        self.assertIn('explicitly approved effective TTL omission',
+                      common[:examples[1].start()].splitlines()[-1])
+
     def test_common_token_mutation_examples_record_exact_argv(self):
         import test_security_guidance as guidance
         text = (ROOT / 'pscale-service-token/SKILL.md').read_text()
