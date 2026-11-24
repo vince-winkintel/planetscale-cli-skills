@@ -2,7 +2,7 @@
 
 ## Compatibility and source
 
-The `insights agent` family and the output contracts below require **PlanetScale CLI v0.354.0 or later**. This does not raise the minimum for existing Insights query/recommendation commands. Check installed help and organization feature availability; do not invent substitute raw APIs or enable the feature after a refusal.
+Except for feedback (v0.356.0), the `insights agent` family and the original output contracts below require **PlanetScale CLI v0.354.0 or later**. This does not raise the minimum for existing Insights query/recommendation commands. Check installed help and organization feature availability; do not invent substitute raw APIs or enable the feature after a refusal.
 
 Immutable source: [agent parent and number validation](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/insights/agent.go), [run list and filters](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/insights/agent_runs.go), [create](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/insights/agent_run_create.go), [show](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/insights/agent_run_show.go), [cancel](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/insights/agent_run_cancel.go), [schedules](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/insights/agent_schedules.go), [schedule update (final one-row output)](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/cmd/insights/agent_schedule_update.go), [JSON models and requests](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/planetscale/insights_agent.go), [pagination](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/planetscale/client.go), [fingerprint/keyspace filters](https://github.com/planetscale/cli/blob/48817e75a58151e931cf7dfc792f919c837858b5/internal/planetscale/insights_tags.go). These behavior statements come from source, not live service execution.
 
@@ -45,9 +45,21 @@ JSON schedule lists are arrays; schedule update returns **one object**, not an a
 
 On not-found, inspect scope and feature availability: the database/branch or run may not exist, or Insights Agent may not be enabled for the organization. Do not enable it, start replacement work, or retry a write automatically. Treat normalized SQL, summaries, actor/repository metadata and links as potentially sensitive. Help examples below do not grant permission to execute writes.
 
+## Completed-run feedback
+
+`insights agent runs feedback <database> <branch> <number>` (also `agent run feedback`) requires **CLI v0.356.0 or later**; existing run/schedule commands retain v0.354.0. Supply explicit `--org` and required `--rating useful|not_useful`. The run number must be a positive integer, not its opaque ID. Optional `--reason` accepts only `wrong_diagnosis`, `fix_wont_work`, `too_risky`, `already_known`, `doesnt_fit`, or `other`; an empty reason is omitted. Reason is not required for `not_useful`, and the client does not forbid a valid reason with `useful`. Optional `--note` is documented as up to 2000 characters; the handler does not enforce that limit locally. Keep notes within the limit and free of secrets or unnecessary private SQL/repository details.
+
+This is a feedback write for a completed run: it sends PUT to the scoped run's `/feedback` endpoint and replaces the caller's previous feedback on repeated rating. There is no confirmation, force, or dry-run option. Inspect the exact run with `runs show`, confirm completion and the intended organization/database/branch/run number, and obtain explicit approval for the rating, reason, note, and replacement of any earlier feedback. A request to review a run is not permission to rate it. Do not invoke feedback as a probe or retry automatically after an ambiguous response.
+
+JSON returns one feedback object with `rating`, `reason`, `note`, `created_at`, and `updated_at`; human output confirms the returned rating; CSV uses a one-row feedback list. Check the response against the approved values and inspect the saved feedback on the run's dashboard page for read-back. `runs show` returns a run model without feedback fields in this version: it can confirm run identity/state, but cannot independently verify saved feedback. If dashboard read-back is unavailable, report that verification is incomplete rather than resubmitting.
+
+Immutable source: [flags, validation and output](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/insights/agent_run_feedback.go), [number validation](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/insights/agent.go), [PUT and feedback/run models](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/planetscale/insights_agent.go), [request fixture](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/planetscale/insights_agent_test.go). This is source-backed guidance, not a live service result or a new binary capture.
+
 ## Capture provenance
 
 Complete help fences below were captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary, with fresh credential-free HOME/XDG/config/cwd and network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Singular `run`/`schedule` aliases and their children were also captured and compared.
+
+The following fences retain their immutable v0.354.0 provenance. In particular, the historical `runs` parent inventory predates `feedback`; use the source-backed feedback section above for current behavior. No v0.356.0 help equality is claimed.
 
 ## pscale insights agent --help
 

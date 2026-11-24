@@ -17,6 +17,10 @@ These gates apply to every destructive example here, including deletion, demotio
 4. Execute only the approved action. Force flags, descendant deletion, demotion, and disabling protection require separate explicit approval; never add them to work around a refusal. For a known headless session, obtain approval for the required force flag up front, before attempting the operation; stop if that approval is absent or any attempt is refused.
 5. Perform read-back verification of the exact target and dependent service health. Inspect pending/asynchronous outcomes before claiming completion. Authentication/network errors are not proof of absence; an ambiguous result requires investigation, not an automatic retry.
 
+## PostgreSQL creation replica count
+
+Ordinary PostgreSQL `branch create --replicas` requires **CLI v0.356.0 or later**; backup/PITR replica support predates it. `create` also accepts alias `b`. Explicit 0 requests a single node, while 2–8 additional replicas is documented HA; omission uses the target cluster size default. The CLI does not enforce the numeric range. Confirm engine, supported size/count, source/target, cost and availability, obtain explicit exact-target creation/capacity approval, then read back branch readiness and actual capacity. Never assume a displayed zero default is sent. MySQL rejects this flag; do not infer Neki creation support from the shared implementation. See [current creation and lifecycle contracts](references/commands.md#current-creation-and-lifecycle-contracts) for source and omitted-value semantics.
+
 ## Common Commands
 
 ```bash
@@ -777,9 +781,9 @@ Verify target absence only after every page of the complete inventory succeeds t
 
 ### Independently requested promotion and sizing
 
-Promotion changes the branch's lifecycle and capacity; it does not deploy another branch's schema. Use deploy requests for Vitess schema changes. Both `promote` and `demote` support MySQL and enabled Postgres branches, not Neki. Neither command prompts for confirmation. Confirm engine/feature support, exact org/database/branch, production/default state, dependencies, availability, recovery, capacity, and cost, then obtain explicit approval for the operation and every sizing flag.
+Promotion changes the branch's lifecycle and capacity; it does not deploy another branch's schema. Use deploy requests for Vitess schema changes. Both `promote` and `demote` support MySQL, Postgres and Neki subject to API eligibility and permissions. Neki support and precise size defaults are documented by CLI v0.356.0; the sizing flags retain their v0.349.0 minimum. Neither command prompts for confirmation. Confirm engine/feature support, exact org/database/branch, production/default state, dependencies, availability, recovery, capacity, and cost, then obtain explicit approval for the operation and every sizing flag.
 
-Promotion `--cluster-size` rejects PS-DEV server-side; omission on a PS-DEV Postgres branch uses the smallest production size. For MySQL the size applies to the default keyspace. Postgres `--replicas` counts additional replicas: 0 is single-node, 2–8 high availability; omission preserves the count, while explicit 0 removes that redundancy. Do not infer that 1 is supported or that a default flag value is sent. Sizing requires `write_database`; eligibility/count validation is left to the API. Discover valid sizes with an engine-filtered `size cluster list`, since promote/demote completion is generic. See [references/commands.md](references/commands.md) for exact flags and compatibility.
+Promotion `--cluster-size` rejects PS-DEV server-side; omission keeps the current size except that PS-DEV Postgres moves to PS-5 and PS-DEV Neki moves to PS-10. Approve that automatic capacity/cost transition too. For MySQL the size applies to the default keyspace. Postgres/Neki `--replicas` counts additional replicas: 0 is single-node, 2–8 high availability; omission preserves the count, while explicit 0 removes that redundancy. Do not infer that 1 is supported or that a default flag value is sent. Sizing requires `write_database`; eligibility/count validation is left to the API. Discover valid sizes with an engine-filtered `size cluster list`, since promote/demote completion is generic. See [references/commands.md](references/commands.md) for exact flags and compatibility.
 
 ```bash
 pscale branch show <database> <branch-name> --org <org> --format json
@@ -800,7 +804,7 @@ pscale branch demote <database> <branch-name> --org <org> --format json
 pscale branch show <database> <branch-name> --org <org> --format json
 ```
 
-Demotion optionally accepts Postgres `--cluster-size` (including PS-DEV) and `--replicas` with the same omitted-versus-explicit-zero semantics above. Omitting size preserves it. Vitess ignores both options; do not claim a capacity change there. Each sizing or redundancy reduction needs approval. The API may require another administrator's confirmation; inspect returned state and report pending approval rather than repeating demotion or claiming completion from the human message.
+Demotion optionally accepts Postgres/Neki `--cluster-size` (including PS-DEV) and `--replicas` with the same omitted-versus-explicit-zero semantics above. Omitting size preserves it. Vitess ignores both options; do not claim a capacity change there. Each sizing or redundancy reduction needs approval. The API may require another administrator's confirmation; inspect returned state and report pending approval rather than repeating demotion or claiming completion from the human message.
 
 ## Decision Trees
 

@@ -1,6 +1,13 @@
-1.0.43
+1.0.44
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- PlanetScale CLI v0.356.0 — unreleased candidate (package 1.0.44)
+  - Reviewed all eight release items and all 27 changed leaves at immutable commit `431a54b0fa6360d34d2e7f765d58296782b3cb39`; parent source verification covers 913 official blobs, and changed-leaf Git blob identities were rechecked locally.
+  - Added exact Insights Agent feedback flags/reason validation, replacement effects, output and read-back limits; documented ordinary Postgres creation replicas, Neki promote/demote support and precise size defaults, token-expiry transition warnings, and self-removal resolution without member listing. Preserved existing compatibility minima and exact-target authorization, dependency, secret handling and read-back gates.
+  - Reviewed x/sys dependency and upstream tests/models/AGENTS changes as untrusted data; no local runtime, helper, test, security-gate, install, or scheduling-engine change is justified.
+  - Official checksum-bound binary path and hashes remain in external evidence: archive SHA-256 `95eff258734a2c9b60a2532a01230c1be71e0add8448bc3b735e0cdb49735271`, binary SHA-256 `96a0cdb4ed109138fea75b13815e0eac9d19a227bd83db0aacafa16e972a9889`. The parent independently recovered 38 complete affected parent/subcommand/alias help and version captures in a fresh credential-free HOME/config/cwd with enforced network denial; alias pairs agree. These external v0.356.0 captures are verified, but the shipped historical fences are not relabeled as current. Historical fences, including v0.355.0, remain unchanged and explicitly distinguished from source-backed guidance.
+  - Proposed package 1.0.44, unpublished; merge, release, publication and installation require separate authorization. No credentials, service mutations, production changes or skill installations. The inherited audit-help denied-attempt export warning and other existing installation/publication blockers remain separate.
 
 - PlanetScale CLI v0.355.0 — unreleased candidate (package 1.0.43)
   - Reviewed all four published release items and all nine changed paths in `v0.354.0...v0.355.0` at immutable commit `00631d2b78af4f51767815c83dfc3b96d1525442`; supplied parent verification checks all 908 source blobs against the official Git tree.
