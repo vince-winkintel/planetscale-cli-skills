@@ -49,17 +49,19 @@ On not-found, inspect scope and feature availability: the database/branch or run
 
 `insights agent runs feedback <database> <branch> <number>` (also `agent run feedback`) requires **CLI v0.356.0 or later**; existing run/schedule commands retain v0.354.0. Supply explicit `--org` and required `--rating useful|not_useful`. The run number must be a positive integer, not its opaque ID. Optional `--reason` accepts only `wrong_diagnosis`, `fix_wont_work`, `too_risky`, `already_known`, `doesnt_fit`, or `other`; an empty reason is omitted. Reason is not required for `not_useful`, and the client does not forbid a valid reason with `useful`. Optional `--note` is documented as up to 2000 characters; the handler does not enforce that limit locally. Keep notes within the limit and free of secrets or unnecessary private SQL/repository details.
 
+Omission means absent from effective configuration, not merely argv: before relying on an omitted rating/reason/note, confirm that `PLANETSCALE_RATING`, `PLANETSCALE_REASON`, `PLANETSCALE_NOTE` and matching user-config `rating`, `reason`, `note` keys do not supply them. Nonempty inherited values preset unchanged flags, can satisfy required rating, and can add unapproved reason/note. Explicit flags take precedence; empty inherited strings do not reliably override user config. Supply the approved rating explicitly and confirm effective reason/note without dumping environment/config or secrets; stop if they cannot be established safely. Project-scoped `.pscale.yml` accepts only org/database/branch, not these keys. See [root initialization and flag presetting](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/root.go#L481-L577).
+
 This is a feedback write for a completed run: it sends PUT to the scoped run's `/feedback` endpoint and replaces the caller's previous feedback on repeated rating. There is no confirmation, force, or dry-run option. Inspect the exact run with `runs show`, confirm completion and the intended organization/database/branch/run number, and obtain explicit approval for the rating, reason, note, and replacement of any earlier feedback. A request to review a run is not permission to rate it. Do not invoke feedback as a probe or retry automatically after an ambiguous response.
 
-JSON returns one feedback object with `rating`, `reason`, `note`, `created_at`, and `updated_at`; human output confirms the returned rating; CSV uses a one-row feedback list. Check the response against the approved values and inspect the saved feedback on the run's dashboard page for read-back. `runs show` returns a run model without feedback fields in this version: it can confirm run identity/state, but cannot independently verify saved feedback. If dashboard read-back is unavailable, report that verification is incomplete rather than resubmitting.
+JSON returns one feedback object with `rating`, `reason`, `note`, `created_at`, and `updated_at`; human output confirms the returned rating; CSV uses a one-row feedback list. Compare returned `rating`, `reason`, and `note` explicitly with the approved values (including intended absence), and inspect the saved feedback on the run's dashboard page for read-back. `runs show` returns a run model without feedback fields in this version: it can confirm run identity/state, but cannot independently verify saved feedback. If dashboard read-back is unavailable, report that verification is incomplete rather than resubmitting.
 
 Immutable source: [flags, validation and output](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/insights/agent_run_feedback.go), [number validation](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/insights/agent.go), [PUT and feedback/run models](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/planetscale/insights_agent.go), [request fixture](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/planetscale/insights_agent_test.go). This is source-backed guidance, not a live service result or a new binary capture.
 
 ## Capture provenance
 
-Complete help fences below were captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary, with fresh credential-free HOME/XDG/config/cwd and network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Singular `run`/`schedule` aliases and their children were also captured and compared.
+Except for the new `runs feedback --help` fence with its own adjacent provenance, complete help fences below were captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary, with fresh credential-free HOME/XDG/config/cwd and network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Singular `run`/`schedule` aliases and their children were also captured and compared.
 
-The following fences retain their immutable v0.354.0 provenance. In particular, the historical `runs` parent inventory predates `feedback`; use the source-backed feedback section above for current behavior. No v0.356.0 help equality is claimed.
+The historical fences retain their immutable v0.354.0 provenance. In particular, the historical `runs` parent inventory predates `feedback`; use the source-backed feedback section above and the separately attributed feedback help below for current behavior. No v0.356.0 help equality is claimed for the historical fences.
 
 ## pscale insights agent --help
 
@@ -98,6 +100,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ```
 
 ## pscale insights agent runs --help
+
+Historical inventory below: it predates `feedback`, available in CLI v0.356.0; see [completed-run feedback](#completed-run-feedback) and its [complete current help](#pscale-insights-agent-runs-feedback---help). The captured bytes and original provenance are unchanged.
 
 ```text
 List Insights Agent runs on a branch, newest first
@@ -226,6 +230,41 @@ Examples:
 Flags:
       --force[=true|false]   Cancel without confirmation
   -h, --help[=true|false]    help for cancel
+
+Global Flags:
+      --api-token string          The API token to use for authenticating against the PlanetScale API.
+      --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
+      --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
+      --debug[=true|false]        Enable debug mode
+  -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
+      --no-color[=true|false]     Disable color output
+      --org string                The organization for the current user
+      --service-token string      Service Token for authenticating.
+      --service-token-id string   The Service Token ID for authenticating.
+
+Agents: run "pscale --skill" to print the installable agent skill, "pscale agent-guide --format json" for machine-readable guidance, or "pscale help agents" to read the full guide.
+```
+
+## pscale insights agent runs feedback --help
+
+Complete feedback help below was captured from the official checksum-verified PlanetScale CLI v0.356.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `95eff258734a2c9b60a2532a01230c1be71e0add8448bc3b735e0cdb49735271`; binary SHA-256: `96a0cdb4ed109138fea75b13815e0eac9d19a227bd83db0aacafa16e972a9889`. Only trailing horizontal terminal padding is removed. Singular `run feedback --help` was captured and matches the complete plural output. These examples do not authorize feedback writes.
+
+```text
+Rate a completed Insights Agent run as useful or not useful. Rating a run
+again replaces your earlier feedback.
+
+Usage:
+  pscale insights agent runs feedback <database> <branch> <number> [flags]
+
+Examples:
+  pscale insights agent runs feedback mydb main 12 --org myorg --rating useful
+  pscale insights agent runs feedback mydb main 12 --org myorg --rating not_useful --reason too_risky --note "Drops an index we still need"
+
+Flags:
+  -h, --help[=true|false]   help for feedback
+      --note string         A note about the run, up to 2000 characters
+      --rating string       Whether the run was useful: useful or not_useful (required)
+      --reason string       Why the run was not useful: wrong_diagnosis (Wrong diagnosis), fix_wont_work (Fix wouldn’t work), too_risky (Too risky), already_known (Already knew this), doesnt_fit (Doesn’t fit our code or setup), other (Other)
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.

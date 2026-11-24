@@ -116,7 +116,7 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **org** | `pscale-org` | List, show, switch, and update organizations; manage SSO, directory sync, email domains, members, and teams |
 | **service-token / oidc-trust** | `pscale-service-token` | Create, duplicate, update name/expiry/IP restrictions, show, and manage CI/CD service tokens; inspect allowed CIDRs and nullable last-used IP/network metadata; list OIDC providers and show their claims before managing approved least-privilege trust policy |
 
-Route Postgres scheduled maintenance to `pscale-maintenance` (`branch maintenance window/event`); immediate Postgres/Neki maintenance stays in `pscale-branch`. Promotion/demotion sizing belongs to `pscale-branch`, requires engine/feature and capacity approval, and supports MySQL/Postgres/Neki subject to API eligibility. CLI v0.356.0 documents Neki support and PS-DEV promotion defaults; sizing flags retain v0.349.0 compatibility. Detach belongs to `pscale-read-only-replica`, is hidden/feature-gated, and is never automatic cleanup.
+Route Postgres scheduled maintenance to `pscale-maintenance` (`branch maintenance window/event`); immediate Postgres/Neki maintenance stays in `pscale-branch`. Promotion/demotion commands support MySQL/Postgres/Neki subject to API eligibility; sizing belongs to `pscale-branch` and requires engine/feature and capacity approval. Sizing applies to Postgres/Neki, except promotion `--cluster-size` also applies to the MySQL default keyspace. Vitess ignores promotion `--replicas` and both demotion sizing flags. Detach belongs to `pscale-read-only-replica`, is hidden/feature-gated, and is never automatic cleanup.
 
 ## Decision Trees
 

@@ -190,6 +190,8 @@ Use JSON for full objects: runs/schedules list returns an array, run create/show
 
 Feedback requires **CLI v0.356.0 or later**. `pscale insights agent runs feedback <database> <branch> <number> --org <org> --rating useful|not_useful` writes the caller's feedback and replaces any previous rating. Inspect `runs show` first, then obtain explicit approval for that exact completed run, rating, optional reason/note, and replacement. No confirmation or dry-run protects this write. Reasons are limited to `wrong_diagnosis`, `fix_wont_work`, `too_risky`, `already_known`, `doesnt_fit`, `other`; reason is optional even for `not_useful`. Keep optional notes within the documented 2000-character limit and review their privacy. Prefer JSON, verify the returned feedback fields, and read back saved feedback in the run dashboard; this version's `runs show` does not expose feedback. Stop on ambiguous results instead of repeating a write. See the self-contained [feedback contract](references/agent-commands.md#completed-run-feedback) for validation, output, and source.
 
+Before relying on omitted feedback fields, confirm that `PLANETSCALE_RATING`, `PLANETSCALE_REASON`, `PLANETSCALE_NOTE` and user-config `rating`, `reason`, `note` do not supply them. Nonempty inherited settings can satisfy required rating or add unapproved reason/note. Pass the approved rating explicitly, establish effective reason/note without dumping settings, and compare all three returned fields with the approved values, including intended absence; stop if effective settings or read-back cannot be confirmed.
+
 ## Related skills
 
 - **pscale-inspect** — point-in-time, read-only diagnostics against one database connection target
