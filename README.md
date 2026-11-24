@@ -110,7 +110,7 @@ pscale branch create my-database feature-branch --from main
 | **pscale-maintenance** | Inspect Vitess Enterprise schedules/history and Postgres windows/events; approve window changes and event rescheduling | `pscale maintenance list/show/windows`, `pscale branch maintenance window/event` |
 | **pscale-sql** | Non-interactive SQL for agents/scripts | `pscale sql --query` |
 | **pscale-metrics** | Query historical/current branch metrics and engine-aware performance reports | `pscale metrics show/instant/report` |
-| **pscale-insights** | Analyze query performance and schema recommendations; inspect Insights Agent runs/schedules and approve repository-changing runs or recurring work | `pscale insights queries/tags/errors/anomalies/recommendations`, `pscale insights agent runs/schedules` |
+| **pscale-insights** | Analyze query performance and schema recommendations; inspect Insights Agent runs/schedules and approve completed-run feedback, repository-changing runs or recurring work | `pscale insights queries/tags/errors/anomalies/recommendations`, `pscale insights agent runs/schedules` |
 | **pscale-traffic-control** | Inventory and safely manage Postgres Traffic Control budgets and matching rules | `pscale traffic-control budget list/show/create/update/delete`, `pscale traffic-control rule create/delete` |
 | **pscale-inspect** | Run point-in-time, read-only MySQL/Vitess, PostgreSQL, and Neki diagnostics against one connection target | `pscale inspect all/locks/seq-scans/bloat` |
 | **pscale-import-d1** | Import Cloudflare D1 exports into PlanetScale Postgres | `pscale import d1 lint/start/verify` |

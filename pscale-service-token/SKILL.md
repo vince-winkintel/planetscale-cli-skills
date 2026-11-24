@@ -37,6 +37,10 @@ Never display or store returned token values in chat, logs, evidence, temporary 
 
 Use human or JSON output for create/duplicate/show/update; confirm the effective format before proceeding. CSV fails after the API call, so a write may have succeeded despite the error. Follow the reconciliation guidance below, not an automatic retry.
 
+## Expiry transition
+
+CLI v0.356.0 warns on stderr when create/duplicate has effective zero or omitted TTL, and when update effectively requests `--ttl never`. This does not locally block the request: create/duplicate still omit TTL and update-to-never still sends null; omitted update TTL preserves expiry without that warning. Server policy can require expiry, so prepare a positive explicitly approved lifetime and do not bypass a refusal with omission or `never`. Existing command/flag minima remain unchanged. Inspect safe metadata/access, approve the exact token, lifetime and dependent automation impact, then verify `expires_at`, CIDRs, grants and health after any separately authorized write. See the [source-backed expiry transition](references/commands.md#expiry-transition); historical help is not a promise that non-expiring tokens remain accepted.
+
 ## Common Commands
 
 ```bash
@@ -46,6 +50,7 @@ pscale service-token create --name <approved-name> --cidrs <approved-ip-or-cidr-
 # Duplicate only after scope/expiry approval and with secret-safe delivery
 pscale service-token duplicate <id> --name <approved-name> --ttl <approved-positive-seconds> --org <org>
 
+# Legacy compatibility only if server expiry policy permits omission
 # Duplicate only after scope approval, with explicitly approved effective TTL omission and secret-safe delivery
 pscale service-token duplicate <id> --name <approved-name> --org <org>
 

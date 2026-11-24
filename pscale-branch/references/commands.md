@@ -1,3 +1,15 @@
+## Current creation and lifecycle contracts
+
+Ordinary PostgreSQL `branch create --replicas` requires **CLI v0.356.0 or later**. Existing backup/PITR replica selection is older and retains its compatibility; restore storage IOPS/throughput still require v0.354.0 and a restore selector. `create` has alias `b`. Replica count excludes the primary: explicit 0 requests one node without redundancy; help documents 2–8 for HA. Omission leaves `replicas` absent so the target cluster size default applies; it is not an explicit zero. Integer parsing does not enforce a range, so do not assume 1 or negative counts are supported. Effective inherited flags can mark the setting changed. MySQL rejects an explicitly set count. The shared non-MySQL request path can forward it for Neki, but the new create help promises PostgreSQL support only; do not infer a Neki create contract from that implementation detail.
+
+Promotion/demotion sizing flags retain their **v0.349.0** minimum. **v0.356.0 documents Neki support** and the precise promotion defaults; it does not add new promote/demote handlers or establish the earliest server enablement. Both operations support MySQL, Postgres and Neki subject to API eligibility and permissions. Promotion forbids PS-DEV; omitting size keeps current capacity except that PS-DEV Postgres moves to PS-5 and PS-DEV Neki moves to PS-10. MySQL promotion size applies to the default keyspace. Demotion permits PS-DEV and omitted size preserves it. For Postgres/Neki, omitted replicas preserve the count, explicit 0 removes redundancy, and 2–8 is documented HA. Vitess ignores promotion replicas and both demotion sizing flags. Size/replica changes require `write_database`; validation and actual defaults are server-side.
+
+Before creation, resizing, promotion or demotion, inspect fresh engine, exact org/database/branch, lifecycle/default state, sizes, pending changes, dependencies, recovery, availability and cost. Obtain explicit authorization for the exact operation and every capacity flag, including loss of redundancy and automatic PS-DEV size transitions. Neither promote nor demote has a confirmation prompt. Use explicit `--org`; never probe with a mutation. Read back `branch show`, actual size/replica counts, readiness/production state and service health; for Neki inspect `branch changes list`, profile/router/admin state as appropriate. A response or human success message alone does not establish asynchronous completion. Stop on a refusal or ambiguous result; do not retry, demote, delete, or change flags automatically.
+
+Immutable source: [create](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/branch/create.go), [create fixtures](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/branch/create_test.go), [promote](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/branch/promote.go), [demote](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/branch/demote.go), [request omission semantics](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/planetscale/branches.go), [parent groups](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/branch/branch.go). These are source-backed contracts, not live provisioning results.
+
+All help fences below retain their stated immutable historical capture provenance. The older parent grouping, restore-only create replica text and Neki exclusion in promote/demote are historical output, superseded operationally by this section; they are not v0.356.0 captures.
+
 The following complete help sections retain captures from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary: `branch maintenance`, `branch maintenance run`, `branch connections`, `branch connections top`, `branch connections kill`, `branch connections kill-transaction`, `branch vtctl`, `branch promote`, and `branch demote`. Each has its own adjacent capture note. The environment was an empty credential-free HOME/XDG/config working directory with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
 The parent `branch` fence has the newer v0.354.0 capture note below. This scoped attribution does not relabel any other fence. Earlier notes below record superseded captures where indicated; unchanged, unlabelled fences retain the legacy default defined below.
@@ -18,7 +30,7 @@ Historical section commentary (superseded only for this fence):
 
 Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
 
-Current commentary: the current parent still groups `connections` under MySQL and Postgres. The current connections help and source-backed action note below cover Neki; historical read-only restrictions are not current authorization rules.
+Historical capture commentary: this parent groups `connections` under MySQL and Postgres. The v0.356.0 source groups connections, promote and demote under MySQL, Postgres, and Neki; the source-backed action note below covers Neki. Historical read-only restrictions are not current authorization rules.
 
 ```text
 Create, delete, diff, and manage branches
@@ -141,6 +153,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ```
 
 ## pscale branch create
+
+Historical help below: its restore-only `--replicas` description is superseded by ordinary PostgreSQL creation support in CLI v0.356.0; see [current creation and lifecycle contracts](#current-creation-and-lifecycle-contracts) for effective omission and engine constraints. The captured bytes and original provenance are unchanged.
 
 Complete help below was captured by the parent from the official checksum-verified PlanetScale CLI v0.354.0 macOS arm64 binary in a fresh credential-free HOME/XDG/config/cwd with network denied. Archive SHA-256: `ef619110dec4d7714b2d858a708d15146027a7455a169b4c9d7dee48d08d5f85`; binary SHA-256: `860140c902d3bc6e5674f42db9242cb98560c3d6809214a738fe6f1e7d1907ab`. Only trailing horizontal terminal padding is removed. Captured examples are reference text, not authorization.
 
@@ -2181,7 +2195,11 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 Neki live connection kill actions, promote/demote sizing flags, and Postgres maintenance window/event commands require CLI v0.349.0 or later, plus API support/permissions. Replay remains read-only. New maintenance window/event help is in the standalone maintenance skill. Changed fences explicitly identify their v0.349.0 capture below or above; unchanged captures retain their original attribution.
 
+This minimum does not make the following historical engine/default descriptions current: CLI v0.356.0 documents Neki promotion/demotion and PS-DEV promotion to PS-5 (Postgres) or PS-10 (Neki); use [current creation and lifecycle contracts](#current-creation-and-lifecycle-contracts), retaining the older sizing-flag minimum.
+
 ## pscale branch promote
+
+Historical help below: the Neki exclusion and “smallest production size” wording are superseded by CLI v0.356.0's Neki support and explicit PS-DEV defaults (Postgres PS-5, Neki PS-10); see [current lifecycle contracts](#current-creation-and-lifecycle-contracts). The captured bytes and original provenance are unchanged.
 
 Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 
@@ -2227,6 +2245,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 ```
 
 ## pscale branch demote
+
+Historical help below: the Neki exclusion and Postgres-only sizing wording are superseded by CLI v0.356.0's Postgres/Neki sizing guidance; Vitess still ignores both sizing flags. See [current lifecycle contracts](#current-creation-and-lifecycle-contracts). The captured bytes and original provenance are unchanged.
 
 Complete help captured from the official, checksum-verified PlanetScale CLI v0.349.0 macOS arm64 binary, in an empty credential-free HOME/XDG/config working environment with `NO_COLOR=1` and `TERM=dumb`. Archive SHA-256: `1bdad82d821ab4eb65207672b38dfa063006460226715cb0937588ec671179a6`. Only terminal padding and trailing whitespace were normalized.
 

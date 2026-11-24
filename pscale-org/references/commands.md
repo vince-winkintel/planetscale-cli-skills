@@ -2,6 +2,16 @@ List, show, switch, and update organizations; manage organization SSO, members, 
 
 Unless a section says otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
+## Self-removal resolution
+
+**CLI v0.356.0** fixes `org member remove` (alias `rm`) so leaving the organization need not list members first. With explicit required `--org`, it calls `GET /v1/user`; an exact current-user ID or case-insensitive current-user email matches self and skips member listing. If current-user lookup fails or does not match, it falls back to the existing paginated member resolver. A membership ID is not the current-user ID and does not take this shortcut. This changes removal resolution, not list/show permissions or the minimum for the existing remove command.
+
+Leaving is a destructive access-control write. Confirm the current identity and exact organization, remaining administration/recovery path, access/dependency impact, and obtain explicit authorization to remove that exact identity. Another member's removal requires admin rights; the last admin cannot be removed. `--delete-passwords` and `--delete-service-tokens` must not be used for self-removal; they require separately approved cleanup when removing someone else. `--force` bypasses confirmation and needs explicit advance authorization for headless use. The client forwards cleanup flags; server rejection is not permission to retry different flags.
+
+JSON success is `result: "member removed"` with `org` and the resolved `user` ID; human output names the removed email and organization. Confirm those identifiers, then arrange independent membership read-back by an already-authorized remaining admin or approved organization UI. Losing access can prevent the departing user's own member list/show read-back. Authentication/permission failures alone do not prove removal; report verification as incomplete if independent read-back is unavailable. Do not automatically rejoin, delete credentials or retry removal.
+
+Immutable source: [self resolver](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/org/member.go), [remove flags, confirmation and output](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/org/member_remove.go), [current-user endpoint](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/planetscale/users.go), [self-removal fixture](https://github.com/planetscale/cli/blob/431a54b0fa6360d34d2e7f765d58296782b3cb39/internal/cmd/org/member_test.go). Existing help below retains its stated immutable historical provenance; this summary is source-backed, not a new binary capture.
+
 ## pscale org
 
 This help fence is exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.

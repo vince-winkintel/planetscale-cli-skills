@@ -104,6 +104,10 @@ pscale org member list --org <org> --format json
 
 Treat updates and removals as external access-control writes. `--force` on remove only skips the confirmation prompt; it is not approval. Do not use `--delete-passwords` or `--delete-service-tokens` when removing yourself.
 
+### Leaving the organization
+
+CLI v0.356.0 resolves self-removal via the current-user endpoint before member listing: exact user ID or case-insensitive current email skips listing; failed/nonmatching lookup falls back to the member resolver. This fixes leaving without member-list permission, not permission to remove other users. `org member remove` and alias `rm` still require explicit `--org`; the last admin cannot leave. Confirm identity, organization, access loss, remaining administration and recovery, and obtain explicit exact-scoped removal approval. Never use password/service-token cleanup flags on self-removal. Headless `--force` requires separate advance approval. Verify the returned organization/user ID and arrange independent read-back by an authorized remaining admin or approved UI, since the departed user can lose list/show access. An access error alone is not verification. See the [self-removal contract](references/commands.md#self-removal-resolution).
+
 ### Update organization settings
 
 `pscale org update` sends only flags explicitly supplied. It can change billing email, identity-provider-managed-role behavior, and billing spend alerts. These are organization-wide settings; confirm the exact target organization and proposed diff, and obtain explicit approval before running the update.
