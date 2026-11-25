@@ -1,6 +1,6 @@
 ---
 name: pscale-org
-description: List, show, switch, update PlanetScale organizations, manage organization SSO and directory sync, and inspect or manage organization members and teams. Use when managing multiple organizations, switching between accounts, viewing organization details, enabling/configuring/disabling SSO, verifying SSO email domains, enabling/disabling directory sync, changing billing email/spend alerts/IdP-managed roles, listing members, showing a member by email or user ID, updating member roles, removing members, creating/updating/deleting teams, adding/removing team members, or troubleshooting organization access. Triggers on org, organization, switch org, list orgs, org update, organization SSO, SSO domain, domain verify, directory sync, spend alert, billing email, IdP roles, idp-sso-managed-roles, org member, organization member, member role, remove member, org team, team member.
+description: Use when listing, showing, switching or updating PlanetScale organizations; managing SSO, directory sync, domains, billing email, spend alerts or IdP-managed roles; inspecting or managing members, teams and custom roles; binding custom role slugs to members; or troubleshooting organization access. Triggers on pscale org, organization, SSO, directory sync, org member, org team, custom-role, custom-roles, permissions, member role, idp-sso-managed-roles.
 ---
 
 # pscale org
@@ -82,7 +82,7 @@ pscale org member show <email-or-user-id> --org <org> --format json
 
 ### Update or remove members
 
-Only organization admins can update another member's role or remove someone else. Nobody can change their own role. A member can remove themselves from the organization, but the last admin cannot be removed. Assignable roles are `admin`, `member`, and `analyst`.
+Only organization admins can update another member's role or remove someone else. Nobody can change their own role. A member can remove themselves from the organization, but the last admin cannot be removed. Assignable roles are built-in `admin`, `member`, `analyst`, or a custom-role slug (custom-role support requires CLI v0.357.0). Inspect the exact custom role before binding; flag acceptance does not validate the slug or grant permission.
 
 ```bash
 # Inspect the target first
@@ -107,6 +107,10 @@ Treat updates and removals as external access-control writes. `--force` on remov
 ### Leaving the organization
 
 CLI v0.356.0 resolves self-removal via the current-user endpoint before member listing: exact user ID or case-insensitive current email skips listing; failed/nonmatching lookup falls back to the member resolver. This fixes leaving without member-list permission, not permission to remove other users. `org member remove` and alias `rm` still require explicit `--org`; the last admin cannot leave. Confirm identity, organization, access loss, remaining administration and recovery, and obtain explicit exact-scoped removal approval. Never use password/service-token cleanup flags on self-removal. Headless `--force` requires separate advance approval. Verify the returned organization/user ID and arrange independent read-back by an authorized remaining admin or approved UI, since the departed user can lose list/show access. An access error alone is not verification. See the [self-removal contract](references/commands.md#self-removal-resolution).
+
+### Manage custom roles
+
+Use `org custom-role list/show` with explicit `--org` to discover exact slugs and full permission objects before writes. CLI v0.357.0 adds create/update/delete and member binding by slug; IDs and display names are not slug substitutes. Permission updates replace the complete set and must include `show_organization`; validation is server-side. Root initialization can supply unset flags from `PLANETSCALE_*` environment or user configuration, so omitted argv does not prove a field is omitted. Inspect effective nonsecret name/description/permissions/force values and neutralize unapproved defaults before approval; stop if the exact write cannot be established. Inspect existing member bindings and IdP role management, obtain explicit approval for every exact role/permission or member-binding change, and preserve administration/recovery. Create/update do not prompt. Deletion `--force` needs separate advance approval. Compare fresh role and member readbacks; access errors are not proof of deletion or successful binding. See the self-contained [custom-role contract](references/custom-roles.md) for flags, pagination, explicit-empty behavior, output and verification limits.
 
 ### Update organization settings
 

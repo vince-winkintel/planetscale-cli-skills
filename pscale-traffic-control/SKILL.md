@@ -86,7 +86,7 @@ pscale traffic-control rule delete <database> <branch> <budget-id> <rule-id> \
   --org <org>
 ```
 
-Rule create also accepts `--keyspace` and repeatable `--tag`; `--kind` defaults to `match`. Each tag must contain non-empty `key` and `value`; `source` defaults to `sql`. Confirm the complete matching scope before creation. A broad or incorrect rule can affect unrelated traffic, especially under an enforced budget. Use `budget show` to verify the created/deleted rule and never infer a rule ID from a truncated display.
+Rule create also accepts `--keyspace` and repeatable `--tag`; `--kind` defaults to `match`. Each tag must contain a nonempty `key` and an explicit `value` field; omitted or empty `source` defaults to `sql`. With CLI v0.357.0, `--tag 'key=app,value='` is accepted and matches queries without that tag. Omitting `value` (`key=app`) is still rejected. Empty is not a wildcard or permission to broaden scope automatically. See the [empty-value contract](references/commands.md#explicitly-empty-tag-values). Inspect effective nonsecret `kind`, fingerprint, keyspace and tag values from argv, `PLANETSCALE_*` environment and trusted user config; root defaults can mark omitted flags changed. Neutralize unapproved noncredential defaults or stop, then obtain approval for the complete effective matching scope before creation. Do not substitute empty for omitted filters. A broad or incorrect rule can affect unrelated traffic, especially under an enforced budget. Use `budget show` to verify the created/deleted rule and never infer a rule ID from a truncated display.
 
 ## Related Skills
 

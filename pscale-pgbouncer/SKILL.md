@@ -1,11 +1,11 @@
 ---
 name: pscale-pgbouncer
-description: Manage dedicated PostgreSQL PgBouncers with PlanetScale CLI. Use when listing or inspecting dedicated poolers, creating primary or replica poolers, changing PgBouncer size, replicas, traffic target, or parameters, monitoring/canceling asynchronous resize requests, or deleting a dedicated PgBouncer. Triggers on pscale pgbouncer, dedicated PgBouncer, Postgres pooler, bouncer resize, replica pooler, PGB SKU.
+description: Manage dedicated PostgreSQL PgBouncers with PlanetScale CLI. Use when listing or inspecting dedicated poolers, creating primary or replica poolers, changing PgBouncer size, replicas, traffic target, or parameters, monitoring/canceling asynchronous resize requests, restarting a dedicated pooler or the primary local PgBouncer, tracking restart status, or deleting a dedicated PgBouncer. Triggers on pscale pgbouncer, dedicated PgBouncer, Postgres pooler, bouncer resize, replica pooler, PGB SKU.
 ---
 
 # pscale pgbouncer
 
-Manage dedicated PgBouncers for PlanetScale PostgreSQL branches. These are separate pooler services, not the local PgBouncer on port 6432 and not the `pgbouncer.*` parameters managed by `pscale branch resize`.
+Manage dedicated PgBouncers for PlanetScale PostgreSQL branches. Dedicated poolers are separate from the local PgBouncer on port 6432 and the `pgbouncer.*` parameters managed by `pscale branch resize`. Restart/status additionally accept `primary` for the primary local PgBouncer.
 
 ## Destructive-operation safety
 
@@ -78,6 +78,12 @@ pscale pgbouncer resize cancel <database> <branch> <name> \
 ```
 
 Cancellation is an operational write. Confirm the latest request is unfinished, obtain approval, cancel exactly the intended pooler, then re-run `status` and `show`.
+
+## Restart a pooler
+
+CLI v0.357.0 adds `pscale pgbouncer restart <database> <branch> <name>` and read-only `restart status <database> <branch> <name> [<restart-id>]`. Pass explicit `--org`; use `primary` only to restart/inspect the primary local PgBouncer. Inspect exact target, dependencies, active transactions, pending operations and recovery, then obtain explicit approval for connection/transaction interruption and every flag. Instances drain one at a time for up to two minutes; remaining connections close and in-flight transactions are interrupted. Failure may leave partial restarts without rollback.
+
+Restart flags are `--force`, `--wait`, and `--wait-timeout` (default 30 minutes). JSON/headless execution requires separately approved `--force`. Unset flags can inherit nonempty `PLANETSCALE_*`/user-config defaults, including `force`, `wait`, and `wait-timeout`; inspect and approve the actual values, neutralize unapproved noncredential defaults, and explicitly set approved values rather than relying on omission. Timeout stops waiting, not the server operation: preserve the returned ID and use status before considering another restart. Verify `state: succeeded` and dependent application health; a zero exit from status can still describe failure. See [restart flags, output and readback limits](references/restart.md).
 
 ## Delete a dedicated PgBouncer
 

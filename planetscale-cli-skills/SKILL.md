@@ -110,10 +110,10 @@ The PlanetScale CLI brings database branches, deploy requests, and schema migrat
 | **billing** | `pscale-billing` | Inspect invoices and manage organization payment methods with sensitive billing-data safeguards |
 | **audit-log** | `pscale-audit-log` | List audit events and export filtered authentication attempts |
 | **password** | `pscale-password` | Create, list, show, update, delete, and scope Vitess connection passwords to read-only regions; inspect and mutate Postgres/Neki roles, inherited-role pairings, and connection targets |
-| **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers |
+| **pgbouncer** | `pscale-pgbouncer` | List, inspect, create, resize, cancel, and delete dedicated PostgreSQL PgBouncers; approve dedicated/local-primary restarts and inspect restart status |
 | **dedicated-read-replica** | `pscale-read-only-replica` | List, inspect, create, resize, configure, detach with irreversible-operation approval, and delete dedicated PostgreSQL read replicas; recognize the deprecated `read-only-replica` compatibility name |
 | **webhook** | `pscale-webhook` | List, inspect, create, update, test, and delete database webhooks, including authorization headers |
-| **org** | `pscale-org` | List, show, switch, and update organizations; manage SSO, directory sync, email domains, members, and teams |
+| **org** | `pscale-org` | List, show, switch, and update organizations; manage SSO, directory sync, email domains, members, teams, custom roles and slug-based member binding |
 | **service-token / oidc-trust** | `pscale-service-token` | Create, duplicate, update name/expiry/IP restrictions, show, and manage CI/CD service tokens; inspect allowed CIDRs and nullable last-used IP/network metadata; list OIDC providers and show their claims before managing approved least-privilege trust policy |
 
 Route Postgres scheduled maintenance to `pscale-maintenance` (`branch maintenance window/event`); immediate Postgres/Neki maintenance stays in `pscale-branch`. Promotion/demotion commands support MySQL/Postgres/Neki subject to API eligibility; sizing belongs to `pscale-branch` and requires engine/feature and capacity approval. Sizing applies to Postgres/Neki, except promotion `--cluster-size` also applies to the MySQL default keyspace. Vitess ignores promotion `--replicas` and both demotion sizing flags. Detach belongs to `pscale-read-only-replica`, is hidden/feature-gated, and is never automatic cleanup.
