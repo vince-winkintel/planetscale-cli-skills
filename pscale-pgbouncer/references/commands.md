@@ -1,8 +1,12 @@
 # pscale pgbouncer command reference
 
-> All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+> Unless individually attributed otherwise, historical help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+See [restart/status](restart.md) for the current restart contract, local-primary exception, authorization and availability/readback limits. Restart and restart status are intentionally documented there as a source-backed contract, not embedded help captures here. The release audit's complete help-capture count includes external verification evidence, not only shipped fences. Unchanged historical fences below are immutable captures, not current command inventories.
 
 ## pscale pgbouncer
+
+Complete help from the official checksum-verified CLI v0.357.0 macOS arm64 binary; only trailing horizontal terminal padding removed.
 
 ```text
 Manage dedicated PgBouncers for a PostgreSQL database branch.
@@ -10,7 +14,8 @@ Manage dedicated PgBouncers for a PostgreSQL database branch.
 Dedicated PgBouncers run separately from the database nodes and provide
 connection pooling for primary or replica traffic. This is distinct from the
 local PgBouncer on port 6432 and from pgbouncer.* parameters on
-'pscale branch resize'.
+'pscale branch resize'. The one exception is 'pscale pgbouncer restart', which
+also accepts "primary" to restart the primary's local PgBouncer.
 
 This command is only available for PostgreSQL databases.
 
@@ -22,19 +27,20 @@ Available Commands:
   delete      Delete a dedicated PgBouncer
   list        List dedicated PgBouncers for a Postgres branch
   resize      Change a dedicated PgBouncer's size, replicas, target, or parameters
+  restart     Restart a PgBouncer in place
   show        Show a dedicated PgBouncer
 
 Flags:
-  -h, --help         help for pgbouncer
-      --org string   The organization for the current user
+  -h, --help[=true|false]   help for pgbouncer
+      --org string          The organization for the current user
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 

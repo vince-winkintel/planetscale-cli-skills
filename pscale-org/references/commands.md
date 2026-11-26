@@ -1,6 +1,8 @@
-List, show, switch, and update organizations; manage organization SSO, members, and teams. The complete SSO command family is documented in [`sso-commands.md`](sso-commands.md).
+List, show, switch, and update organizations; manage organization SSO, members, teams, and custom roles. The complete SSO command family is documented in [`sso-commands.md`](sso-commands.md); the custom-role and member-binding contract is in [`custom-roles.md`](custom-roles.md).
 
 Unless a section says otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+See [custom roles and member binding](custom-roles.md) for the current slug-based contract. The custom-role group and its list/show/create/update/delete leaves are intentionally documented there as a source-backed contract, not embedded help captures here. The release audit's complete help-capture count includes external verification evidence, not only shipped fences. Unchanged historical fences retain their original provenance and are not current command inventories.
 
 ## Self-removal resolution
 
@@ -14,7 +16,7 @@ Immutable source: [self resolver](https://github.com/planetscale/cli/blob/431a54
 
 ## pscale org
 
-This help fence is exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.
+Complete help from the official checksum-verified CLI v0.357.0 macOS arm64 binary; only trailing horizontal terminal padding removed.
 
 ```text
 Manage organizations
@@ -23,6 +25,7 @@ Usage:
   pscale org [command]
 
 Available Commands:
+  custom-role Manage organization custom roles
   list        List the currently active organizations
   member      List, show, update, and remove organization members
   show        Display the currently active organization
@@ -32,15 +35,15 @@ Available Commands:
   update      Update an organization's settings
 
 Flags:
-  -h, --help   help for org
+  -h, --help[=true|false]   help for org
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
@@ -127,6 +130,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale org member
 
+Complete help from the official checksum-verified CLI v0.357.0 macOS arm64 binary; only trailing horizontal terminal padding removed.
+
 ```text
 Manage organization members and their roles.
 
@@ -135,7 +140,8 @@ show, update, and remove take an email or a user id (the USER_ID column from
 
 Only organization admins can change another member's role or remove someone
 else. Nobody can change their own role. Members can still leave the organization
-themselves.
+themselves. A role is a built-in name (admin, member, analyst) or a custom
+role slug.
 
 Usage:
   pscale org member [command]
@@ -147,16 +153,16 @@ Available Commands:
   update      Update an organization member's role
 
 Flags:
-  -h, --help         help for member
-      --org string   The organization for the current user
+  -h, --help[=true|false]   help for member
+      --org string          The organization for the current user
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
 
@@ -228,27 +234,29 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## pscale org member update
 
+Complete help from the official checksum-verified CLI v0.357.0 macOS arm64 binary; only trailing horizontal terminal padding removed.
+
 ```text
 Update another member's organization role.
 
 Identify the member by email or by the USER_ID from 'org member list'.
 Only organization admins can do this. You cannot change your own role.
-Assignable roles: admin, member, analyst.
+--role is a built-in name (admin, member, analyst) or a custom role slug.
 
 Usage:
   pscale org member update <email|user-id> [flags]
 
 Flags:
-  -h, --help          help for update
-      --role string   Role to assign: admin, member, or analyst
+  -h, --help[=true|false]   help for update
+      --role string         Role to assign: a built-in name (admin, member, analyst) or a custom role slug
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --org string                The organization for the current user
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.

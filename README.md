@@ -118,10 +118,10 @@ pscale branch create my-database feature-branch --from main
 | **pscale-billing** | Inspect invoices and manage organization payment methods | `pscale billing payment-method show/update/delete`, `pscale billing invoice list/show/line-items` |
 | **pscale-audit-log** | List audit events and export authentication attempts | `pscale audit-log list/auth-attempts` |
 | **pscale-password** | Connection passwords and Postgres/Neki roles, including Vitess read-only-region credentials, Neki inherited-role pairings and router/shard targets, named Postgres replica targets, status/expiration, and metadata/IP restriction updates | `pscale password create/list/show/update`, `pscale role create/list/get/default/reset/delete/reassign` |
-| **pscale-pgbouncer** | Dedicated PostgreSQL PgBouncer lifecycle and asynchronous resizing | `pscale pgbouncer list/show/create/resize/delete` |
+| **pscale-pgbouncer** | Dedicated PostgreSQL PgBouncer lifecycle, resizing, and dedicated/local-primary restarts | `pscale pgbouncer list/show/create/resize/delete/restart`, `pscale pgbouncer restart status` |
 | **pscale-read-only-replica** | Dedicated PostgreSQL read-replica lifecycle, sizing, regions, parameters, and approved irreversible feature-gated detach | `pscale dedicated-read-replica list/show/create/update/delete/detach` |
 | **pscale-webhook** | Database webhook lifecycle, authorization headers, and test events | `pscale webhook list/show/create/update/test/delete` |
-| **pscale-org** | Switch organizations, update settings, manage SSO/directory sync/domains, and inspect or manage members/teams | `pscale org list/switch/update/sso/member/team` |
+| **pscale-org** | Switch organizations, update settings, manage SSO/directory sync/domains, and inspect or manage members/teams/custom roles | `pscale org list/switch/update/sso/member/team/custom-role` |
 | **pscale-service-token** | CI/CD authentication, approved token duplication/name/expiry/IP restriction changes, CIDR and last-used IP/network metadata, OIDC provider claim discovery, and approved trust policy | `pscale service-token create/show/duplicate/update`, `pscale oidc-trust providers list/show` |
 
 ## 🛠️ Automation Scripts

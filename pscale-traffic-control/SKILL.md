@@ -49,7 +49,7 @@ Traffic Control is a database resource guardrail. It does not replace query tuni
 ## Budget writes
 
 ```bash
-# Create in warn mode after approval; omitted numeric limits remain unlimited
+# Create in warn mode after approval; limits absent from effective config remain unlimited
 pscale traffic-control budget create <database> <branch> --org <org> \
   --name <name> \
   --mode warn \
@@ -60,7 +60,7 @@ pscale traffic-control budget create <database> <branch> --org <org> \
   --warning-threshold <0-100> \
   --format json
 
-# Update sends only flags explicitly supplied
+# Update sends effective changed fields, including environment/user-config presets
 pscale traffic-control budget update <database> <branch> <budget-id> \
   --org <org> --mode warn --format json
 
@@ -68,7 +68,7 @@ pscale traffic-control budget update <database> <branch> <budget-id> \
 pscale traffic-control budget delete <database> <branch> <budget-id> --org <org>
 ```
 
-`--name` is required on create and the default mode is `warn`. On create and update, omitted numeric flags are not sent; distinguish omission from an explicit zero. Before changing limits or mode, save the current JSON and verify that the application has a tested rollback path. Use `--force` on delete only for an already-approved non-interactive action.
+`--name` is required on create and the default mode is `warn` without overrides. On create and update, numeric flags are not sent only when absent from argv and effective environment/user configuration; distinguish true omission from an explicit zero. Root initialization can preset unset flags from `PLANETSCALE_*` environment or trusted user configuration and mark them changed: inherited `PLANETSCALE_MODE=enforce`, for example, can turn a name-only update into enforcement. Inspect effective nonsecret name, mode, capacity, rate, burst, concurrency, warning-threshold and delete-force settings; neutralize unapproved noncredential defaults with approval or stop. Never dump credential-bearing configuration or environment. Before changing limits or mode, save the current JSON and verify that the application has a tested rollback path. Obtain approval for the complete effective diff. Use `--force` on delete only for an already-approved non-interactive action.
 
 ## Rule writes
 
@@ -86,7 +86,7 @@ pscale traffic-control rule delete <database> <branch> <budget-id> <rule-id> \
   --org <org>
 ```
 
-Rule create also accepts `--keyspace` and repeatable `--tag`; `--kind` defaults to `match`. Each tag must contain non-empty `key` and `value`; `source` defaults to `sql`. Confirm the complete matching scope before creation. A broad or incorrect rule can affect unrelated traffic, especially under an enforced budget. Use `budget show` to verify the created/deleted rule and never infer a rule ID from a truncated display.
+Rule create also accepts `--keyspace` and repeatable `--tag`; `--kind` defaults to `match`. Each tag must contain a nonempty `key` and an explicit `value` field; omitted or empty `source` defaults to `sql`. With CLI v0.357.0, `--tag 'key=app,value='` is accepted and matches queries without that tag. Omitting `value` (`key=app`) is still rejected. Empty is not a wildcard or permission to broaden scope automatically. See the [empty-value contract](references/commands.md#explicitly-empty-tag-values). Inspect effective nonsecret `kind`, fingerprint, keyspace and tag values from argv, `PLANETSCALE_*` environment and trusted user config; root defaults can mark omitted flags changed. Neutralize unapproved noncredential defaults or stop, then obtain approval for the complete effective matching scope before creation. Do not substitute empty for omitted filters. A broad or incorrect rule can affect unrelated traffic, especially under an enforced budget. Use `budget show` to verify the created/deleted rule and never infer a rule ID from a truncated display.
 
 ## Related Skills
 

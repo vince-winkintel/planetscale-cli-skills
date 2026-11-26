@@ -1,6 +1,15 @@
-1.0.44
+1.0.45
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
+
+- PlanetScale CLI v0.357.0 — unreleased candidate (package 1.0.45)
+  - Independent review corrected effective-flag guidance: root initialization can preset environment/user-config values and mark omitted flags changed. Role permission replacement, member role, restart force/wait/timeout and traffic-rule filters now require explicit nonsecret effective-value preflight and neutralization of unapproved noncredential defaults; no runtime changes.
+  - Reviewed all 12 release items and all 31 changed source leaves at immutable commit `46b515a6b57b73fb73c2d45e36ede5e08e89d161`; supplied verification covers 920 official source blobs.
+  - Added slug-based custom-role list/show/create/update/delete and member binding, complete permission replacement, omission/empty distinctions, server validation and exact-target authorization/readback limits.
+  - Added PostgreSQL dedicated/local-primary PgBouncer restart/status flags, drain/transaction interruption, partial-failure and timeout behavior, status exit limits and application-health verification. Added Traffic Control explicit-empty tag matching versus missing-value rejection. New feature minima are v0.357.0; existing minima remain unchanged.
+  - Captured 48 complete root/version/affected parent/child/alias surfaces using the required credential-free, network-denied helper. Updated five affected complete help fences with trailing horizontal terminal-padding normalization only; retained historical provenance for unchanged captures. Official macOS arm64 archive SHA-256 `7f9d1e770d5948a7bfd56234940f7d076db99ac3833d005b7635eb93d3e59ac9`; binary SHA-256 `fabbfe92616c16ef7274a1c6e4980362348da7ed5546074f1b4e5a22d5cc4041`.
+  - Reviewed OAuth2/text runtime dependencies, tools x/mod, Go/container/Ruby CI changes, Oracle MySQL 8.4.13.1 image clients, release PR automation, upstream tests/models and AGENTS text as untrusted data. No local runtime/helper/test/security-gate, distribution/install or scheduling-engine changes are warranted.
+  - Unpublished documentation candidate only; no staging, commits, credentials, service mutations, installations or external writes. Parent independently reruns gates. The inherited audit-help denied-export warning and existing install/publication/security blockers remain separate.
 
 - PlanetScale CLI v0.356.0 — unreleased candidate (package 1.0.44)
   - Review consistency corrections: marked historical create/promote/demote help and the Insights run inventory beside their fences; clarified MySQL versus Postgres/Neki sizing, retained standalone auth expiry-transition safeguards, documented inherited feedback rating/reason/note and exact returned-value comparison, and disambiguated create/update CIDRs from duplicate TTL compatibility. Existing safety gates and historical capture bytes remain unchanged.

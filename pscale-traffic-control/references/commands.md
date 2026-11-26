@@ -1,6 +1,14 @@
 # `pscale traffic-control` command reference
 
-All help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+Unless individually attributed otherwise, historical help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
+
+## Explicitly empty tag values
+
+**CLI v0.357.0** permits an explicit empty tag value: `--tag 'key=app,value='` matches queries without the `app` tag. `key=app` still fails because the `value` field is missing; an empty/missing key also fails. Omitted or empty `source` defaults to `sql`; `--tag` is repeatable. This is an absent-tag match, not a wildcard, an empty-value-equality guarantee for present tags, or an omitted rule filter. The client parses fields without trimming and forwards the empty value; live matching and acceptance remain server-side.
+
+Rule creation forwards fingerprint/keyspace/tag filters when their flags are marked changed. Root initialization can preset unset flags from nonempty `PLANETSCALE_FINGERPRINT`, `PLANETSCALE_KEYSPACE`, `PLANETSCALE_TAG`, other matching environment values, or trusted user configuration, marking them changed without explicit argv. Inspect the complete effective `kind`, fingerprint, keyspace and tag filters before approval; neutralize unapproved noncredential defaults or stop. Unsetting environment overrides alone does not remove user-config defaults. Do not use an empty filter as an omission substitute, dump credentials, or change configuration without approval. This new tag-value behavior does not otherwise change existing filter or budget numeric contracts. Inspect the full budget/rules, engine, application traffic and exact matching scope first. Obtain explicit approval for organization/database/branch/budget, the absent-tag scope and enforcement/rejection impact; preserve rollback. After any approved rule write, read `budget show` JSON and compare the returned rule ID, kind, filters and tag key/value/source, then verify observed application impact. Client help is not proof of live matching behavior.
+
+Source: [root environment/config flag initialization](https://github.com/planetscale/cli/blob/46b515a6b57b73fb73c2d45e36ede5e08e89d161/internal/cmd/root.go), [parser and flags](https://github.com/planetscale/cli/blob/46b515a6b57b73fb73c2d45e36ede5e08e89d161/internal/cmd/trafficcontrol/rule_create.go), [empty versus missing fixtures](https://github.com/planetscale/cli/blob/46b515a6b57b73fb73c2d45e36ede5e08e89d161/internal/cmd/trafficcontrol/rule_create_test.go).
 
 ## `pscale traffic-control`
 
@@ -249,6 +257,8 @@ Agents: run "pscale --skill" to print the installable agent skill, "pscale agent
 
 ## `pscale traffic-control rule create`
 
+Complete help from the official checksum-verified CLI v0.357.0 macOS arm64 binary; only trailing horizontal terminal padding removed.
+
 ```text
 Create a traffic rule on a budget
 
@@ -257,18 +267,18 @@ Usage:
 
 Flags:
       --fingerprint string   SQL fingerprint to match
-  -h, --help                 help for create
+  -h, --help[=true|false]    help for create
       --keyspace string      Keyspace to match
       --kind string          Kind of rule (default "match")
-      --tag stringArray      Tag in the format key=<key>,value=<value>,source=<source> (repeatable)
+      --tag stringArray      Tag in the format key=<key>,value=<value>,source=<source> (repeatable). An empty value (value=) matches queries without the tag.
 
 Global Flags:
       --api-token string          The API token to use for authenticating against the PlanetScale API.
       --api-url string            The base URL for the PlanetScale API. (default "https://api.planetscale.com/")
       --config string             Config file (default is $HOME/.config/planetscale/pscale.yml)
-      --debug                     Enable debug mode
+      --debug[=true|false]        Enable debug mode
   -f, --format string             Show output in a specific format. Possible values: [human, json, csv] (default "human")
-      --no-color                  Disable color output
+      --no-color[=true|false]     Disable color output
       --org string                The organization for the current user
       --service-token string      Service Token for authenticating.
       --service-token-id string   The Service Token ID for authenticating.
