@@ -1,6 +1,6 @@
 ---
 name: pscale-org
-description: Use when listing, showing, switching or updating PlanetScale organizations; managing SSO, directory sync, domains, billing email, spend alerts or IdP-managed roles; inspecting or managing members, teams and custom roles; binding custom role slugs to members; or troubleshooting organization access. Triggers on pscale org, organization, SSO, directory sync, org member, org team, custom-role, custom-roles, permissions, member role, idp-sso-managed-roles.
+description: Use when listing, showing, switching or updating PlanetScale organizations; managing SSO, directory sync, domains, billing email, spend alerts or IdP-managed roles; inspecting or managing members, teams and custom roles; removing members; adding/removing team members; binding custom role slugs to members; or troubleshooting organization access. Triggers on pscale org, organization, switch org, list orgs, org update, SSO, SSO domain, domain verify, directory sync, spend alert, billing email, org member, member role, remove member, org team, team member, custom-role, custom-roles, custom role permissions, org role permissions, idp-sso-managed-roles.
 ---
 
 # pscale org
@@ -110,11 +110,11 @@ CLI v0.356.0 resolves self-removal via the current-user endpoint before member l
 
 ### Manage custom roles
 
-Use `org custom-role list/show` with explicit `--org` to discover exact slugs and full permission objects before writes. CLI v0.357.0 adds create/update/delete and member binding by slug; IDs and display names are not slug substitutes. Permission updates replace the complete set and must include `show_organization`; validation is server-side. Root initialization can supply unset flags from `PLANETSCALE_*` environment or user configuration, so omitted argv does not prove a field is omitted. Inspect effective nonsecret name/description/permissions/force values and neutralize unapproved defaults before approval; stop if the exact write cannot be established. Inspect existing member bindings and IdP role management, obtain explicit approval for every exact role/permission or member-binding change, and preserve administration/recovery. Create/update do not prompt. Deletion `--force` needs separate advance approval. Compare fresh role and member readbacks; access errors are not proof of deletion or successful binding. See the self-contained [custom-role contract](references/custom-roles.md) for flags, pagination, explicit-empty behavior, output and verification limits.
+The entire `org custom-role` group (`list`, `show`, `create`, `update`, `delete`) and member binding by custom-role slug require CLI v0.357.0. Use `org custom-role list/show` with explicit `--org` to discover exact slugs and full permission objects before writes; IDs and display names are not slug substitutes. Permission updates replace the complete set and must include `show_organization`; validation is server-side. Root initialization can supply unset flags from `PLANETSCALE_*` environment or user configuration, so omitted argv does not prove a field is omitted. Inspect effective nonsecret name/description/permissions/force values and neutralize unapproved defaults before approval; stop if the exact write cannot be established. Inspect existing member bindings and IdP role management, obtain explicit approval for every exact role/permission or member-binding change, and preserve administration/recovery. Create/update do not prompt. Deletion `--force` needs separate advance approval. Compare fresh role and member readbacks; access errors are not proof of deletion or successful binding. See the self-contained [custom-role contract](references/custom-roles.md) for flags, pagination, explicit-empty behavior, output and verification limits.
 
 ### Update organization settings
 
-`pscale org update` sends only flags explicitly supplied. It can change billing email, identity-provider-managed-role behavior, and billing spend alerts. These are organization-wide settings; confirm the exact target organization and proposed diff, and obtain explicit approval before running the update.
+`pscale org update` selects update inputs from effective changed flags, not argv alone: root initialization can preset unset flags from `PLANETSCALE_*` environment or trusted user configuration and mark them changed. It can change billing email, identity-provider-managed-role behavior, and billing spend alerts, including the coupled effects described below. Inspect the effective nonsecret billing-email, IdP-role, spend-alert and amount settings; neutralize unapproved noncredential defaults with approval or stop. These are organization-wide settings; confirm the exact target organization and complete proposed diff, and obtain explicit approval before running the update. Never dump credential-bearing configuration or environment.
 
 ```bash
 # Optional: confirms only the locally active organization name; it does not inspect settings
@@ -224,4 +224,4 @@ pscale org switch <correct-org>
 
 ## References
 
-See `references/commands.md` for organization, member, update, and team commands. See `references/sso-commands.md` for the complete organization SSO command family.
+See `references/commands.md` for captured organization, member, update, and team help. See [references/custom-roles.md](references/custom-roles.md) for the source-backed custom-role and member-binding contract, and `references/sso-commands.md` for the complete organization SSO command family.

@@ -49,7 +49,7 @@ Traffic Control is a database resource guardrail. It does not replace query tuni
 ## Budget writes
 
 ```bash
-# Create in warn mode after approval; omitted numeric limits remain unlimited
+# Create in warn mode after approval; limits absent from effective config remain unlimited
 pscale traffic-control budget create <database> <branch> --org <org> \
   --name <name> \
   --mode warn \
@@ -60,7 +60,7 @@ pscale traffic-control budget create <database> <branch> --org <org> \
   --warning-threshold <0-100> \
   --format json
 
-# Update sends only flags explicitly supplied
+# Update sends effective changed fields, including environment/user-config presets
 pscale traffic-control budget update <database> <branch> <budget-id> \
   --org <org> --mode warn --format json
 
@@ -68,7 +68,7 @@ pscale traffic-control budget update <database> <branch> <budget-id> \
 pscale traffic-control budget delete <database> <branch> <budget-id> --org <org>
 ```
 
-`--name` is required on create and the default mode is `warn`. On create and update, omitted numeric flags are not sent; distinguish omission from an explicit zero. Before changing limits or mode, save the current JSON and verify that the application has a tested rollback path. Use `--force` on delete only for an already-approved non-interactive action.
+`--name` is required on create and the default mode is `warn` without overrides. On create and update, numeric flags are not sent only when absent from argv and effective environment/user configuration; distinguish true omission from an explicit zero. Root initialization can preset unset flags from `PLANETSCALE_*` environment or trusted user configuration and mark them changed: inherited `PLANETSCALE_MODE=enforce`, for example, can turn a name-only update into enforcement. Inspect effective nonsecret name, mode, capacity, rate, burst, concurrency, warning-threshold and delete-force settings; neutralize unapproved noncredential defaults with approval or stop. Never dump credential-bearing configuration or environment. Before changing limits or mode, save the current JSON and verify that the application has a tested rollback path. Obtain approval for the complete effective diff. Use `--force` on delete only for an already-approved non-interactive action.
 
 ## Rule writes
 

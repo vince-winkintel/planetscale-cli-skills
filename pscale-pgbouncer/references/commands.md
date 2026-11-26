@@ -2,7 +2,7 @@
 
 > Unless individually attributed otherwise, historical help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
-See [restart/status](restart.md) for the current restart contract, local-primary exception, authorization and availability/readback limits. Unchanged historical fences below are immutable captures, not current command inventories.
+See [restart/status](restart.md) for the current restart contract, local-primary exception, authorization and availability/readback limits. Restart and restart status are intentionally documented there as a source-backed contract, not embedded help captures here. The release audit's complete help-capture count includes external verification evidence, not only shipped fences. Unchanged historical fences below are immutable captures, not current command inventories.
 
 ## pscale pgbouncer
 

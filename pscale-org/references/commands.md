@@ -1,8 +1,8 @@
-List, show, switch, and update organizations; manage organization SSO, members, and teams. The complete SSO command family is documented in [`sso-commands.md`](sso-commands.md).
+List, show, switch, and update organizations; manage organization SSO, members, teams, and custom roles. The complete SSO command family is documented in [`sso-commands.md`](sso-commands.md); the custom-role and member-binding contract is in [`custom-roles.md`](custom-roles.md).
 
 Unless a section says otherwise, help fences below are exact output from the official, checksum-verified PlanetScale CLI v0.324.0 macOS arm64 release binary after normalizing only trailing whitespace.
 
-See [custom roles and member binding](custom-roles.md) for the current slug-based contract. Unchanged historical fences retain their original provenance and are not current command inventories.
+See [custom roles and member binding](custom-roles.md) for the current slug-based contract. The custom-role group and its list/show/create/update/delete leaves are intentionally documented there as a source-backed contract, not embedded help captures here. The release audit's complete help-capture count includes external verification evidence, not only shipped fences. Unchanged historical fences retain their original provenance and are not current command inventories.
 
 ## Self-removal resolution
 
@@ -16,7 +16,7 @@ Immutable source: [self resolver](https://github.com/planetscale/cli/blob/431a54
 
 ## pscale org
 
-Complete help from the official checksum-verified CLI v0.357.0 macOS arm64 binary; only trailing horizontal terminal padding removed. Superseded attribution retained as history: This help fence is exact output from the official, checksum-verified PlanetScale CLI v0.328.0 macOS arm64 release binary after normalizing only trailing whitespace.
+Complete help from the official checksum-verified CLI v0.357.0 macOS arm64 binary; only trailing horizontal terminal padding removed.
 
 ```text
 Manage organizations
